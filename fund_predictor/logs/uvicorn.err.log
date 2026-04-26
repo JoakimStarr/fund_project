@@ -1,0 +1,630 @@
+INFO:     Started server process [13392]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-04-26 18:19:05,621 | INFO | backend.app.services.feature_service | request_id=808658496876 | fund_code=018956 | task_id=- | stage=feature_build_start | feature_build_start
+2026-04-26 18:19:05,622 | INFO | backend.app.services.data_service | request_id=808658496876 | fund_code=018956 | task_id=- | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 18:19:06,769 | INFO | backend.app.services.feature_service | request_id=808658496876 | fund_code=018956 | task_id=- | stage=data_fetch_start | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=87 source_used=cache fallback_used=False
+2026-04-26 18:19:06,838 | INFO | backend.app.services.feature_service | request_id=808658496876 | fund_code=018956 | task_id=- | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 18:19:06,897 | ERROR | backend.app.services.prediction_service | request_id=808658496876 | fund_code=018956 | task_id=- | stage=predict_failed | predict_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 129, in predict_next
+    cols = list(model.named_steps["imputer"].feature_names_in_)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    Xt = transform.transform(Xt)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    X = self._validate_input(X, in_fit=False)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 363, in _validate_input
+    raise ve
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    X = validate_data(
+        self,
+    ...<6 lines>...
+        copy=self.copy,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2929, in validate_data
+    _check_feature_names(_estimator, X, reset=reset)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2787, in _check_feature_names
+    raise ValueError(message)
+ValueError: The feature names should match those that were passed during fit.
+Feature names unseen at fit time:
+- beta_cyb_60
+- beta_hs300_60
+- beta_kcb50_60
+- beta_zz1000_60
+Feature names seen at fit time, yet now missing:
+- beta_style_tech_60
+- beta_theme_60
+- beta_top10_60
+- proxy_pred_ret_60
+- proxy_r2_60
+- ...
+
+2026-04-26 18:19:06,905 | ERROR | backend.app.main | request_id=808658496876 | fund_code=- | task_id=- | stage=request | unhandled_request_error
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 151, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\streams\memory.py", line 132, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 129, in predict_next
+    cols = list(model.named_steps["imputer"].feature_names_in_)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    Xt = transform.transform(Xt)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    X = self._validate_input(X, in_fit=False)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 363, in _validate_input
+    raise ve
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    X = validate_data(
+        self,
+    ...<6 lines>...
+        copy=self.copy,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2929, in validate_data
+    _check_feature_names(_estimator, X, reset=reset)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2787, in _check_feature_names
+    raise ValueError(message)
+ValueError: The feature names should match those that were passed during fit.
+Feature names unseen at fit time:
+- beta_cyb_60
+- beta_hs300_60
+- beta_kcb50_60
+- beta_zz1000_60
+Feature names seen at fit time, yet now missing:
+- beta_style_tech_60
+- beta_theme_60
+- beta_top10_60
+- proxy_pred_ret_60
+- proxy_r2_60
+- ...
+
+2026-04-26 18:19:06,916 | ERROR | backend.app.main | request_id=808658496876 | fund_code=- | task_id=- | stage=request | unexpected_error
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
+  |     yield
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 183, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    |     await route.handle(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    |     await self.app(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    |     return await run_in_threadpool(dependant.call, **values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    |     return await anyio.to_thread.run_sync(func)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    |     return await get_async_backend().run_sync_in_worker_thread(
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    |     return await future
+    |            ^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    |     result = context.run(func, *args)
+    |   File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    |     data = predict_next(fund_code, request_id_var.get())
+    |   File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 129, in predict_next
+    |     cols = list(model.named_steps["imputer"].feature_names_in_)
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    |     Xt = transform.transform(Xt)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    |     data_to_wrap = f(self, X, *args, **kwargs)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    |     X = self._validate_input(X, in_fit=False)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 363, in _validate_input
+    |     raise ve
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    |     X = validate_data(
+    |         self,
+    |     ...<6 lines>...
+    |         copy=self.copy,
+    |     )
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2929, in validate_data
+    |     _check_feature_names(_estimator, X, reset=reset)
+    |     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2787, in _check_feature_names
+    |     raise ValueError(message)
+    | ValueError: The feature names should match those that were passed during fit.
+    | Feature names unseen at fit time:
+    | - beta_cyb_60
+    | - beta_hs300_60
+    | - beta_kcb50_60
+    | - beta_zz1000_60
+    | Feature names seen at fit time, yet now missing:
+    | - beta_style_tech_60
+    | - beta_theme_60
+    | - beta_top10_60
+    | - proxy_pred_ret_60
+    | - proxy_r2_60
+    | - ...
+    | 
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 129, in predict_next
+    cols = list(model.named_steps["imputer"].feature_names_in_)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    Xt = transform.transform(Xt)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    X = self._validate_input(X, in_fit=False)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 363, in _validate_input
+    raise ve
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    X = validate_data(
+        self,
+    ...<6 lines>...
+        copy=self.copy,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2929, in validate_data
+    _check_feature_names(_estimator, X, reset=reset)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2787, in _check_feature_names
+    raise ValueError(message)
+ValueError: The feature names should match those that were passed during fit.
+Feature names unseen at fit time:
+- beta_cyb_60
+- beta_hs300_60
+- beta_kcb50_60
+- beta_zz1000_60
+Feature names seen at fit time, yet now missing:
+- beta_style_tech_60
+- beta_theme_60
+- beta_top10_60
+- proxy_pred_ret_60
+- proxy_r2_60
+- ...
+
+ERROR:    Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
+  |     yield
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 183, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         self.scope, self.receive, self.send
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    |     return await self.app(scope, receive, send)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    |     await route.handle(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    |     await self.app(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    |     return await run_in_threadpool(dependant.call, **values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    |     return await anyio.to_thread.run_sync(func)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    |     return await get_async_backend().run_sync_in_worker_thread(
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    |     return await future
+    |            ^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    |     result = context.run(func, *args)
+    |   File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    |     data = predict_next(fund_code, request_id_var.get())
+    |   File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 129, in predict_next
+    |     cols = list(model.named_steps["imputer"].feature_names_in_)
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    |     Xt = transform.transform(Xt)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    |     data_to_wrap = f(self, X, *args, **kwargs)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    |     X = self._validate_input(X, in_fit=False)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 363, in _validate_input
+    |     raise ve
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    |     X = validate_data(
+    |         self,
+    |     ...<6 lines>...
+    |         copy=self.copy,
+    |     )
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2929, in validate_data
+    |     _check_feature_names(_estimator, X, reset=reset)
+    |     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2787, in _check_feature_names
+    |     raise ValueError(message)
+    | ValueError: The feature names should match those that were passed during fit.
+    | Feature names unseen at fit time:
+    | - beta_cyb_60
+    | - beta_hs300_60
+    | - beta_kcb50_60
+    | - beta_zz1000_60
+    | Feature names seen at fit time, yet now missing:
+    | - beta_style_tech_60
+    | - beta_theme_60
+    | - beta_top10_60
+    | - proxy_pred_ret_60
+    | - proxy_r2_60
+    | - ...
+    | 
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Pythonѧϰ\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 129, in predict_next
+    cols = list(model.named_steps["imputer"].feature_names_in_)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    Xt = transform.transform(Xt)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    X = self._validate_input(X, in_fit=False)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 363, in _validate_input
+    raise ve
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    X = validate_data(
+        self,
+    ...<6 lines>...
+        copy=self.copy,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2929, in validate_data
+    _check_feature_names(_estimator, X, reset=reset)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2787, in _check_feature_names
+    raise ValueError(message)
+ValueError: The feature names should match those that were passed during fit.
+Feature names unseen at fit time:
+- beta_cyb_60
+- beta_hs300_60
+- beta_kcb50_60
+- beta_zz1000_60
+Feature names seen at fit time, yet now missing:
+- beta_style_tech_60
+- beta_theme_60
+- beta_top10_60
+- proxy_pred_ret_60
+- proxy_r2_60
+- ...
+

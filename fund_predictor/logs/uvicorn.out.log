@@ -1,0 +1,43 @@
+INFO:     127.0.0.1:40840 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56688 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23173 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23173 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7482 - "GET /assets/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7482 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56473 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56473 - "GET /assets/style.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:28337 - "GET /assets/app.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:33300 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:27175 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:27175 - "GET /assets/style.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:23174 - "GET /assets/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35449 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:35449 - "GET /assets/app.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:35449 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:35449 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:35449 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:35449 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:35449 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:58026 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:12484 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:12484 - "GET /assets/app.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:12484 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:59610 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59610 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57850 - "GET /assets/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42739 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:21976 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:21976 - "GET /assets/app.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:37825 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:37825 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:37825 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:27719 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:6255 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:6255 - "GET /assets/app.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:12117 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12117 - "GET /assets/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:16997 - "GET /assets/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14352 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:14352 - "POST /api/fund/predict HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:49588 - "GET / HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:49588 - "GET /assets/app.js HTTP/1.1" 304 Not Modified

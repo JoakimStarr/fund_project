@@ -1,0 +1,28 @@
+{
+  "interval_method": "regime_residual_quantile",
+  "vol_col": "residual_vol_60",
+  "regime_thresholds": {
+    "low_max": 0.015502727159444134,
+    "high_min": 0.01803593513547731
+  },
+  "global_quantiles": {
+    "70": 0.031879493667928555,
+    "80": 0.036316911191021324,
+    "90": 0.04577050702540558,
+    "99": 0.06686385579955212
+  },
+  "group_quantiles": {},
+  "group_size": {
+    "low_vol": 38,
+    "mid_vol": 38,
+    "high_vol": 40
+  },
+  "coverage_70": 0.6982758620689655,
+  "coverage_80": 0.8017241379310345,
+  "coverage_90": 0.896551724137931,
+  "coverage_99": 0.9827586206896551,
+  "width_70_bp": 637.5898733585711,
+  "width_80_bp": 726.3382238204265,
+  "width_90_bp": 915.4101405081117,
+  "width_99_bp": 1337.2771159910424
+}
