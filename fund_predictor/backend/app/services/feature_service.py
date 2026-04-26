@@ -116,7 +116,6 @@ def build_features(fund_code: str, require_fresh: bool = False) -> tuple[pd.Data
                 idx_df[f"{name}_volume_chg_{win}"] = idx_df["volume"].pct_change(win)
             idx_df[f"{name}_vol_20"] = idx_df[f"{name}_ret"].rolling(20).std()
             keep = ["date"] + [c for c in idx_df.columns if c.startswith(f"{name}_") and not c.endswith("_volume")]
-            keep += [c for c in idx_df.columns if c.startswith(f"{name}_volume_chg")]
             df = df.merge(idx_df[keep], on="date", how="left")
 
         df["style_growth_vs_large"] = df["cyb_ret"] - df["hs300_ret"]
@@ -125,8 +124,6 @@ def build_features(fund_code: str, require_fresh: bool = False) -> tuple[pd.Data
         for col in ["style_growth_vs_large", "style_small_vs_large", "style_tech_vs_large"]:
             df[f"{col}_mean_5"] = df[col].rolling(5).mean()
             df[f"{col}_mean_20"] = df[col].rolling(20).mean()
-        beta_cols = ["hs300_ret", "cyb_ret", "kcb50_ret", "zz1000_ret"]
-        df = pd.concat([df, _rolling_beta(df, "fund_ret", beta_cols, window=60)], axis=1)
         df, proxy_meta = build_proxy_features(fund_code, df)
 
         duplicated_cols = df.columns[df.columns.duplicated()].tolist()

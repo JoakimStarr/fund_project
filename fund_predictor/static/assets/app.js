@@ -597,21 +597,23 @@ async function loadModelInfo(code) {
   }
 }
 
-async function predict() {
+async function predict(options = {}) {
   clearError();
   setBusy(true);
   setStatus("正在加载模型并预测。");
   try {
     const code = fundCode();
+    const forceRetrain = options.forceRetrain ?? ($("forceRetrain")?.checked || false);
     const res = await api("/api/fund/predict", {
       method: "POST",
-      body: JSON.stringify({ fund_code: code, force_retrain: $("forceRetrain")?.checked || false }),
+      body: JSON.stringify({ fund_code: code, force_retrain: forceRetrain }),
     });
     renderPrediction(res.data);
     await Promise.all([loadBacktest(code), loadModelInfo(code)]);
     setStatus("预测完成。");
   } catch (err) {
     if (err?.code === "MODEL_NOT_FOUND") setStatus("该基金尚未训练，请点击训练并预测。");
+    if (err?.code === "MODEL_TRAINING_FAILED") setStatus("上一次训练失败，模型未保存，请查看日志。");
     showError(err);
   } finally {
     setBusy(false);
@@ -638,7 +640,7 @@ async function trainAndPredict() {
           setProgress(100, "completed", "训练完成", "completed");
           setStatus("训练完成，正在自动预测。");
           setBusy(false);
-          await predict();
+          await predict({ forceRetrain: false });
         }
         if (task.status === "failed") {
           clearInterval(timer);

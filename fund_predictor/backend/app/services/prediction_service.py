@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 
 from backend.app.core.errors import DirectionModelError, PredictionFeatureMissingError
@@ -427,8 +428,8 @@ def _build_excess_signals(metrics: dict) -> dict:
     # 判断相对收益信号是否强于绝对收益信号
     point_corr = metrics.get("point", {}).get("pred_real_corr", 0)
     if reliable_models > 0:
-        avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
-        signals["stronger_than_absolute"] = avg_excess_corr > point_corr + 0.05
+        avg_excess_corr = float(np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")]))
+        signals["stronger_than_absolute"] = bool(avg_excess_corr > point_corr + 0.05)
     
     return signals
 

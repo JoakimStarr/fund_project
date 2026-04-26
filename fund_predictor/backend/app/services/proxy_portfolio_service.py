@@ -306,12 +306,16 @@ def build_proxy_exposure_summary(df: pd.DataFrame) -> dict:
     proxy_r2 = latest.get("proxy_r2_60")
     tracking_error = latest.get("tracking_error_60")
     quality = latest.get("proxy_quality_flag", "low")
+    if pd.notna(quality):
+        quality = str(quality)
+    else:
+        quality = "low"
 
     return {
         "top_exposures": top_exposures,
         "proxy_r2_60": float(proxy_r2) if pd.notna(proxy_r2) else None,
         "tracking_error_60": float(tracking_error) if pd.notna(tracking_error) else None,
-        "proxy_quality_flag": quality if pd.notna(quality) else "low",
+        "proxy_quality_flag": quality,
     }
 
 

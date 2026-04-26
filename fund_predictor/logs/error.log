@@ -12817,3 +12817,1666 @@ Traceback (most recent call last):
   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 21, in predict
     raise ModelNotFoundError("该基金尚未训练或需要重训，请点击训练并预测", details={"fund_code": fund_code})
 backend.app.core.errors.ModelNotFoundError: 该基金尚未训练或需要重训，请点击训练并预测
+2026-04-26 22:21:37,413 | ERROR | backend.app.services.proxy_portfolio_service | request_id=f2bea6a8dd3f | fund_code=018956 | task_id=train_018956_0f9c1079ee | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    "proxy_r2_60": float(proxy_r2) if pd.notna(proxy_r2) else None,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    def _get_top_exposures(row: pd.Series, beta_cols: list[str], top_n: int = 3) -> list[dict]:
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    logger.info("rolling_proxy_exposure_success")
+           ^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 22:24:39,298 | ERROR | backend.app.main | request_id=c1e8c9a15b95 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 21, in predict
+    if should_retrain(fund_code, force_retrain=req.force_retrain):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练或需要重训，请点击训练并预测
+2026-04-26 22:39:43,773 | ERROR | backend.app.services.proxy_portfolio_service | request_id=cda38c24552d | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | duplicate_feature_columns fund_code=018956 columns=['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20', 'beta_hs300_60', 'beta_cyb_60', 'beta_kcb50_60', 'beta_zz1000_60']
+2026-04-26 22:39:43,774 | ERROR | backend.app.services.prediction_service | request_id=cda38c24552d | fund_code=018956 | task_id=- | stage=predict_failed | predict_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 173, in predict_next
+    data_full, _, meta = build_features(fund_code, require_fresh=False)
+                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\feature_service.py", line 130, in build_features
+    df, proxy_meta = build_proxy_features(fund_code, df)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 338, in build_proxy_features
+    raise DuplicateFeatureColumnsError(
+    ...<2 lines>...
+    )
+backend.app.core.errors.DuplicateFeatureColumnsError: 特征表存在重复列名: ['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20', 'beta_hs300_60', 'beta_cyb_60', 'beta_kcb50_60', 'beta_zz1000_60']
+2026-04-26 22:39:43,776 | ERROR | backend.app.main | request_id=cda38c24552d | fund_code=- | task_id=- | stage=request | app_error code=DUPLICATE_FEATURE_COLUMNS
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 173, in predict_next
+    data_full, _, meta = build_features(fund_code, require_fresh=False)
+                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\feature_service.py", line 130, in build_features
+    df, proxy_meta = build_proxy_features(fund_code, df)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 338, in build_proxy_features
+    raise DuplicateFeatureColumnsError(
+    ...<2 lines>...
+    )
+backend.app.core.errors.DuplicateFeatureColumnsError: 特征表存在重复列名: ['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20', 'beta_hs300_60', 'beta_cyb_60', 'beta_kcb50_60', 'beta_zz1000_60']
+2026-04-26 22:39:58,944 | ERROR | backend.app.services.proxy_portfolio_service | request_id=4f3a92655748 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | duplicate_feature_columns fund_code=018956 columns=['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20', 'beta_hs300_60', 'beta_cyb_60', 'beta_kcb50_60', 'beta_zz1000_60']
+2026-04-26 22:39:58,944 | ERROR | backend.app.services.prediction_service | request_id=4f3a92655748 | fund_code=018956 | task_id=- | stage=predict_failed | predict_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 173, in predict_next
+    data_full, _, meta = build_features(fund_code, require_fresh=False)
+                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\feature_service.py", line 130, in build_features
+    df, proxy_meta = build_proxy_features(fund_code, df)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 338, in build_proxy_features
+    raise DuplicateFeatureColumnsError(
+    ...<2 lines>...
+    )
+backend.app.core.errors.DuplicateFeatureColumnsError: 特征表存在重复列名: ['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20', 'beta_hs300_60', 'beta_cyb_60', 'beta_kcb50_60', 'beta_zz1000_60']
+2026-04-26 22:39:58,945 | ERROR | backend.app.main | request_id=4f3a92655748 | fund_code=- | task_id=- | stage=request | app_error code=DUPLICATE_FEATURE_COLUMNS
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 173, in predict_next
+    data_full, _, meta = build_features(fund_code, require_fresh=False)
+                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\feature_service.py", line 130, in build_features
+    df, proxy_meta = build_proxy_features(fund_code, df)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 338, in build_proxy_features
+    raise DuplicateFeatureColumnsError(
+    ...<2 lines>...
+    )
+backend.app.core.errors.DuplicateFeatureColumnsError: 特征表存在重复列名: ['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20', 'beta_hs300_60', 'beta_cyb_60', 'beta_kcb50_60', 'beta_zz1000_60']
+2026-04-26 22:44:07,306 | ERROR | backend.app.services.proxy_portfolio_service | request_id=4dabbb2fb230 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | duplicate_feature_columns fund_code=018956 columns=['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20']
+2026-04-26 22:44:07,307 | ERROR | backend.app.services.prediction_service | request_id=4dabbb2fb230 | fund_code=018956 | task_id=- | stage=predict_failed | predict_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 173, in predict_next
+    data_full, _, meta = build_features(fund_code, require_fresh=False)
+                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\feature_service.py", line 128, in build_features
+    df, proxy_meta = build_proxy_features(fund_code, df)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 338, in build_proxy_features
+    raise DuplicateFeatureColumnsError(
+    ...<2 lines>...
+    )
+backend.app.core.errors.DuplicateFeatureColumnsError: 特征表存在重复列名: ['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20']
+2026-04-26 22:44:07,309 | ERROR | backend.app.main | request_id=4dabbb2fb230 | fund_code=- | task_id=- | stage=request | app_error code=DUPLICATE_FEATURE_COLUMNS
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 173, in predict_next
+    data_full, _, meta = build_features(fund_code, require_fresh=False)
+                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\feature_service.py", line 128, in build_features
+    df, proxy_meta = build_proxy_features(fund_code, df)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 338, in build_proxy_features
+    raise DuplicateFeatureColumnsError(
+    ...<2 lines>...
+    )
+backend.app.core.errors.DuplicateFeatureColumnsError: 特征表存在重复列名: ['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20']
+2026-04-26 22:44:20,402 | ERROR | backend.app.services.proxy_portfolio_service | request_id=42689ab814c8 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | duplicate_feature_columns fund_code=018956 columns=['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20']
+2026-04-26 22:44:20,403 | ERROR | backend.app.services.prediction_service | request_id=42689ab814c8 | fund_code=018956 | task_id=- | stage=predict_failed | predict_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 173, in predict_next
+    data_full, _, meta = build_features(fund_code, require_fresh=False)
+                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\feature_service.py", line 128, in build_features
+    df, proxy_meta = build_proxy_features(fund_code, df)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 338, in build_proxy_features
+    raise DuplicateFeatureColumnsError(
+    ...<2 lines>...
+    )
+backend.app.core.errors.DuplicateFeatureColumnsError: 特征表存在重复列名: ['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20']
+2026-04-26 22:44:20,404 | ERROR | backend.app.main | request_id=42689ab814c8 | fund_code=- | task_id=- | stage=request | app_error code=DUPLICATE_FEATURE_COLUMNS
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 173, in predict_next
+    data_full, _, meta = build_features(fund_code, require_fresh=False)
+                         ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\feature_service.py", line 128, in build_features
+    df, proxy_meta = build_proxy_features(fund_code, df)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 338, in build_proxy_features
+    raise DuplicateFeatureColumnsError(
+    ...<2 lines>...
+    )
+backend.app.core.errors.DuplicateFeatureColumnsError: 特征表存在重复列名: ['hs300_volume_chg_5', 'hs300_volume_chg_20', 'zz500_volume_chg_5', 'zz500_volume_chg_20', 'zz1000_volume_chg_5', 'zz1000_volume_chg_20', 'cyb_volume_chg_5', 'cyb_volume_chg_20', 'kcb50_volume_chg_5', 'kcb50_volume_chg_20']
+2026-04-26 22:47:28,299 | ERROR | backend.app.services.prediction_service | request_id=764f98d96723 | fund_code=018956 | task_id=- | stage=predict_failed | predict_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 286, in predict_next
+    "excess_signals": _build_excess_signals(metrics),
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 430, in _build_excess_signals
+    avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+                      ^^
+NameError: name 'np' is not defined
+2026-04-26 22:47:28,302 | ERROR | backend.app.main | request_id=764f98d96723 | fund_code=- | task_id=- | stage=request | unhandled_request_error
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 151, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\streams\memory.py", line 132, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 286, in predict_next
+    "excess_signals": _build_excess_signals(metrics),
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 430, in _build_excess_signals
+    avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+                      ^^
+NameError: name 'np' is not defined
+2026-04-26 22:47:28,312 | ERROR | backend.app.main | request_id=764f98d96723 | fund_code=- | task_id=- | stage=request | unexpected_error
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
+  |     yield
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 183, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    |     await route.handle(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    |     await self.app(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    |     return await run_in_threadpool(dependant.call, **values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    |     return await anyio.to_thread.run_sync(func)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    |     return await get_async_backend().run_sync_in_worker_thread(
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    |     return await future
+    |            ^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    |     result = context.run(func, *args)
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    |     data = predict_next(fund_code, request_id_var.get())
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 286, in predict_next
+    |     "excess_signals": _build_excess_signals(metrics),
+    |                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 430, in _build_excess_signals
+    |     avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+    |                       ^^
+    | NameError: name 'np' is not defined
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 286, in predict_next
+    "excess_signals": _build_excess_signals(metrics),
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 430, in _build_excess_signals
+    avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+                      ^^
+NameError: name 'np' is not defined
+2026-04-26 22:47:47,203 | ERROR | backend.app.services.prediction_service | request_id=30b929a12527 | fund_code=018956 | task_id=- | stage=predict_failed | predict_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 286, in predict_next
+    "excess_signals": _build_excess_signals(metrics),
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 430, in _build_excess_signals
+    avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+                      ^^
+NameError: name 'np' is not defined
+2026-04-26 22:47:47,206 | ERROR | backend.app.main | request_id=30b929a12527 | fund_code=- | task_id=- | stage=request | unhandled_request_error
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 151, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\streams\memory.py", line 132, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 286, in predict_next
+    "excess_signals": _build_excess_signals(metrics),
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 430, in _build_excess_signals
+    avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+                      ^^
+NameError: name 'np' is not defined
+2026-04-26 22:47:47,211 | ERROR | backend.app.main | request_id=30b929a12527 | fund_code=- | task_id=- | stage=request | unexpected_error
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
+  |     yield
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 183, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    |     await route.handle(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    |     await self.app(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    |     return await run_in_threadpool(dependant.call, **values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    |     return await anyio.to_thread.run_sync(func)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    |     return await get_async_backend().run_sync_in_worker_thread(
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    |     return await future
+    |            ^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    |     result = context.run(func, *args)
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    |     data = predict_next(fund_code, request_id_var.get())
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 286, in predict_next
+    |     "excess_signals": _build_excess_signals(metrics),
+    |                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 430, in _build_excess_signals
+    |     avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+    |                       ^^
+    | NameError: name 'np' is not defined
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 35, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 286, in predict_next
+    "excess_signals": _build_excess_signals(metrics),
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 430, in _build_excess_signals
+    avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+                      ^^
+NameError: name 'np' is not defined
+2026-04-26 22:59:56,401 | ERROR | backend.app.main | request_id=1519f00e306a | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 34, in predict
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:57,158 | ERROR | backend.app.main | request_id=924a6880a7dd | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 34, in predict
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:57,529 | ERROR | backend.app.main | request_id=ffe10b7ea1de | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:57,603 | ERROR | backend.app.main | request_id=787bc0299bb5 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 34, in predict
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:57,738 | ERROR | backend.app.main | request_id=2818e540e8c7 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:57,764 | ERROR | backend.app.main | request_id=d3c4b4513290 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:57,800 | ERROR | backend.app.main | request_id=532a6df19242 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:57,823 | ERROR | backend.app.main | request_id=aef925c99670 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:57,879 | ERROR | backend.app.main | request_id=df7387569e4f | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:57,886 | ERROR | backend.app.main | request_id=b3d7ea981320 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:57,893 | ERROR | backend.app.main | request_id=946892074b7c | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:57,900 | ERROR | backend.app.main | request_id=1c4541f6bb7d | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:57,956 | ERROR | backend.app.main | request_id=90fc75dd3b8d | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:57,961 | ERROR | backend.app.main | request_id=c54de3cc720b | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:57,986 | ERROR | backend.app.main | request_id=f96b14649ffc | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:58,007 | ERROR | backend.app.main | request_id=5ced92c72d39 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:58,041 | ERROR | backend.app.main | request_id=958ed2820122 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:58,072 | ERROR | backend.app.main | request_id=8452ae27619a | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:58,077 | ERROR | backend.app.main | request_id=b222a4c5a5ef | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:58,086 | ERROR | backend.app.main | request_id=a80fc8dd82fe | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:58,089 | ERROR | backend.app.main | request_id=fa8892b8076e | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:58,097 | ERROR | backend.app.main | request_id=7b27b4b74af8 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
+2026-04-26 22:59:58,101 | ERROR | backend.app.main | request_id=5642e52433bd | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 51, in backtest
+    raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 回测文件不存在
+2026-04-26 22:59:58,110 | ERROR | backend.app.main | request_id=ad472f288aa8 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 42, in model_info
+    return {"ok": True, "data": get_model_info(fund_code)}
+                                ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 131, in get_model_info
+    _, _, config, metrics, interval_config = load_model_archive(fund_code)
+                                             ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\model_registry_service.py", line 118, in load_model_archive
+    raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练，请点击训练并预测
