@@ -6,6 +6,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression, Ridge
 
 from backend.app.core.config import RAW_DIR
+from backend.app.core.errors import DuplicateFeatureColumnsError, ProxyPortfolioError
 from backend.app.core.logging_config import set_log_context
 from backend.app.services.data_service import get_index_daily
 from backend.app.services.holding_service import get_fund_holdings
@@ -120,6 +121,13 @@ def build_top10_proxy(fund_code: str) -> tuple[pd.DataFrame, dict]:
     out["top10_proxy_missing_count"] = missing_count
     out["holding_report_date"] = latest_date
     out["holding_scope"] = holding_meta.get("holding_scope", "top10")
+
+    if not out["date"].is_unique:
+        logger.error("top10_proxy_date_not_unique fund_code=%s duplicate_count=%s", fund_code, out["date"].duplicated().sum())
+        raise ProxyPortfolioError(
+            "top10_proxy date 列存在重复值",
+            details={"fund_code": fund_code, "duplicate_count": int(out["date"].duplicated().sum())},
+        )
 
     stage = "top10_proxy_build_success" if top10_status == "usable" else "top10_proxy_partial_success" if top10_status == "partial" else "top10_proxy_unavailable"
     set_log_context(stage=stage)
@@ -261,13 +269,28 @@ def fit_rolling_proxy_exposure(df: pd.DataFrame, window: int = 60) -> pd.DataFra
     return out
 
 
+def _safe_scalar(value):
+    if isinstance(value, pd.Series):
+        value = value.dropna()
+        if value.empty:
+            return None
+        return value.iloc[-1]
+    return value
+
+
 def _get_top_exposures(row: pd.Series, beta_cols: list[str], top_n: int = 3) -> list[dict]:
     exposures = []
     for col in beta_cols:
-        val = row.get(col)
-        if pd.notna(val):
-            name = col.replace("beta_", "").replace("_60", "")
-            exposures.append({"name": name, "beta": float(abs(val)), "sign": "positive" if val >= 0 else "negative"})
+        raw_val = row.get(col, None)
+        val = _safe_scalar(raw_val)
+        if val is None or pd.isna(val):
+            continue
+        try:
+            beta = float(val)
+        except Exception:
+            continue
+        name = col.replace("beta_", "").replace("_60", "")
+        exposures.append({"name": name, "beta": abs(beta), "sign": "positive" if beta >= 0 else "negative"})
     exposures.sort(key=lambda x: x["beta"], reverse=True)
     return exposures[:top_n]
 
@@ -309,6 +332,14 @@ def build_proxy_features(fund_code: str, base_df: pd.DataFrame) -> tuple[pd.Data
         exposure = fit_rolling_proxy_exposure(out)
         out = pd.concat([out, exposure], axis=1)
 
+        duplicated_cols = out.columns[out.columns.duplicated()].tolist()
+        if duplicated_cols:
+            logger.error("duplicate_feature_columns fund_code=%s columns=%s", fund_code, duplicated_cols[:20])
+            raise DuplicateFeatureColumnsError(
+                f"特征表存在重复列名: {duplicated_cols[:20]}",
+                details={"fund_code": fund_code, "duplicated_columns": duplicated_cols[:20]},
+            )
+
         exposure_summary = build_proxy_exposure_summary(out)
 
         meta = {
@@ -320,6 +351,8 @@ def build_proxy_features(fund_code: str, base_df: pd.DataFrame) -> tuple[pd.Data
         set_log_context(stage="proxy_feature_merge_success")
         logger.info("proxy_feature_merge_success proxy_available=%s top10_status=%s proxy_r2_60=%s", meta["proxy_available"], holding_meta.get("top10_proxy_status"), exposure_summary.get("proxy_r2_60"))
         return out, meta
+    except DuplicateFeatureColumnsError:
+        raise
     except Exception as exc:
         logger.exception("proxy_portfolio_failed")
         return base_df, {"proxy_available": False, "proxy_method": "return_inferred_only", "reason": str(exc)}

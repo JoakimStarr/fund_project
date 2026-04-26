@@ -361,6 +361,13 @@ def _calibration_error(y_true: np.ndarray, p_up: np.ndarray, bins: int = 10) -> 
     return float(err)
 
 
+def _predict_p_up(model, X) -> np.ndarray:
+    proba = model.predict_proba(X)
+    classes = list(model.classes_)
+    p_up = proba[:, classes.index(1)]
+    return p_up
+
+
 def _direction_metrics(y_true: np.ndarray, p_up: np.ndarray, baseline_acc: float) -> dict[str, Any]:
     pred = (p_up >= 0.5).astype(int)
     target_ret = y_true
@@ -372,9 +379,14 @@ def _direction_metrics(y_true: np.ndarray, p_up: np.ndarray, baseline_acc: float
     except Exception:
         auc = None
     acc = float(accuracy_score(y_bin, pred))
+    mask = np.abs(target_ret) > 0.003
+    if np.any(mask):
+        direction_acc_03 = float(np.mean(np.sign(target_ret[mask]) == np.sign(p_up[mask] - 0.5)))
+    else:
+        direction_acc_03 = None
     return {
         "direction_acc": acc,
-        "direction_acc_03": float(np.mean(np.sign(target_ret - 0.003) == np.sign(p_up - 0.5))),
+        "direction_acc_03": direction_acc_03,
         "auc": auc,
         "brier_score": float(brier_score_loss(y_bin, p_up)),
         "calibration_error": _calibration_error(y_bin, p_up),
@@ -405,7 +417,7 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
             base = _make_pipeline(selector, scaler, clone(model), len(feature_cols), "classification")
             base.fit(train_base[feature_cols], y_train)
             calibrated = _calibrated_direction_pipeline(base, valid[feature_cols], y_valid)
-            p_valid = calibrated.predict_proba(valid[feature_cols])[:, 1]
+            p_valid = _predict_p_up(calibrated, valid[feature_cols])
             m = _direction_metrics(valid["target_next"].to_numpy(), p_valid, baseline_acc)
             rough.append({"model": model_name, "selector": selector, "scaler": scaler, "metrics": m})
         except ProbabilityCalibrationError:
@@ -431,7 +443,7 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
             base = _make_pipeline(item["selector"], item["scaler"], clone(_classifiers()[item["model"]]), len(feature_cols), "classification")
             base.fit(fit_part[feature_cols], y_fit)
             calibrated = _calibrated_direction_pipeline(base, calib_part[feature_cols], y_calib)
-            p_test = calibrated.predict_proba(test[feature_cols])[:, 1]
+            p_test = _predict_p_up(calibrated, test[feature_cols])
             m = _direction_metrics(test["target_next"].to_numpy(), p_test, baseline_acc)
             final.append({**item, "pipeline": calibrated, "p_test": p_test, "final_metrics": m})
         except Exception:

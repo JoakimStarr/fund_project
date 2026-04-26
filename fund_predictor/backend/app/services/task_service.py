@@ -71,6 +71,23 @@ def get_task(task_id: str) -> dict | None:
     return data
 
 
+def get_latest_task(fund_code: str) -> dict | None:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT * FROM tasks WHERE fund_code=? ORDER BY created_at DESC LIMIT 1",
+            (fund_code,),
+        ).fetchone()
+    if not row:
+        return None
+    data = dict(row)
+    if data.get("error_details"):
+        try:
+            data["details"] = json.loads(data["error_details"])
+        except json.JSONDecodeError:
+            data["details"] = {"raw": data["error_details"]}
+    return data
+
+
 def run_training_task(task_id: str, fund_code: str, force: bool = True) -> None:
     set_log_context(task_id=task_id, fund_code=fund_code, stage="training_start")
     try:

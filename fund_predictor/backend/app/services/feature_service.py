@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from backend.app.core.config import MIN_TRAIN_ROWS, PROCESSED_DIR
-from backend.app.core.errors import AppError, FeatureBuildError, InsufficientDataError
+from backend.app.core.errors import AppError, DuplicateFeatureColumnsError, FeatureBuildError, InsufficientDataError
 from backend.app.core.logging_config import set_log_context
 from backend.app.services.data_service import get_fund_nav, load_market_data
 from backend.app.services.proxy_portfolio_service import build_proxy_features
@@ -128,6 +128,15 @@ def build_features(fund_code: str, require_fresh: bool = False) -> tuple[pd.Data
         beta_cols = ["hs300_ret", "cyb_ret", "kcb50_ret", "zz1000_ret"]
         df = pd.concat([df, _rolling_beta(df, "fund_ret", beta_cols, window=60)], axis=1)
         df, proxy_meta = build_proxy_features(fund_code, df)
+
+        duplicated_cols = df.columns[df.columns.duplicated()].tolist()
+        if duplicated_cols:
+            logger.error("duplicate_feature_columns fund_code=%s columns=%s", fund_code, duplicated_cols[:20])
+            raise DuplicateFeatureColumnsError(
+                f"特征表存在重复列名: {duplicated_cols[:20]}",
+                details={"fund_code": fund_code, "duplicated_columns": duplicated_cols[:20]},
+            )
+
         df["target_next"] = df["fund_ret"].shift(-1)
 
         # 相对收益目标 (V2.6)

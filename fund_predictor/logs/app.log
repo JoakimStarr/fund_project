@@ -12591,3 +12591,1010 @@ ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.i
 2026-04-26 20:23:26,439 | INFO | backend.app.services.feature_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=exposure_stability_check_success | exposure_stability_check_success fund_code=018956
 2026-04-26 20:23:26,570 | INFO | backend.app.services.feature_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=exposure_stability_check_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=89 source_used=akshare_fund_open_fund_info_em fallback_used=False
 2026-04-26 20:23:26,668 | INFO | backend.app.services.feature_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 20:29:57,512 | INFO | backend.app.services.feature_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=feature_build_start | feature_build_start
+2026-04-26 20:29:57,513 | INFO | backend.app.services.data_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 20:29:59,238 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 20:29:59,239 | INFO | backend.app.services.holding_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 20:29:59,243 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 20:29:59,256 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 20:29:59,259 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 20:29:59,259 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 20:29:59,273 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 20:29:59,275 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 20:29:59,275 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 20:29:59,284 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 20:29:59,286 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 20:29:59,286 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 20:29:59,298 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 20:29:59,300 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 20:29:59,300 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 20:29:59,305 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 20:29:59,306 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 20:29:59,307 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 20:29:59,315 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 20:29:59,317 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 20:29:59,317 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 20:29:59,333 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 20:29:59,335 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 20:29:59,335 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 20:29:59,341 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 20:29:59,342 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 20:29:59,343 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 20:29:59,348 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 20:29:59,349 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 20:29:59,350 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 20:29:59,356 | INFO | backend.app.services.stock_price_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 20:29:59,358 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 20:29:59,449 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 20:29:59,450 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 20:29:59,882 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 20:29:59,914 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 20:30:08,101 | INFO | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 20:30:08,104 | ERROR | backend.app.services.proxy_portfolio_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 20:30:08,108 | INFO | backend.app.services.feature_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=excess_target_build_start | excess_target_build_start fund_code=018956
+2026-04-26 20:30:08,111 | INFO | backend.app.services.feature_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=excess_target_build_success | excess_target_build_success fund_code=018956 excess_targets=['target_excess_cyb', 'target_excess_kcb50']
+2026-04-26 20:30:08,111 | INFO | backend.app.services.feature_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=exposure_stability_check_success | exposure_stability_check_success fund_code=018956
+2026-04-26 20:30:08,269 | INFO | backend.app.services.feature_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=exposure_stability_check_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=89 source_used=cache fallback_used=False
+2026-04-26 20:30:08,406 | INFO | backend.app.services.feature_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 20:30:08,564 | INFO | backend.app.services.prediction_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=regime_interval_fallback | regime_interval_fallback group=high_vol size=40
+2026-04-26 20:30:08,566 | ERROR | backend.app.services.prediction_service | request_id=1207693d796b | fund_code=018956 | task_id=- | stage=predict_failed | predict_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 285, in predict_next
+    "excess_signals": _build_excess_signals(metrics),
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 429, in _build_excess_signals
+    avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+                      ^^
+NameError: name 'np' is not defined
+2026-04-26 20:30:08,569 | ERROR | backend.app.main | request_id=1207693d796b | fund_code=- | task_id=- | stage=request | unhandled_request_error
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 151, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\streams\memory.py", line 132, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 285, in predict_next
+    "excess_signals": _build_excess_signals(metrics),
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 429, in _build_excess_signals
+    avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+                      ^^
+NameError: name 'np' is not defined
+2026-04-26 20:30:08,589 | ERROR | backend.app.main | request_id=1207693d796b | fund_code=- | task_id=- | stage=request | unexpected_error
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
+  |     yield
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 183, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    |     await route.handle(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    |     await self.app(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    |     return await run_in_threadpool(dependant.call, **values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    |     return await anyio.to_thread.run_sync(func)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    |     return await get_async_backend().run_sync_in_worker_thread(
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    |     return await future
+    |            ^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    |     result = context.run(func, *args)
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    |     data = predict_next(fund_code, request_id_var.get())
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 285, in predict_next
+    |     "excess_signals": _build_excess_signals(metrics),
+    |                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 429, in _build_excess_signals
+    |     avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+    |                       ^^
+    | NameError: name 'np' is not defined
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 285, in predict_next
+    "excess_signals": _build_excess_signals(metrics),
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 429, in _build_excess_signals
+    avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+                      ^^
+NameError: name 'np' is not defined
+2026-04-26 20:30:28,854 | ERROR | backend.app.main | request_id=db64f397843c | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 21, in predict
+    raise ModelNotFoundError("该基金尚未训练或需要重训，请点击训练并预测", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练或需要重训，请点击训练并预测
+2026-04-26 20:30:29,912 | ERROR | backend.app.main | request_id=b35f4b276213 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 21, in predict
+    raise ModelNotFoundError("该基金尚未训练或需要重训，请点击训练并预测", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练或需要重训，请点击训练并预测
+2026-04-26 20:30:34,622 | ERROR | backend.app.main | request_id=f1bf2678d6b3 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 21, in predict
+    raise ModelNotFoundError("该基金尚未训练或需要重训，请点击训练并预测", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练或需要重训，请点击训练并预测
+2026-04-26 20:30:39,980 | INFO | backend.app.services.feature_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=feature_build_start | feature_build_start
+2026-04-26 20:30:39,981 | INFO | backend.app.services.data_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 20:30:41,333 | INFO | backend.app.services.data_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=data_fetch_success | data_fetch_success fund nav fund_code=018956 rows=640 start=2023-08-10 end=2026-04-24 source=akshare_fund_open_fund_info_em
+2026-04-26 20:30:44,029 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 20:30:44,030 | INFO | backend.app.services.holding_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 20:30:44,037 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 20:30:44,050 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 20:30:44,051 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 20:30:44,052 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 20:30:44,068 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 20:30:44,070 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 20:30:44,070 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 20:30:44,079 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 20:30:44,081 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 20:30:44,081 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 20:30:44,093 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 20:30:44,095 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 20:30:44,096 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 20:30:44,102 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 20:30:44,105 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 20:30:44,106 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 20:30:44,116 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 20:30:44,118 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 20:30:44,119 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 20:30:44,139 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 20:30:44,141 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 20:30:44,142 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 20:30:44,148 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 20:30:44,149 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 20:30:44,149 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 20:30:44,155 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 20:30:44,156 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 20:30:44,157 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 20:30:44,165 | INFO | backend.app.services.stock_price_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 20:30:44,167 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 20:30:44,271 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 20:30:44,271 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 20:30:44,865 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 20:30:44,909 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 20:30:53,103 | INFO | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 20:30:53,109 | ERROR | backend.app.services.proxy_portfolio_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 20:30:53,116 | INFO | backend.app.services.feature_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=excess_target_build_start | excess_target_build_start fund_code=018956
+2026-04-26 20:30:53,125 | INFO | backend.app.services.feature_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=excess_target_build_success | excess_target_build_success fund_code=018956 excess_targets=['target_excess_cyb', 'target_excess_kcb50']
+2026-04-26 20:30:53,128 | INFO | backend.app.services.feature_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=exposure_stability_check_success | exposure_stability_check_success fund_code=018956
+2026-04-26 20:30:53,632 | INFO | backend.app.services.feature_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=exposure_stability_check_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=89 source_used=akshare_fund_open_fund_info_em fallback_used=False
+2026-04-26 20:30:53,871 | INFO | backend.app.services.feature_service | request_id=6e8be129dc62 | fund_code=018956 | task_id=train_018956_3134982612 | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 20:36:21,350 | ERROR | backend.app.main | request_id=d9df451ce301 | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 21, in predict
+    raise ModelNotFoundError("该基金尚未训练或需要重训，请点击训练并预测", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练或需要重训，请点击训练并预测
+2026-04-26 21:34:17,923 | INFO | backend.app.services.feature_service | request_id=e3564d4c28e1 | fund_code=018956 | task_id=train_018956_066b2de099 | stage=feature_build_start | feature_build_start
+2026-04-26 21:34:17,924 | INFO | backend.app.services.data_service | request_id=e3564d4c28e1 | fund_code=018956 | task_id=train_018956_066b2de099 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 21:34:18,339 | ERROR | backend.app.services.data_service | request_id=e3564d4c28e1 | fund_code=018956 | task_id=train_018956_066b2de099 | stage=data_fetch_start | data_fetch_failed fund nav primary
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 796, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+        sock=sock,
+    ...<14 lines>...
+        assert_fingerprint=self.assert_fingerprint,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 975, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+        sock=sock,
+    ...<8 lines>...
+        tls_in_tls=tls_in_tls,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 483, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 527, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 490, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 796, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+        sock=sock,
+    ...<14 lines>...
+        assert_fingerprint=self.assert_fingerprint,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 975, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+        sock=sock,
+    ...<8 lines>...
+        tls_in_tls=tls_in_tls,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 483, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 527, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\data_service.py", line 146, in get_fund_nav
+    out = _fetch_fund_nav_akshare(fund_code)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\data_service.py", line 92, in _fetch_fund_nav_akshare
+    unit = ak.fund_open_fund_info_em(symbol=fund_code, indicator="\u5355\u4f4d\u51c0\u503c\u8d70\u52bf")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\fund\fund_em.py", line 351, in fund_open_fund_info_em
+    r = requests.get(url, headers=headers)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 660, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+2026-04-26 21:34:29,117 | ERROR | backend.app.services.data_service | request_id=e3564d4c28e1 | fund_code=018956 | task_id=train_018956_066b2de099 | stage=data_fetch_failed | data_fetch_failed fund nav fallback
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 796, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+        sock=sock,
+    ...<14 lines>...
+        assert_fingerprint=self.assert_fingerprint,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 975, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+        sock=sock,
+    ...<8 lines>...
+        tls_in_tls=tls_in_tls,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 483, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 527, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 490, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 796, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+        sock=sock,
+    ...<14 lines>...
+        assert_fingerprint=self.assert_fingerprint,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 975, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+        sock=sock,
+    ...<8 lines>...
+        tls_in_tls=tls_in_tls,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 483, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 527, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\data_service.py", line 163, in get_fund_nav
+    out = _fetch_fund_nav_eastmoney_html(fund_code)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\data_service.py", line 119, in _fetch_fund_nav_eastmoney_html
+    resp = requests.get(url, params=params, headers=headers, timeout=20)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 660, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+2026-04-26 21:34:48,885 | INFO | backend.app.services.feature_service | request_id=708fd9d4a6a5 | fund_code=018956 | task_id=train_018956_b11d7fb273 | stage=feature_build_start | feature_build_start
+2026-04-26 21:34:48,885 | INFO | backend.app.services.data_service | request_id=708fd9d4a6a5 | fund_code=018956 | task_id=train_018956_b11d7fb273 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 21:34:54,162 | ERROR | backend.app.services.data_service | request_id=708fd9d4a6a5 | fund_code=018956 | task_id=train_018956_b11d7fb273 | stage=data_fetch_start | data_fetch_failed fund nav primary
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 796, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+        sock=sock,
+    ...<14 lines>...
+        assert_fingerprint=self.assert_fingerprint,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 975, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+        sock=sock,
+    ...<8 lines>...
+        tls_in_tls=tls_in_tls,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 483, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 527, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 490, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 796, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+        sock=sock,
+    ...<14 lines>...
+        assert_fingerprint=self.assert_fingerprint,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 975, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+        sock=sock,
+    ...<8 lines>...
+        tls_in_tls=tls_in_tls,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 483, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\ssl_.py", line 527, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sock=sock,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        session=session
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1076, in _create
+    self.do_handshake()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\ssl.py", line 1372, in do_handshake
+    self._sslobj.do_handshake()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\data_service.py", line 146, in get_fund_nav
+    out = _fetch_fund_nav_akshare(fund_code)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\data_service.py", line 92, in _fetch_fund_nav_akshare
+    unit = ak.fund_open_fund_info_em(symbol=fund_code, indicator="\u5355\u4f4d\u51c0\u503c\u8d70\u52bf")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\fund\fund_em.py", line 351, in fund_open_fund_info_em
+    r = requests.get(url, headers=headers)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 660, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))
+2026-04-26 21:35:04,171 | ERROR | backend.app.services.data_service | request_id=708fd9d4a6a5 | fund_code=018956 | task_id=train_018956_b11d7fb273 | stage=data_fetch_failed | data_fetch_failed fund nav fallback
+urllib3.exceptions.SSLError: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1028)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='fundf10.eastmoney.com', port=443): Max retries exceeded with url: /F10DataApi.aspx?type=lsjz&code=018956&page=1&per=20&sdate=&edate= (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1028)')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\data_service.py", line 163, in get_fund_nav
+    out = _fetch_fund_nav_eastmoney_html(fund_code)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\data_service.py", line 119, in _fetch_fund_nav_eastmoney_html
+    resp = requests.get(url, params=params, headers=headers, timeout=20)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 676, in send
+    raise SSLError(e, request=request)
+requests.exceptions.SSLError: HTTPSConnectionPool(host='fundf10.eastmoney.com', port=443): Max retries exceeded with url: /F10DataApi.aspx?type=lsjz&code=018956&page=1&per=20&sdate=&edate= (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1028)')))
+2026-04-26 21:36:30,233 | INFO | backend.app.services.feature_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=feature_build_start | feature_build_start
+2026-04-26 21:36:30,233 | INFO | backend.app.services.data_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 21:36:31,532 | INFO | backend.app.services.data_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=data_fetch_success | data_fetch_success fund nav fund_code=018956 rows=640 start=2023-08-10 end=2026-04-24 source=akshare_fund_open_fund_info_em
+2026-04-26 21:36:32,852 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 21:36:32,853 | INFO | backend.app.services.holding_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 21:36:32,857 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 21:36:32,867 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 21:36:32,869 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 21:36:32,869 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 21:36:32,880 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 21:36:32,881 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 21:36:32,881 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 21:36:32,888 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 21:36:32,889 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 21:36:32,889 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 21:36:32,898 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 21:36:32,900 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 21:36:32,900 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 21:36:32,904 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 21:36:32,906 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 21:36:32,906 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 21:36:32,913 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 21:36:32,915 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 21:36:32,915 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 21:36:32,929 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 21:36:32,930 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 21:36:32,930 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 21:36:32,935 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 21:36:32,936 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 21:36:32,937 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 21:36:32,942 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 21:36:32,943 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 21:36:32,943 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 21:36:32,949 | INFO | backend.app.services.stock_price_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 21:36:32,950 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 21:36:33,015 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 21:36:33,015 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 21:36:33,387 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 21:36:33,414 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 21:36:38,276 | INFO | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 21:36:38,280 | ERROR | backend.app.services.proxy_portfolio_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 21:36:38,284 | INFO | backend.app.services.feature_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=excess_target_build_start | excess_target_build_start fund_code=018956
+2026-04-26 21:36:38,286 | INFO | backend.app.services.feature_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=excess_target_build_success | excess_target_build_success fund_code=018956 excess_targets=['target_excess_cyb', 'target_excess_kcb50']
+2026-04-26 21:36:38,286 | INFO | backend.app.services.feature_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=exposure_stability_check_success | exposure_stability_check_success fund_code=018956
+2026-04-26 21:36:38,387 | INFO | backend.app.services.feature_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=exposure_stability_check_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=89 source_used=akshare_fund_open_fund_info_em fallback_used=False
+2026-04-26 21:36:38,466 | INFO | backend.app.services.feature_service | request_id=5c98f2973a84 | fund_code=018956 | task_id=train_018956_1150d24300 | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 21:39:38,307 | ERROR | backend.app.main | request_id=34bfa4f5d3cc | fund_code=- | task_id=- | stage=request | app_error code=MODEL_NOT_FOUND
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 21, in predict
+    raise ModelNotFoundError("该基金尚未训练或需要重训，请点击训练并预测", details={"fund_code": fund_code})
+backend.app.core.errors.ModelNotFoundError: 该基金尚未训练或需要重训，请点击训练并预测

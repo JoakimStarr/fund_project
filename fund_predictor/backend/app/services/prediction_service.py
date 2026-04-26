@@ -279,6 +279,7 @@ def predict_next(fund_code: str, request_id: str) -> dict:
             "failed_themes": proxy_meta.get("failed_themes", []),
             "top_exposures": exposure_summary.get("top_exposures", []),
             "proxy_disclaimer": "代理组合根据公开披露持仓、主题指数和历史收益拟合构建，不代表基金真实实时持仓。",
+            "theme_proxy_disclaimer": "当前主题因子为宽基代理，解释力有限。" if proxy_meta.get("theme_available_count", 0) > 0 else None,
             "point_prediction_health": _point_health(point_metrics),
             "direction_health": _direction_health(direction_metrics, signal),
             # V2.6 相对收益信号

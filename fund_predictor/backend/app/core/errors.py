@@ -106,3 +106,13 @@ class ProxyPortfolioError(AppError):
 class ProxyExposureError(AppError):
     code = "PROXY_EXPOSURE_FAILED"
     stage = "proxy_exposure"
+
+
+class DuplicateFeatureColumnsError(AppError):
+    code = "DUPLICATE_FEATURE_COLUMNS"
+    stage = "feature_engineering"
+
+
+class ModelTrainingFailedError(AppError):
+    code = "MODEL_TRAINING_FAILED"
+    stage = "training"

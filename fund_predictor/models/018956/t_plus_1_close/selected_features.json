@@ -13,12 +13,12 @@
   ],
   "direction": [
     "fund_ret_std_10",
-    "recent_max_loss_20",
     "hs300_ret_lag1",
     "zz1000_ret_mean_20",
     "zz1000_mom_20",
     "cyb_mom_20",
     "style_growth_vs_large",
+    "style_tech_vs_large",
     "style_small_vs_large_mean_5",
     "target_excess_cyb",
     "target_excess_kcb50"
