@@ -311,22 +311,135 @@ function renderProxyCard(data) {
   const available = data.proxy_available !== false;
   const reason = data.proxy_unavailable_reason || "代理组合暂不可用，当前结果基于历史收益和市场因子。";
   const helpful = data.proxy_features_helpful === true ? renderBadge("有提升", "success") : renderBadge("未证实提升", "neutral");
+  const top10Status = data.top10_proxy_status || "unavailable";
+  const failedCodes = data.failed_stock_codes || [];
+  const sourcesUsed = data.stock_sources_used || {};
+  const topExposures = data.top_exposures || [];
+  const top10Unavailable = top10Status === "unavailable";
+  const top10Partial = top10Status === "partial";
+
+  let top10StatusBadge = renderBadge(top10Status, top10Status === "usable" ? "success" : top10Status === "partial" ? "warning" : "danger");
+  let top10Warning = "";
+  if (top10Unavailable) {
+    top10Warning = `<div class="notice warning">重仓股代理不可用，当前代理组合主要依赖主题指数和收益反推。</div>`;
+  } else if (top10Partial) {
+    top10Warning = `<div class="notice">部分重仓股行情获取失败，代理组合可能存在偏差。</div>`;
+  }
+
+  let sourcesHtml = "";
+  if (Object.keys(sourcesUsed).length > 0) {
+    const sourceItems = Object.entries(sourcesUsed).map(([code, src]) => `<span>${code}: ${src}</span>`).join("");
+    sourcesHtml = `<details class="source-details"><summary>数据源详情 (${Object.keys(sourcesUsed).length}只)</summary><div class="source-grid">${sourceItems}</div></details>`;
+  }
+
+  let failedHtml = "";
+  if (failedCodes.length > 0) {
+    failedHtml = `<details class="failed-details"><summary>失败股票 (${failedCodes.length}只)</summary><div class="failed-codes">${failedCodes.join(", ")}</div></details>`;
+  }
+
+  let exposuresHtml = "";
+  if (topExposures.length > 0) {
+    const exposureItems = topExposures.map(e => `<span class="exposure-item"><b>${e.name}</b>: ${e.sign === "positive" ? "+" : "-"}${(e.beta * 100).toFixed(1)}%</span>`).join("");
+    exposuresHtml = `<div class="exposures-row"><span>主要暴露因子:</span>${exposureItems}</div>`;
+  }
+
   $("proxyCard").innerHTML = `
     <div class="section-title">基金代理资产组合</div>
-    ${available ? "" : `<div class="notice warning">${reason}</div>`}
+    ${!available ? `<div class="notice warning">${reason}</div>` : ""}
+    ${top10Warning}
     <div class="split-metrics">
       <div><span>持仓报告日期</span><b>${data.holding_report_date || "-"}</b></div>
       <div><span>持仓范围</span><b>${data.holding_scope || "unavailable"}</b></div>
+      <div><span>Top10 状态</span><b>${top10StatusBadge}</b></div>
       <div><span>成功股票数量</span><b>${data.top10_proxy_available_count ?? 0}</b></div>
-      <div><span>缺失股票数量</span><b>${data.top10_proxy_missing_count ?? "-"}</b></div>
+      <div><span>缺失股票数量</span><b>${data.top10_proxy_missing_count ?? 0}</b></div>
       <div><span>主题代理成功</span><b>${data.theme_available_count ?? 0}</b></div>
       <div><span>proxy_r2_60</span><b>${num(data.proxy_r2_60) === null ? "-" : num(data.proxy_r2_60).toFixed(3)}</b></div>
       <div><span>tracking_error_60</span><b>${formatPct(data.tracking_error_60, 2)}</b></div>
       <div><span>解释力</span><b>${qualityBadge(data.proxy_quality_flag)}</b></div>
       <div><span>代理特征贡献</span><b>${helpful}</b></div>
     </div>
+    ${exposuresHtml}
+    ${sourcesHtml}
+    ${failedHtml}
     <p class="subtle-text">代理组合基于公开披露持仓、主题指数和历史收益拟合构建，不代表基金真实实时持仓。</p>
     ${data.proxy_quality_flag === "low" ? `<div class="notice">代理组合对该基金近期收益解释力较弱，点预测可信度较低。</div>` : ""}
+  `;
+}
+
+function renderExcessSignalsCard(data) {
+  const signals = data.excess_signals || {};
+  const cyb = signals.outperform_cyb;
+  const kcb50 = signals.outperform_kcb50;
+  const top10 = signals.outperform_top10;
+  const theme = signals.outperform_theme;
+  const stronger = signals.stronger_than_absolute;
+  const reliableCount = signals.reliable_count || 0;
+
+  let signalRows = "";
+  if (cyb) {
+    const badge = cyb.reliable ? renderBadge(cyb.direction === "outperform" ? "跑赢" : "跑输", cyb.direction === "outperform" ? "success" : "danger") : renderBadge("不可靠", "neutral");
+    signalRows += `<div><span>vs 创业板</span><b>${badge}</b><span class="subtle-text">prob ${(cyb.prob * 100).toFixed(1)}%</span></div>`;
+  }
+  if (kcb50) {
+    const badge = kcb50.reliable ? renderBadge(kcb50.direction === "outperform" ? "跑赢" : "跑输", kcb50.direction === "outperform" ? "success" : "danger") : renderBadge("不可靠", "neutral");
+    signalRows += `<div><span>vs 科创50</span><b>${badge}</b><span class="subtle-text">prob ${(kcb50.prob * 100).toFixed(1)}%</span></div>`;
+  }
+  if (top10) {
+    const badge = top10.reliable ? renderBadge(top10.direction === "outperform" ? "跑赢" : "跑输", top10.direction === "outperform" ? "success" : "danger") : renderBadge("不可靠", "neutral");
+    signalRows += `<div><span>vs Top10代理</span><b>${badge}</b><span class="subtle-text">prob ${(top10.prob * 100).toFixed(1)}%</span></div>`;
+  }
+  if (theme) {
+    const badge = theme.reliable ? renderBadge(theme.direction === "outperform" ? "跑赢" : "跑输", theme.direction === "outperform" ? "success" : "danger") : renderBadge("不可靠", "neutral");
+    signalRows += `<div><span>vs 主题代理</span><b>${badge}</b><span class="subtle-text">prob ${(theme.prob * 100).toFixed(1)}%</span></div>`;
+  }
+
+  if (!signalRows) {
+    signalRows = `<div class="notice">相对收益模型暂不可用，需要更多训练数据。</div>`;
+  }
+
+  $("excessSignalsCard").innerHTML = `
+    <div class="section-title">相对收益信号</div>
+    <div class="split-metrics">${signalRows}</div>
+    ${stronger ? `<div class="notice success">相对收益信号强于绝对收益信号。</div>` : ""}
+    ${reliableCount > 0 ? `<p class="subtle-text">可靠模型数量: ${reliableCount}</p>` : ""}
+  `;
+}
+
+function renderModelMonitoringCard(data) {
+  const monitoring = data.model_monitoring || {};
+  const predictions = monitoring.predictions || [];
+  const degradation = monitoring.degradation_flag;
+  const avgImprovement = monitoring.avg_model_vs_mean_improvement;
+  const directionAcc = monitoring.recent_direction_acc;
+
+  const recentCount = predictions.length;
+  const degradationBadge = degradation ? renderBadge("模型退化", "danger") : renderBadge("正常", "success");
+
+  let recentRows = "";
+  if (predictions.length > 0) {
+    const recent = predictions.slice(-5);
+    recentRows = recent.map(r => `
+      <div class="monitoring-row">
+        <span>${r.date || "-"}</span>
+        <span>预测: ${formatSignedPctCN(r.pred_return)}</span>
+        <span>p_up: ${formatPct(r.p_up, 1)}</span>
+        <span>${r.direction_signal || "-"}</span>
+      </div>
+    `).join("");
+  }
+
+  $("modelMonitoringCard").innerHTML = `
+    <div class="section-title">模型监控</div>
+    <div class="split-metrics">
+      <div><span>状态</span><b>${degradationBadge}</b></div>
+      <div><span>最近预测次数</span><b>${recentCount}</b></div>
+      ${avgImprovement !== undefined ? `<div><span>平均提升</span><b>${formatPct(avgImprovement, 2)}</b></div>` : ""}
+      ${directionAcc !== undefined ? `<div><span>近期方向准确率</span><b>${formatPct(directionAcc, 1)}</b></div>` : ""}
+    </div>
+    ${degradation ? `<div class="notice warning">模型可能已退化，建议重新训练。</div>` : ""}
+    ${data.exposure_shift_flag ? `<div class="notice warning">近期基金暴露可能发生漂移，点预测可信度下降。</div>` : ""}
+    ${recentRows ? `<details class="monitoring-details"><summary>最近5次预测</summary>${recentRows}</details>` : ""}
   `;
 }
 
@@ -411,6 +524,8 @@ function renderPrediction(data) {
   renderCoreMetrics(data);
   renderDirectionCard(data);
   renderProxyCard(data);
+  renderExcessSignalsCard(data);
+  renderModelMonitoringCard(data);
   renderHealthCard(data);
   renderHistoryTable(data.prediction_history || []);
 }

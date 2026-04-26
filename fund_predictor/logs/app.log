@@ -11122,3 +11122,1472 @@ requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com
 2026-04-26 18:48:00,406 | INFO | backend.app.services.feature_service | request_id=434ccc20c994 | fund_code=018956 | task_id=- | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
 2026-04-26 18:48:00,536 | INFO | backend.app.services.prediction_service | request_id=434ccc20c994 | fund_code=018956 | task_id=- | stage=regime_interval_fallback | regime_interval_fallback group=high_vol size=40
 2026-04-26 18:48:00,546 | INFO | backend.app.services.prediction_service | request_id=434ccc20c994 | fund_code=018956 | task_id=- | stage=predict_success | predict_success asof=2026-04-24 pred=0.00291202 p_up=0.4397673492777147
+2026-04-26 19:07:05,579 | INFO | backend.app.services.feature_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=feature_build_start | feature_build_start
+2026-04-26 19:07:05,580 | INFO | backend.app.services.data_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:07:06,630 | INFO | backend.app.services.proxy_portfolio_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=top10_proxy_build_start | top10_proxy_build_start
+2026-04-26 19:07:06,631 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:07:06,637 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300502
+2026-04-26 19:07:07,044 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=300502
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.300502&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.300502&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:07,049 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300308
+2026-04-26 19:07:07,689 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=300308
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.300308&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.300308&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:07,692 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300757
+2026-04-26 19:07:08,433 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=300757
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.300757&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.300757&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:08,436 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300394
+2026-04-26 19:07:08,899 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=300394
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.300394&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.300394&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:08,903 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688048
+2026-04-26 19:07:09,277 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=688048
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=1.688048&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=1.688048&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:09,280 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=002837
+2026-04-26 19:07:09,932 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=002837
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.002837&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.002837&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:09,936 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=600105
+2026-04-26 19:07:11,028 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=600105
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=1.600105&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=1.600105&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:11,032 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=301183
+2026-04-26 19:07:11,532 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=301183
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.301183&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=0.301183&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:11,537 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=603052
+2026-04-26 19:07:12,304 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=603052
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=1.603052&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=1.603052&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:12,308 | INFO | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688313
+2026-04-26 19:07:12,656 | ERROR | backend.app.services.holding_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=stock_price_fetch_failed | stock_price_fetch_failed stock_code=688313
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\http\client.py", line 300, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 645, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\urllib3\util\retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=1.688313&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\holding_service.py", line 114, in get_stock_daily
+    raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
+  File "C:\Users\18385\miniconda3\Lib\site-packages\akshare\stock_feature\stock_hist_em.py", line 992, in stock_zh_a_hist
+    r = requests.get(url, params=params, timeout=timeout)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 592, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\sessions.py", line 706, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\requests\adapters.py", line 672, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: HTTPSConnectionPool(host='push2his.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/stock/kline/get?fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61%2Cf116&ut=7eea3edcaed734bea9cbfc24409ed989&klt=101&fqt=1&secid=1.688313&beg=20200101&end=20500101 (Caused by ProxyError('Unable to connect to proxy', RemoteDisconnected('Remote end closed connection without response')))
+2026-04-26 19:07:12,660 | INFO | backend.app.services.proxy_portfolio_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:07:13,039 | INFO | backend.app.services.proxy_portfolio_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:07:13,059 | INFO | backend.app.services.proxy_portfolio_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:07:17,534 | INFO | backend.app.services.proxy_portfolio_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:07:17,536 | INFO | backend.app.services.proxy_portfolio_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=proxy_feature_merge_success | proxy_feature_merge_success proxy_available=True
+2026-04-26 19:07:17,679 | INFO | backend.app.services.feature_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=proxy_feature_merge_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=181 source_used=cache fallback_used=False
+2026-04-26 19:07:17,827 | INFO | backend.app.services.feature_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 19:07:18,327 | INFO | backend.app.services.prediction_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=regime_interval_fallback | regime_interval_fallback group=high_vol size=40
+2026-04-26 19:07:18,337 | INFO | backend.app.services.prediction_service | request_id=8d9f15e5033c | fund_code=018956 | task_id=- | stage=predict_success | predict_success asof=2026-04-24 pred=0.00291202 p_up=0.4397673492777147
+2026-04-26 19:16:44,437 | INFO | backend.app.services.feature_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=feature_build_start | feature_build_start
+2026-04-26 19:16:44,439 | INFO | backend.app.services.data_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:16:45,608 | INFO | backend.app.services.proxy_portfolio_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=top10_proxy_build_start | top10_proxy_build_start
+2026-04-26 19:16:45,608 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:16:45,617 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300502
+2026-04-26 19:16:45,627 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300308
+2026-04-26 19:16:45,638 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300757
+2026-04-26 19:16:45,646 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300394
+2026-04-26 19:16:45,654 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688048
+2026-04-26 19:16:45,661 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=002837
+2026-04-26 19:16:45,668 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=600105
+2026-04-26 19:16:45,681 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=301183
+2026-04-26 19:16:45,686 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=603052
+2026-04-26 19:16:45,690 | INFO | backend.app.services.holding_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688313
+2026-04-26 19:16:45,763 | INFO | backend.app.services.proxy_portfolio_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=top10_proxy_build_success | top10_proxy_build_success available=10 missing=0
+2026-04-26 19:16:45,764 | INFO | backend.app.services.proxy_portfolio_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:16:46,073 | INFO | backend.app.services.proxy_portfolio_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:16:46,096 | INFO | backend.app.services.proxy_portfolio_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:16:50,686 | INFO | backend.app.services.proxy_portfolio_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:16:50,688 | INFO | backend.app.services.proxy_portfolio_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=proxy_feature_merge_success | proxy_feature_merge_success proxy_available=True
+2026-04-26 19:16:50,829 | INFO | backend.app.services.feature_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=proxy_feature_merge_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=188 source_used=cache fallback_used=False
+2026-04-26 19:16:50,990 | INFO | backend.app.services.feature_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 19:16:51,151 | INFO | backend.app.services.prediction_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=regime_interval_fallback | regime_interval_fallback group=high_vol size=40
+2026-04-26 19:16:51,164 | INFO | backend.app.services.prediction_service | request_id=0d27b193e482 | fund_code=018956 | task_id=- | stage=predict_success | predict_success asof=2026-04-24 pred=0.00291202 p_up=0.4397673492777147
+2026-04-26 19:26:53,012 | INFO | backend.app.services.feature_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=feature_build_start | feature_build_start
+2026-04-26 19:26:53,013 | INFO | backend.app.services.data_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:26:54,960 | INFO | backend.app.services.proxy_portfolio_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=top10_proxy_build_start | top10_proxy_build_start
+2026-04-26 19:26:54,961 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:26:54,968 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300502
+2026-04-26 19:26:54,982 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300308
+2026-04-26 19:26:54,997 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300757
+2026-04-26 19:26:55,007 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300394
+2026-04-26 19:26:55,022 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688048
+2026-04-26 19:26:55,030 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=002837
+2026-04-26 19:26:55,042 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=600105
+2026-04-26 19:26:55,068 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=301183
+2026-04-26 19:26:55,075 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=603052
+2026-04-26 19:26:55,086 | INFO | backend.app.services.holding_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688313
+2026-04-26 19:26:55,230 | INFO | backend.app.services.proxy_portfolio_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=top10_proxy_build_success | top10_proxy_build_success available=10 missing=0
+2026-04-26 19:26:55,230 | INFO | backend.app.services.proxy_portfolio_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:26:55,794 | INFO | backend.app.services.proxy_portfolio_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:26:55,825 | INFO | backend.app.services.proxy_portfolio_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:27:04,570 | INFO | backend.app.services.proxy_portfolio_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:27:04,572 | INFO | backend.app.services.proxy_portfolio_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=proxy_feature_merge_success | proxy_feature_merge_success proxy_available=True
+2026-04-26 19:27:04,855 | INFO | backend.app.services.feature_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=proxy_feature_merge_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=188 source_used=cache fallback_used=False
+2026-04-26 19:27:05,192 | INFO | backend.app.services.feature_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 19:27:05,469 | INFO | backend.app.services.prediction_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=regime_interval_fallback | regime_interval_fallback group=high_vol size=40
+2026-04-26 19:27:05,486 | INFO | backend.app.services.prediction_service | request_id=9c1c054aae04 | fund_code=018956 | task_id=- | stage=predict_success | predict_success asof=2026-04-24 pred=0.00291202 p_up=0.4397673492777147
+2026-04-26 19:28:52,220 | INFO | backend.app.services.feature_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=feature_build_start | feature_build_start
+2026-04-26 19:28:52,221 | INFO | backend.app.services.data_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:28:53,993 | INFO | backend.app.services.data_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=data_fetch_success | data_fetch_success fund nav fund_code=018956 rows=640 start=2023-08-10 end=2026-04-24 source=akshare_fund_open_fund_info_em
+2026-04-26 19:28:56,138 | INFO | backend.app.services.proxy_portfolio_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=top10_proxy_build_start | top10_proxy_build_start
+2026-04-26 19:28:56,139 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:28:56,149 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300502
+2026-04-26 19:28:56,164 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300308
+2026-04-26 19:28:56,183 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300757
+2026-04-26 19:28:56,192 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300394
+2026-04-26 19:28:56,207 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688048
+2026-04-26 19:28:56,223 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=002837
+2026-04-26 19:28:56,238 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=600105
+2026-04-26 19:28:56,266 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=301183
+2026-04-26 19:28:56,276 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=603052
+2026-04-26 19:28:56,284 | INFO | backend.app.services.holding_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688313
+2026-04-26 19:28:56,391 | INFO | backend.app.services.proxy_portfolio_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=top10_proxy_build_success | top10_proxy_build_success available=10 missing=0
+2026-04-26 19:28:56,391 | INFO | backend.app.services.proxy_portfolio_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:28:56,873 | INFO | backend.app.services.proxy_portfolio_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:28:56,918 | INFO | backend.app.services.proxy_portfolio_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:29:04,417 | INFO | backend.app.services.proxy_portfolio_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:29:04,420 | INFO | backend.app.services.proxy_portfolio_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=proxy_feature_merge_success | proxy_feature_merge_success proxy_available=True
+2026-04-26 19:29:04,628 | INFO | backend.app.services.feature_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=proxy_feature_merge_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=188 source_used=akshare_fund_open_fund_info_em fallback_used=False
+2026-04-26 19:29:04,861 | INFO | backend.app.services.feature_service | request_id=c41fed946d4f | fund_code=018956 | task_id=train_018956_eb3a8024b2 | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 19:30:46,389 | INFO | backend.app.services.feature_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=feature_build_start | feature_build_start
+2026-04-26 19:30:46,390 | INFO | backend.app.services.data_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:30:47,674 | INFO | backend.app.services.data_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=data_fetch_success | data_fetch_success fund nav fund_code=018956 rows=640 start=2023-08-10 end=2026-04-24 source=akshare_fund_open_fund_info_em
+2026-04-26 19:30:49,625 | INFO | backend.app.services.proxy_portfolio_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=top10_proxy_build_start | top10_proxy_build_start
+2026-04-26 19:30:49,627 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:30:49,636 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300502
+2026-04-26 19:30:49,652 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300308
+2026-04-26 19:30:49,671 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300757
+2026-04-26 19:30:49,684 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=300394
+2026-04-26 19:30:49,699 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688048
+2026-04-26 19:30:49,712 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=002837
+2026-04-26 19:30:49,725 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=600105
+2026-04-26 19:30:49,747 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=301183
+2026-04-26 19:30:49,756 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=603052
+2026-04-26 19:30:49,764 | INFO | backend.app.services.holding_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=stock_price_fetch_start | stock_price_fetch_start stock_code=688313
+2026-04-26 19:30:49,876 | INFO | backend.app.services.proxy_portfolio_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=top10_proxy_build_success | top10_proxy_build_success available=10 missing=0
+2026-04-26 19:30:49,877 | INFO | backend.app.services.proxy_portfolio_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:30:50,420 | INFO | backend.app.services.proxy_portfolio_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:30:50,470 | INFO | backend.app.services.proxy_portfolio_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:30:58,423 | INFO | backend.app.services.proxy_portfolio_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:30:58,428 | INFO | backend.app.services.proxy_portfolio_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=proxy_feature_merge_success | proxy_feature_merge_success proxy_available=True
+2026-04-26 19:30:58,644 | INFO | backend.app.services.feature_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=proxy_feature_merge_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=188 source_used=akshare_fund_open_fund_info_em fallback_used=False
+2026-04-26 19:30:58,902 | INFO | backend.app.services.feature_service | request_id=7c4a9fd58466 | fund_code=018956 | task_id=train_018956_4558c047a0 | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 19:35:28,221 | INFO | backend.app.services.feature_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=feature_build_start | feature_build_start
+2026-04-26 19:35:28,222 | INFO | backend.app.services.data_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:35:30,017 | INFO | backend.app.services.data_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=data_fetch_success | data_fetch_success fund nav fund_code=018956 rows=640 start=2023-08-10 end=2026-04-24 source=akshare_fund_open_fund_info_em
+2026-04-26 19:35:31,750 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 19:35:31,751 | INFO | backend.app.services.holding_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:35:31,756 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 19:35:31,766 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 19:35:31,768 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 19:35:31,768 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 19:35:31,778 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 19:35:31,780 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 19:35:31,781 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 19:35:31,790 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 19:35:31,792 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 19:35:31,792 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 19:35:31,802 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 19:35:31,803 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 19:35:31,804 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 19:35:31,809 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 19:35:31,811 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 19:35:31,811 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 19:35:31,819 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 19:35:31,821 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 19:35:31,821 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 19:35:31,837 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 19:35:31,839 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 19:35:31,840 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 19:35:31,844 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 19:35:31,846 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 19:35:31,846 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 19:35:31,853 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 19:35:31,855 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 19:35:31,855 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 19:35:31,861 | INFO | backend.app.services.stock_price_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 19:35:31,863 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 19:35:31,945 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 19:35:31,946 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:35:32,378 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:35:32,414 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:35:38,527 | INFO | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:35:38,533 | ERROR | backend.app.services.proxy_portfolio_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 19:35:38,667 | INFO | backend.app.services.feature_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=rolling_proxy_exposure_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=87 source_used=akshare_fund_open_fund_info_em fallback_used=False
+2026-04-26 19:35:38,764 | INFO | backend.app.services.feature_service | request_id=62ca1118368b | fund_code=018956 | task_id=train_018956_14e41ddd47 | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 19:41:09,268 | INFO | backend.app.services.feature_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=feature_build_start | feature_build_start
+2026-04-26 19:41:09,269 | INFO | backend.app.services.data_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:41:11,368 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 19:41:11,369 | INFO | backend.app.services.holding_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:41:11,374 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 19:41:11,390 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 19:41:11,392 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 19:41:11,393 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 19:41:11,428 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 19:41:11,429 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 19:41:11,430 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 19:41:11,444 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 19:41:11,446 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 19:41:11,447 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 19:41:11,463 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 19:41:11,465 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 19:41:11,467 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 19:41:11,476 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 19:41:11,479 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 19:41:11,480 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 19:41:11,495 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 19:41:11,497 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 19:41:11,499 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 19:41:11,522 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 19:41:11,524 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 19:41:11,526 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 19:41:11,536 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 19:41:11,538 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 19:41:11,539 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 19:41:11,547 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 19:41:11,549 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 19:41:11,550 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 19:41:11,561 | INFO | backend.app.services.stock_price_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 19:41:11,563 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 19:41:11,675 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 19:41:11,677 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:41:12,376 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:41:12,426 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:41:20,566 | INFO | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:41:20,593 | ERROR | backend.app.services.proxy_portfolio_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 19:41:20,725 | INFO | backend.app.services.feature_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=87 source_used=cache fallback_used=False
+2026-04-26 19:41:20,833 | INFO | backend.app.services.feature_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 19:41:20,997 | ERROR | backend.app.services.prediction_service | request_id=ba1e22302586 | fund_code=018956 | task_id=- | stage=predict_failed | predict_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 183, in predict_next
+    pred = float(point_model.predict(point_x)[0])
+                 ~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    Xt = transform.transform(Xt)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    X = self._validate_input(X, in_fit=False)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    X = validate_data(
+        self,
+    ...<6 lines>...
+        copy=self.copy,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2954, in validate_data
+    out = check_array(X, input_name="X", **check_params)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 1053, in check_array
+    array = _asarray_with_order(array, order=order, dtype=dtype, xp=xp)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_array_api.py", line 757, in _asarray_with_order
+    array = numpy.asarray(array, order=order, dtype=dtype)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 2168, in __array__
+    arr = np.asarray(values, dtype=dtype)
+TypeError: float() argument must be a string or a real number, not 'NAType'
+2026-04-26 19:41:21,012 | ERROR | backend.app.main | request_id=ba1e22302586 | fund_code=- | task_id=- | stage=request | unhandled_request_error
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 151, in call_next
+    message = await recv_stream.receive()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\streams\memory.py", line 132, in receive
+    raise EndOfStream from None
+anyio.EndOfStream
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 183, in predict_next
+    pred = float(point_model.predict(point_x)[0])
+                 ~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    Xt = transform.transform(Xt)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    X = self._validate_input(X, in_fit=False)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    X = validate_data(
+        self,
+    ...<6 lines>...
+        copy=self.copy,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2954, in validate_data
+    out = check_array(X, input_name="X", **check_params)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 1053, in check_array
+    array = _asarray_with_order(array, order=order, dtype=dtype, xp=xp)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_array_api.py", line 757, in _asarray_with_order
+    array = numpy.asarray(array, order=order, dtype=dtype)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 2168, in __array__
+    arr = np.asarray(values, dtype=dtype)
+TypeError: float() argument must be a string or a real number, not 'NAType'
+2026-04-26 19:41:21,040 | ERROR | backend.app.main | request_id=ba1e22302586 | fund_code=- | task_id=- | stage=request | unexpected_error
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
+  |     yield
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 183, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    |     await route.handle(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    |     await self.app(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    |     return await run_in_threadpool(dependant.call, **values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    |     return await anyio.to_thread.run_sync(func)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    |     return await get_async_backend().run_sync_in_worker_thread(
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    |     return await future
+    |            ^^^^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    |     result = context.run(func, *args)
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    |     data = predict_next(fund_code, request_id_var.get())
+    |   File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 183, in predict_next
+    |     pred = float(point_model.predict(point_x)[0])
+    |                  ~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    |     Xt = transform.transform(Xt)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    |     data_to_wrap = f(self, X, *args, **kwargs)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    |     X = self._validate_input(X, in_fit=False)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    |     X = validate_data(
+    |         self,
+    |     ...<6 lines>...
+    |         copy=self.copy,
+    |     )
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2954, in validate_data
+    |     out = check_array(X, input_name="X", **check_params)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 1053, in check_array
+    |     array = _asarray_with_order(array, order=order, dtype=dtype, xp=xp)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_array_api.py", line 757, in _asarray_with_order
+    |     array = numpy.asarray(array, order=order, dtype=dtype)
+    |   File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 2168, in __array__
+    |     arr = np.asarray(values, dtype=dtype)
+    | TypeError: float() argument must be a string or a real number, not 'NAType'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\18385\miniconda3\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\main.py", line 27, in request_context
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 302, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\fastapi\routing.py", line 215, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\starlette\concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 2518, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\anyio\_backends\_asyncio.py", line 1002, in run
+    result = context.run(func, *args)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\api\fund.py", line 22, in predict
+    data = predict_next(fund_code, request_id_var.get())
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\prediction_service.py", line 183, in predict_next
+    pred = float(point_model.predict(point_x)[0])
+                 ~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\pipeline.py", line 788, in predict
+    Xt = transform.transform(Xt)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_set_output.py", line 316, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 609, in transform
+    X = self._validate_input(X, in_fit=False)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\impute\_base.py", line 344, in _validate_input
+    X = validate_data(
+        self,
+    ...<6 lines>...
+        copy=self.copy,
+    )
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 2954, in validate_data
+    out = check_array(X, input_name="X", **check_params)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\validation.py", line 1053, in check_array
+    array = _asarray_with_order(array, order=order, dtype=dtype, xp=xp)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\sklearn\utils\_array_api.py", line 757, in _asarray_with_order
+    array = numpy.asarray(array, order=order, dtype=dtype)
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 2168, in __array__
+    arr = np.asarray(values, dtype=dtype)
+TypeError: float() argument must be a string or a real number, not 'NAType'
+2026-04-26 19:43:02,966 | INFO | backend.app.services.feature_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=feature_build_start | feature_build_start
+2026-04-26 19:43:02,966 | INFO | backend.app.services.data_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:43:04,468 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 19:43:04,468 | INFO | backend.app.services.holding_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:43:04,474 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 19:43:04,484 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 19:43:04,485 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 19:43:04,486 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 19:43:04,496 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 19:43:04,497 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 19:43:04,498 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 19:43:04,504 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 19:43:04,505 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 19:43:04,506 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 19:43:04,516 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 19:43:04,518 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 19:43:04,518 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 19:43:04,523 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 19:43:04,525 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 19:43:04,525 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 19:43:04,534 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 19:43:04,535 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 19:43:04,536 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 19:43:04,554 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 19:43:04,556 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 19:43:04,556 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 19:43:04,561 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 19:43:04,563 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 19:43:04,563 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 19:43:04,568 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 19:43:04,569 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 19:43:04,570 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 19:43:04,577 | INFO | backend.app.services.stock_price_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 19:43:04,579 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 19:43:04,661 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 19:43:04,662 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:43:05,100 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:43:05,128 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:43:10,859 | INFO | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:43:10,863 | ERROR | backend.app.services.proxy_portfolio_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 19:43:10,993 | INFO | backend.app.services.feature_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=rolling_proxy_exposure_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=87 source_used=cache fallback_used=False
+2026-04-26 19:43:11,090 | INFO | backend.app.services.feature_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 19:43:15,139 | INFO | backend.app.services.prediction_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=regime_interval_fallback | regime_interval_fallback group=high_vol size=40
+2026-04-26 19:43:15,155 | INFO | backend.app.services.prediction_service | request_id=1dd6101b58ce | fund_code=018956 | task_id=- | stage=predict_success | predict_success asof=2026-04-24 pred=0.00264913 p_up=0.4551157889060236
+2026-04-26 19:43:57,673 | INFO | backend.app.services.feature_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=feature_build_start | feature_build_start
+2026-04-26 19:43:57,673 | INFO | backend.app.services.data_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:43:59,011 | INFO | backend.app.services.data_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=data_fetch_success | data_fetch_success fund nav fund_code=018956 rows=640 start=2023-08-10 end=2026-04-24 source=akshare_fund_open_fund_info_em
+2026-04-26 19:44:00,532 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 19:44:00,533 | INFO | backend.app.services.holding_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:44:00,538 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 19:44:00,550 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 19:44:00,553 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 19:44:00,553 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 19:44:00,567 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 19:44:00,568 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 19:44:00,569 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 19:44:00,577 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 19:44:00,579 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 19:44:00,580 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 19:44:00,592 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 19:44:00,594 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 19:44:00,594 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 19:44:00,600 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 19:44:00,601 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 19:44:00,602 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 19:44:00,611 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 19:44:00,612 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 19:44:00,613 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 19:44:00,630 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 19:44:00,633 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 19:44:00,633 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 19:44:00,640 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 19:44:00,642 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 19:44:00,643 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 19:44:00,648 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 19:44:00,650 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 19:44:00,650 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 19:44:00,657 | INFO | backend.app.services.stock_price_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 19:44:00,658 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 19:44:00,737 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 19:44:00,737 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:44:01,164 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:44:01,191 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:44:07,579 | INFO | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:44:07,584 | ERROR | backend.app.services.proxy_portfolio_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 19:44:07,726 | INFO | backend.app.services.feature_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=rolling_proxy_exposure_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=87 source_used=akshare_fund_open_fund_info_em fallback_used=False
+2026-04-26 19:44:07,821 | INFO | backend.app.services.feature_service | request_id=2b8900301e3f | fund_code=018956 | task_id=train_018956_dbea74e098 | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 19:57:41,194 | INFO | backend.app.services.feature_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=feature_build_start | feature_build_start
+2026-04-26 19:57:41,195 | INFO | backend.app.services.data_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 19:57:45,431 | INFO | backend.app.services.data_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=data_fetch_success | data_fetch_success fund nav fund_code=018956 rows=640 start=2023-08-10 end=2026-04-24 source=akshare_fund_open_fund_info_em
+2026-04-26 19:57:51,439 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 19:57:51,440 | INFO | backend.app.services.holding_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 19:57:51,457 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 19:57:51,489 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 19:57:51,493 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 19:57:51,494 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 19:57:51,526 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 19:57:51,531 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 19:57:51,532 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 19:57:51,553 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 19:57:51,558 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 19:57:51,559 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 19:57:51,591 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 19:57:51,596 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 19:57:51,597 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 19:57:51,615 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 19:57:51,619 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 19:57:51,620 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 19:57:51,644 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 19:57:51,650 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 19:57:51,651 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 19:57:51,695 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 19:57:51,699 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 19:57:51,700 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 19:57:51,714 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 19:57:51,718 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 19:57:51,719 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 19:57:51,731 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 19:57:51,735 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 19:57:51,736 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 19:57:51,756 | INFO | backend.app.services.stock_price_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 19:57:51,761 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 19:57:52,030 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 19:57:52,032 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 19:57:53,332 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 19:57:53,434 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 19:58:09,006 | INFO | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 19:58:09,012 | ERROR | backend.app.services.proxy_portfolio_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 19:58:09,400 | INFO | backend.app.services.feature_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=rolling_proxy_exposure_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=87 source_used=akshare_fund_open_fund_info_em fallback_used=False
+2026-04-26 19:58:09,660 | INFO | backend.app.services.feature_service | request_id=08115ecb3d37 | fund_code=018956 | task_id=train_018956_8d21fb85c4 | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 20:18:09,641 | INFO | backend.app.services.feature_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=feature_build_start | feature_build_start
+2026-04-26 20:18:09,643 | INFO | backend.app.services.data_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 20:18:10,874 | INFO | backend.app.services.data_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=data_fetch_success | data_fetch_success fund nav fund_code=018956 rows=640 start=2023-08-10 end=2026-04-24 source=akshare_fund_open_fund_info_em
+2026-04-26 20:18:12,813 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 20:18:12,814 | INFO | backend.app.services.holding_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 20:18:12,821 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 20:18:12,835 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 20:18:12,838 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 20:18:12,838 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 20:18:12,856 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 20:18:12,858 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 20:18:12,859 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 20:18:12,870 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 20:18:12,872 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 20:18:12,873 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 20:18:12,885 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 20:18:12,887 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 20:18:12,887 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 20:18:12,894 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 20:18:12,896 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 20:18:12,897 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 20:18:12,907 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 20:18:12,908 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 20:18:12,909 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 20:18:12,929 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 20:18:12,930 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 20:18:12,931 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 20:18:12,937 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 20:18:12,939 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 20:18:12,939 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 20:18:12,946 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 20:18:12,948 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 20:18:12,949 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 20:18:12,957 | INFO | backend.app.services.stock_price_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 20:18:12,959 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 20:18:13,056 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 20:18:13,057 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 20:18:13,568 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 20:18:13,597 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 20:18:21,866 | INFO | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 20:18:21,870 | ERROR | backend.app.services.proxy_portfolio_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 20:18:22,043 | INFO | backend.app.services.feature_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=rolling_proxy_exposure_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=87 source_used=akshare_fund_open_fund_info_em fallback_used=False
+2026-04-26 20:18:22,150 | INFO | backend.app.services.feature_service | request_id=a8dda4a8f0bf | fund_code=018956 | task_id=train_018956_75d0a1616a | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639
+2026-04-26 20:23:15,349 | INFO | backend.app.services.feature_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=feature_build_start | feature_build_start
+2026-04-26 20:23:15,350 | INFO | backend.app.services.data_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=data_fetch_start | data_fetch_start fund nav
+2026-04-26 20:23:17,363 | INFO | backend.app.services.data_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=data_fetch_success | data_fetch_success fund nav fund_code=018956 rows=640 start=2023-08-10 end=2026-04-24 source=akshare_fund_open_fund_info_em
+2026-04-26 20:23:18,996 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=top10_proxy_build_start | top10_proxy_build_start fund_code=018956
+2026-04-26 20:23:18,997 | INFO | backend.app.services.holding_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=holding_fetch_start | holding_fetch_start
+2026-04-26 20:23:19,003 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300502
+2026-04-26 20:23:19,016 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300502 source=cache rows=2463
+2026-04-26 20:23:19,018 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300502 stock_name=新易盛 source=cache rows=2463
+2026-04-26 20:23:19,019 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300308
+2026-04-26 20:23:19,031 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300308 source=cache rows=3243
+2026-04-26 20:23:19,033 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300308 stock_name=中际旭创 source=cache rows=3243
+2026-04-26 20:23:19,034 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300757
+2026-04-26 20:23:19,043 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300757 source=cache rows=1748
+2026-04-26 20:23:19,044 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300757 stock_name=罗博特科 source=cache rows=1748
+2026-04-26 20:23:19,045 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=300394
+2026-04-26 20:23:19,057 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=300394 source=cache rows=2704
+2026-04-26 20:23:19,058 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=300394 stock_name=天孚通信 source=cache rows=2704
+2026-04-26 20:23:19,059 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688048
+2026-04-26 20:23:19,064 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688048 source=cache rows=984
+2026-04-26 20:23:19,066 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688048 stock_name=长光华芯 source=cache rows=984
+2026-04-26 20:23:19,067 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=002837
+2026-04-26 20:23:19,076 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=002837 source=cache rows=2185
+2026-04-26 20:23:19,078 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=002837 stock_name=英维克 source=cache rows=2185
+2026-04-26 20:23:19,078 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=600105
+2026-04-26 20:23:19,098 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=600105 source=cache rows=6780
+2026-04-26 20:23:19,100 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=600105 stock_name=永鼎股份 source=cache rows=6780
+2026-04-26 20:23:19,101 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=301183
+2026-04-26 20:23:19,107 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=301183 source=cache rows=952
+2026-04-26 20:23:19,109 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=301183 stock_name=东田微 source=cache rows=952
+2026-04-26 20:23:19,110 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=603052
+2026-04-26 20:23:19,115 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=603052 source=cache rows=859
+2026-04-26 20:23:19,117 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=603052 stock_name=可川科技 source=cache rows=859
+2026-04-26 20:23:19,117 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_multi_source_start | stock_daily_multi_source_start stock_code=688313
+2026-04-26 20:23:19,125 | INFO | backend.app.services.stock_price_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | stock_daily_source_success stock_code=688313 source=cache rows=1372
+2026-04-26 20:23:19,126 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=stock_daily_source_success | top10_proxy_stock_success fund_code=018956 stock_code=688313 stock_name=仕佳光子 source=cache rows=1372
+2026-04-26 20:23:19,214 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=top10_proxy_build_success | top10_proxy_build_success fund_code=018956 available=10 missing=0 status=usable
+2026-04-26 20:23:19,214 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=theme_proxy_fetch_start | theme_proxy_fetch_start
+2026-04-26 20:23:19,660 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=theme_proxy_fetch_success | theme_proxy_fetch_success available=12 failed=0
+2026-04-26 20:23:19,688 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=rolling_proxy_exposure_start | rolling_proxy_exposure_start
+2026-04-26 20:23:26,424 | INFO | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=rolling_proxy_exposure_success | rolling_proxy_exposure_success
+2026-04-26 20:23:26,427 | ERROR | backend.app.services.proxy_portfolio_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=rolling_proxy_exposure_success | proxy_portfolio_failed
+Traceback (most recent call last):
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 312, in build_proxy_features
+    exposure_summary = build_proxy_exposure_summary(out)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 281, in build_proxy_exposure_summary
+    top_exposures = _get_top_exposures(latest, beta_cols)
+  File "C:\Users\18385\Desktop\Python学习\fund_project\fund_predictor\backend\app\services\proxy_portfolio_service.py", line 268, in _get_top_exposures
+    if pd.notna(val):
+       ~~~~~~~~^^^^^
+  File "C:\Users\18385\miniconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+2026-04-26 20:23:26,435 | INFO | backend.app.services.feature_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=excess_target_build_start | excess_target_build_start fund_code=018956
+2026-04-26 20:23:26,438 | INFO | backend.app.services.feature_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=excess_target_build_success | excess_target_build_success fund_code=018956 excess_targets=['target_excess_cyb', 'target_excess_kcb50']
+2026-04-26 20:23:26,439 | INFO | backend.app.services.feature_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=exposure_stability_check_success | exposure_stability_check_success fund_code=018956
+2026-04-26 20:23:26,570 | INFO | backend.app.services.feature_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=exposure_stability_check_success | data_self_check fund_code=018956 nav_rows=640 nav_start_date=2023-08-10 nav_end_date=2026-04-24 dataset_rows=640 data_train_rows=639 feature_count=89 source_used=akshare_fund_open_fund_info_em fallback_used=False
+2026-04-26 20:23:26,668 | INFO | backend.app.services.feature_service | request_id=44a3b8b0a16c | fund_code=018956 | task_id=train_018956_708cb67c78 | stage=feature_build_success | feature_build_success rows_full=640 rows_train=639

@@ -130,6 +130,33 @@ def build_features(fund_code: str, require_fresh: bool = False) -> tuple[pd.Data
         df, proxy_meta = build_proxy_features(fund_code, df)
         df["target_next"] = df["fund_ret"].shift(-1)
 
+        # 相对收益目标 (V2.6)
+        set_log_context(stage="excess_target_build_start")
+        logger.info("excess_target_build_start fund_code=%s", fund_code)
+        
+        if "cyb_ret" in df.columns:
+            df["target_excess_cyb"] = df["fund_ret"].shift(-1) - df["cyb_ret"].shift(-1)
+        if "kcb50_ret" in df.columns:
+            df["target_excess_kcb50"] = df["fund_ret"].shift(-1) - df["kcb50_ret"].shift(-1)
+        if "top10_proxy_ret" in df.columns:
+            df["target_excess_top10"] = df["fund_ret"].shift(-1) - df["top10_proxy_ret"].shift(-1)
+        if "theme_proxy_ret" in df.columns:
+            df["target_excess_theme"] = df["fund_ret"].shift(-1) - df["theme_proxy_ret"].shift(-1)
+        
+        set_log_context(stage="excess_target_build_success")
+        logger.info("excess_target_build_success fund_code=%s excess_targets=%s", fund_code, 
+                    [c for c in df.columns if c.startswith("target_excess_")])
+
+        # 暴露稳定性指标 (V2.6)
+        if "proxy_r2_60" in df.columns:
+            df["proxy_r2_mean_20"] = df["proxy_r2_60"].rolling(20).mean()
+            df["proxy_r2_trend_20"] = df["proxy_r2_60"].diff(20)
+        if "tracking_error_60" in df.columns:
+            df["tracking_error_mean_20"] = df["tracking_error_60"].rolling(20).mean()
+        
+        set_log_context(stage="exposure_stability_check_success")
+        logger.info("exposure_stability_check_success fund_code=%s", fund_code)
+
         banned = [c for c in df.columns if c.endswith(("_open", "_close", "_high", "_low", "_volume"))]
         df = df.drop(columns=banned, errors="ignore")
         df = df.replace([np.inf, -np.inf], np.nan).sort_values("date").reset_index(drop=True)

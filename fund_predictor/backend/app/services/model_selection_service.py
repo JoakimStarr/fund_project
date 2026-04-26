@@ -30,6 +30,23 @@ from sklearn.metrics import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import RobustScaler, StandardScaler
 
+# XGB/LightGBM 可选导入 (V2.6)
+try:
+    import xgboost as xgb
+    XGB_AVAILABLE = True
+except ImportError:
+    xgb = None
+    XGB_AVAILABLE = False
+    logger.warning("xgboost_not_available")
+
+try:
+    import lightgbm as lgb
+    LGBM_AVAILABLE = True
+except ImportError:
+    lgb = None
+    LGBM_AVAILABLE = False
+    logger.warning("lightgbm_not_available")
+
 from backend.app.core.config import INTERVAL_ALPHA
 from backend.app.core.errors import BaselineEvalError, ModelSelectionError, ProbabilityCalibrationError, RegimeIntervalError
 from backend.app.core.logging_config import set_log_context
@@ -89,7 +106,7 @@ def _selected_features(pipe: Pipeline, feature_cols: list[str]) -> list[str]:
 
 
 def _regressors() -> dict[str, Any]:
-    return {
+    models = {
         "ridge": Ridge(alpha=1.0),
         "bayesian_ridge": BayesianRidge(),
         "elastic_net": ElasticNet(alpha=0.001, l1_ratio=0.2, max_iter=5000),
@@ -98,15 +115,27 @@ def _regressors() -> dict[str, Any]:
         "hist_gbr": HistGradientBoostingRegressor(max_iter=120, max_leaf_nodes=15, random_state=42),
         "gbr": GradientBoostingRegressor(n_estimators=120, max_depth=2, random_state=42),
     }
+    # XGB/LightGBM 候选 (V2.6)
+    if XGB_AVAILABLE and xgb is not None:
+        models["xgboost"] = xgb.XGBRegressor(n_estimators=100, max_depth=3, learning_rate=0.05, random_state=42, n_jobs=-1, verbosity=0)
+    if LGBM_AVAILABLE and lgb is not None:
+        models["lightgbm"] = lgb.LGBMRegressor(n_estimators=100, max_depth=4, learning_rate=0.05, random_state=42, n_jobs=-1, verbose=-1)
+    return models
 
 
 def _classifiers() -> dict[str, Any]:
-    return {
+    models = {
         "logistic": LogisticRegression(max_iter=2000, class_weight="balanced"),
         "extra_trees_cls": ExtraTreesClassifier(n_estimators=160, max_depth=5, random_state=42, n_jobs=-1, class_weight="balanced"),
         "random_forest_cls": RandomForestClassifier(n_estimators=140, max_depth=5, random_state=42, n_jobs=-1, class_weight="balanced"),
         "hist_gbc": HistGradientBoostingClassifier(max_iter=120, max_leaf_nodes=15, random_state=42),
     }
+    # XGB/LightGBM 候选 (V2.6)
+    if XGB_AVAILABLE and xgb is not None:
+        models["xgboost_cls"] = xgb.XGBClassifier(n_estimators=100, max_depth=3, learning_rate=0.05, random_state=42, n_jobs=-1, verbosity=0)
+    if LGBM_AVAILABLE and lgb is not None:
+        models["lightgbm_cls"] = lgb.LGBMClassifier(n_estimators=100, max_depth=4, learning_rate=0.05, random_state=42, n_jobs=-1, verbose=-1)
+    return models
 
 
 def _candidates(models: dict[str, Any]) -> list[tuple[str, str, str, Any]]:
@@ -572,9 +601,195 @@ def select_and_train(data_train: pd.DataFrame, progress_cb=None) -> tuple[ModelB
             selected_features_direction=selected_direction,
             interval_config=interval_config,
         )
+        
+        # 相对收益模型训练 (V2.6)
+        excess_metrics = _train_excess_models(data_train, feature_cols, test, progress_cb)
+        metrics["excess"] = excess_metrics
+        
+        # 暴露稳定性检查 (V2.6)
+        exposure_shift = _check_exposure_shift(test)
+        metrics["exposure_shift_flag"] = exposure_shift.get("shift_flag", False)
+        metrics["exposure_shift_details"] = exposure_shift
+        
         return bundle, metrics, backtest, direction_backtest
     except ModelSelectionError:
         raise
     except Exception as exc:
         logger.exception("model_selection_failed")
         raise ModelSelectionError("Model selection failed", details={"reason": str(exc)}) from exc
+
+
+def _train_excess_models(data_train: pd.DataFrame, feature_cols: list[str], test: pd.DataFrame, progress_cb=None) -> dict[str, Any]:
+    """训练相对收益模型 (V2.6)"""
+    set_log_context(stage="excess_model_train_start")
+    logger.info("excess_model_train_start")
+    
+    excess_targets = ["target_excess_cyb", "target_excess_kcb50", "target_excess_top10", "target_excess_theme"]
+    results = {}
+    
+    for target in excess_targets:
+        if target not in data_train.columns:
+            continue
+        
+        target_name = target.replace("target_", "")
+        train_clean = data_train.dropna(subset=[target])
+        
+        if len(train_clean) < 100:
+            logger.warning("excess_model_skipped target=%s reason=insufficient_data rows=%s", target, len(train_clean))
+            continue
+        
+        try:
+            # 简单训练一个 Ridge 模型
+            pipe = _make_pipeline("all", "standard", Ridge(alpha=1.0), len(feature_cols), "regression")
+            pipe.fit(train_clean[feature_cols], train_clean[target])
+            
+            # 预测
+            pred = pipe.predict(test[feature_cols])
+            true_vals = test[target].dropna()
+            pred_vals = pred[:len(true_vals)]
+            
+            if len(true_vals) > 10:
+                corr = float(np.corrcoef(true_vals, pred_vals)[0, 1]) if np.std(pred_vals) > 0 else 0.0
+                rmse = float(np.sqrt(mean_squared_error(true_vals, pred_vals)))
+                
+                # 方向预测 (跑赢/跑输)
+                direction_true = (true_vals > 0).astype(int)
+                direction_pred = (pred_vals > 0).astype(int)
+                direction_acc = float(accuracy_score(direction_true, direction_pred))
+                
+                # AUC
+                try:
+                    auc = float(roc_auc_score(direction_true, pred_vals)) if len(np.unique(direction_true)) == 2 else None
+                except Exception:
+                    auc = None
+                
+                results[target_name] = {
+                    "excess_corr": corr,
+                    "excess_rmse": rmse,
+                    "excess_direction_acc": direction_acc,
+                    "excess_auc": auc,
+                    "outperform_prob": float(np.mean(pred_vals > 0)),
+                    "model_available": True,
+                }
+                logger.info("excess_model_train_success target=%s corr=%s auc=%s", target_name, round(corr, 3), auc)
+        except Exception:
+            logger.exception("excess_model_train_failed target=%s", target)
+    
+    set_log_context(stage="excess_model_train_success")
+    logger.info("excess_model_train_success models=%s", list(results.keys()))
+    return results
+
+
+def _check_exposure_shift(test: pd.DataFrame) -> dict[str, Any]:
+    """检查暴露漂移 (V2.6)"""
+    set_log_context(stage="exposure_stability_check_start")
+    logger.info("exposure_stability_check_start")
+    
+    result = {"shift_flag": False, "proxy_r2_decline": None, "tracking_error_rise": None}
+    
+    if "proxy_r2_60" not in test.columns or "tracking_error_60" not in test.columns:
+        return result
+    
+    try:
+        proxy_r2 = test["proxy_r2_60"].dropna()
+        tracking_error = test["tracking_error_60"].dropna()
+        
+        if len(proxy_r2) >= 20:
+            recent_r2 = proxy_r2.iloc[-20:].mean()
+            earlier_r2 = proxy_r2.iloc[-60:-20].mean() if len(proxy_r2) >= 60 else proxy_r2.iloc[:-20].mean()
+            r2_decline = earlier_r2 - recent_r2
+            result["proxy_r2_decline"] = float(r2_decline)
+            
+            if r2_decline > 0.2:
+                result["shift_flag"] = True
+        
+        if len(tracking_error) >= 20:
+            recent_te = tracking_error.iloc[-20:].mean()
+            earlier_te = tracking_error.iloc[-60:-20].mean() if len(tracking_error) >= 60 else tracking_error.iloc[:-20].mean()
+            te_rise = recent_te - earlier_te
+            result["tracking_error_rise"] = float(te_rise)
+            
+            if te_rise > 0.005:
+                result["shift_flag"] = True
+        
+        set_log_context(stage="exposure_stability_check_success")
+        logger.info("exposure_stability_check_success shift_flag=%s", result["shift_flag"])
+    except Exception:
+        logger.exception("exposure_stability_check_failed")
+    
+    return result
+
+
+def update_model_monitoring(fund_code: str, prediction: dict, actual_return: float | None = None) -> dict[str, Any]:
+    """更新模型监控记录 (V2.6)"""
+    import json
+    from pathlib import Path
+    
+    set_log_context(stage="model_monitoring_start")
+    logger.info("model_monitoring_start fund_code=%s", fund_code)
+    
+    monitor_path = Path("models") / fund_code / "t_plus_1_close" / "model_monitoring.json"
+    monitor_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # 读取现有记录
+    if monitor_path.exists():
+        with open(monitor_path, "r", encoding="utf-8") as f:
+            monitoring = json.load(f)
+    else:
+        monitoring = {"predictions": [], "degradation_flag": False}
+    
+    # 添加新记录
+    record = {
+        "date": prediction.get("asof_date"),
+        "pred_return": prediction.get("pred_return"),
+        "actual_return": actual_return,
+        "p_up": prediction.get("p_up"),
+        "direction_signal": prediction.get("direction_signal"),
+        "proxy_r2_60": prediction.get("proxy_r2_60"),
+        "model_vs_mean_improvement": prediction.get("metrics", {}).get("point", {}).get("model_vs_mean_improvement"),
+    }
+    
+    if actual_return is not None:
+        record["error"] = actual_return - prediction.get("pred_return", 0)
+        record["direction_correct"] = (actual_return > 0 and prediction.get("p_up", 0.5) > 0.5) or (actual_return < 0 and prediction.get("p_up", 0.5) < 0.5)
+    
+    monitoring["predictions"].append(record)
+    
+    # 只保留最近 20 次
+    monitoring["predictions"] = monitoring["predictions"][-20:]
+    
+    # 检查模型退化
+    recent = monitoring["predictions"][-20:]
+    if len(recent) >= 10:
+        mean_improvements = [r.get("model_vs_mean_improvement") for r in recent if r.get("model_vs_mean_improvement") is not None]
+        direction_corrects = [r.get("direction_correct") for r in recent if r.get("direction_correct") is not None]
+        
+        avg_improvement = np.mean(mean_improvements) if mean_improvements else 0
+        direction_acc = np.mean(direction_corrects) if direction_corrects else 0.5
+        
+        monitoring["degradation_flag"] = avg_improvement < 0 or direction_acc < 0.5
+        monitoring["avg_model_vs_mean_improvement"] = float(avg_improvement)
+        monitoring["recent_direction_acc"] = float(direction_acc)
+    
+    # 保存
+    with open(monitor_path, "w", encoding="utf-8") as f:
+        json.dump(monitoring, f, indent=2, ensure_ascii=False)
+    
+    set_log_context(stage="model_monitoring_success")
+    logger.info("model_monitoring_success degradation_flag=%s", monitoring.get("degradation_flag"))
+    
+    return monitoring
+
+
+def load_model_monitoring(fund_code: str) -> dict[str, Any]:
+    """加载模型监控记录 (V2.6)"""
+    import json
+    from pathlib import Path
+    
+    monitor_path = Path("models") / fund_code / "t_plus_1_close" / "model_monitoring.json"
+    
+    if monitor_path.exists():
+        with open(monitor_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    
+    return {"predictions": [], "degradation_flag": False}

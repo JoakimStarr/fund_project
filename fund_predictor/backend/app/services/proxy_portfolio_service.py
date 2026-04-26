@@ -8,7 +8,8 @@ from sklearn.linear_model import LinearRegression, Ridge
 from backend.app.core.config import RAW_DIR
 from backend.app.core.logging_config import set_log_context
 from backend.app.services.data_service import get_index_daily
-from backend.app.services.holding_service import get_fund_holdings, get_stock_daily
+from backend.app.services.holding_service import get_fund_holdings
+from backend.app.services.stock_price_service import get_stock_daily_multi_source
 
 logger = logging.getLogger(__name__)
 
@@ -32,66 +33,108 @@ def _compound_ret(s: pd.Series, window: int) -> pd.Series:
     return (1 + s).rolling(window).apply(np.prod, raw=True) - 1
 
 
+def _get_top10_status(available_count: int) -> str:
+    if available_count >= 7:
+        return "usable"
+    if available_count >= 3:
+        return "partial"
+    return "unavailable"
+
+
 def build_top10_proxy(fund_code: str) -> tuple[pd.DataFrame, dict]:
     set_log_context(fund_code=fund_code, stage="top10_proxy_build_start")
-    logger.info("top10_proxy_build_start")
+    logger.info("top10_proxy_build_start fund_code=%s", fund_code)
+
     holdings, holding_meta = get_fund_holdings(fund_code)
     if holdings.empty:
+        set_log_context(stage="top10_proxy_unavailable")
+        logger.warning("top10_proxy_unavailable fund_code=%s reason=no_holdings", fund_code)
         return pd.DataFrame(), {
             **holding_meta,
             "proxy_method": "return_inferred_only",
             "top10_proxy_available_count": 0,
             "top10_proxy_missing_count": 0,
+            "top10_proxy_status": "unavailable",
             "failed_stock_codes": [],
+            "stock_sources_used": {},
+            "holding_report_date": None,
+            "holding_scope": "unavailable",
         }
 
     latest_date = holdings["report_date"].max()
     latest = holdings[holdings["report_date"] == latest_date].copy().sort_values("rank").head(10)
     weights = latest.set_index("stock_code")["weight_nav"].astype(float)
-    if weights.sum() > 0:
-        weights = weights / weights.sum()
 
     frames = []
     failed = []
+    sources_used = {}
+    stock_names = latest.set_index("stock_code")["stock_name"].to_dict() if "stock_name" in latest.columns else {}
+
     for code in weights.index:
-        prices, _ = get_stock_daily(code)
+        prices, price_meta = get_stock_daily_multi_source(code)
         if prices.empty:
             failed.append(code)
-            continue
-        frames.append(prices[["date", "ret"]].rename(columns={"ret": code}))
+            logger.warning("top10_proxy_stock_failed fund_code=%s stock_code=%s", fund_code, code)
+        else:
+            frames.append(prices[["date", "ret"]].rename(columns={"ret": code}))
+            sources_used[code] = price_meta.get("source", "unknown")
+            if code in stock_names:
+                logger.info("top10_proxy_stock_success fund_code=%s stock_code=%s stock_name=%s source=%s rows=%s", fund_code, code, stock_names.get(code, ""), price_meta.get("source"), len(prices))
+
+    available_count = len(frames)
+    missing_count = len(failed)
+    top10_status = _get_top10_status(available_count)
 
     if not frames:
+        set_log_context(stage="top10_proxy_unavailable")
+        logger.warning("top10_proxy_unavailable fund_code=%s reason=all_stocks_failed", fund_code)
         return pd.DataFrame(), {
             **holding_meta,
             "proxy_method": "return_inferred_only",
             "top10_proxy_available_count": 0,
-            "top10_proxy_missing_count": int(len(weights)),
+            "top10_proxy_missing_count": missing_count,
+            "top10_proxy_status": "unavailable",
             "failed_stock_codes": failed,
+            "stock_sources_used": sources_used,
+            "holding_report_date": latest_date,
+            "holding_scope": holding_meta.get("holding_scope", "top10"),
         }
 
     merged = frames[0]
     for frame in frames[1:]:
         merged = merged.merge(frame, on="date", how="outer")
     merged = merged.sort_values("date")
+
     available_codes = [c for c in merged.columns if c != "date"]
-    proxy_ret = merged[available_codes].mul(weights.reindex(available_codes).fillna(0), axis=1).sum(axis=1, min_count=1)
+    valid_weights = weights.reindex(available_codes).fillna(0)
+    if valid_weights.sum() > 0:
+        valid_weights = valid_weights / valid_weights.sum()
+
+    proxy_ret = merged[available_codes].mul(valid_weights, axis=1).sum(axis=1, min_count=1)
+
     out = pd.DataFrame({"date": merged["date"], "top10_proxy_ret": proxy_ret})
     out["top10_proxy_mom5"] = _compound_ret(out["top10_proxy_ret"], 5)
     out["top10_proxy_mom20"] = _compound_ret(out["top10_proxy_ret"], 20)
     out["top10_proxy_vol20"] = out["top10_proxy_ret"].rolling(20).std()
-    out["top10_proxy_available_count"] = len(available_codes)
-    out["top10_proxy_missing_count"] = len(failed)
+    out["top10_proxy_available_count"] = available_count
+    out["top10_proxy_missing_count"] = missing_count
     out["holding_report_date"] = latest_date
     out["holding_scope"] = holding_meta.get("holding_scope", "top10")
 
-    set_log_context(stage="top10_proxy_build_success")
-    logger.info("top10_proxy_build_success available=%s missing=%s", len(available_codes), len(failed))
+    stage = "top10_proxy_build_success" if top10_status == "usable" else "top10_proxy_partial_success" if top10_status == "partial" else "top10_proxy_unavailable"
+    set_log_context(stage=stage)
+    logger.info("%s fund_code=%s available=%s missing=%s status=%s", stage, fund_code, available_count, missing_count, top10_status)
+
     return out, {
         **holding_meta,
-        "proxy_method": "partial_top10_proxy" if failed else "top10_proxy",
-        "top10_proxy_available_count": len(available_codes),
-        "top10_proxy_missing_count": len(failed),
+        "proxy_method": "top10_proxy" if top10_status == "usable" else "partial_top10_proxy" if top10_status == "partial" else "return_inferred_only",
+        "top10_proxy_available_count": available_count,
+        "top10_proxy_missing_count": missing_count,
+        "top10_proxy_status": top10_status,
         "failed_stock_codes": failed,
+        "stock_sources_used": sources_used,
+        "holding_report_date": latest_date,
+        "holding_scope": holding_meta.get("holding_scope", "top10"),
     }
 
 
@@ -136,7 +179,6 @@ def build_theme_proxy() -> tuple[pd.DataFrame, dict]:
     ret_cols = [c for c in merged.columns if c.startswith("theme_") and c.endswith("_ret")]
     for col in ret_cols:
         base = col.removesuffix("_ret")
-        merged[f"{base}_ret_lag1"] = merged[col].shift(1)
         merged[f"{base}_mom5"] = _compound_ret(merged[col], 5)
         merged[f"{base}_mom20"] = _compound_ret(merged[col], 20)
         merged[f"{base}_vol20"] = merged[col].rolling(20).std()
@@ -165,8 +207,10 @@ def add_theme_relative_features(df: pd.DataFrame) -> pd.DataFrame:
 def fit_rolling_proxy_exposure(df: pd.DataFrame, window: int = 60) -> pd.DataFrame:
     set_log_context(stage="rolling_proxy_exposure_start")
     logger.info("rolling_proxy_exposure_start")
+
     cols = ["top10_proxy_ret", "theme_proxy_ret", "hs300_ret", "cyb_ret", "kcb50_ret", "zz1000_ret", "style_tech_vs_large"]
     names = ["top10", "theme", "hs300", "cyb", "kcb50", "zz1000", "style_tech"]
+
     out = pd.DataFrame(index=df.index)
     for name in names:
         out[f"beta_{name}_60"] = np.nan
@@ -202,10 +246,6 @@ def fit_rolling_proxy_exposure(df: pd.DataFrame, window: int = 60) -> pd.DataFra
             out.loc[df.index[i], "tracking_error_60"] = float(np.std(resid, ddof=1))
             out.loc[df.index[i], "proxy_pred_ret_60"] = pred
             out.loc[df.index[i], "proxy_residual"] = float(df.iloc[i]["fund_ret"] - pred) if pd.notna(df.iloc[i]["fund_ret"]) else np.nan
-            try:
-                LinearRegression(positive=True).fit(x, y)
-            except Exception:
-                logger.exception("rolling_proxy_nnls_failed")
         except Exception:
             logger.exception("rolling_proxy_exposure_window_failed index=%s", i)
 
@@ -219,6 +259,37 @@ def fit_rolling_proxy_exposure(df: pd.DataFrame, window: int = 60) -> pd.DataFra
     set_log_context(stage="rolling_proxy_exposure_success")
     logger.info("rolling_proxy_exposure_success")
     return out
+
+
+def _get_top_exposures(row: pd.Series, beta_cols: list[str], top_n: int = 3) -> list[dict]:
+    exposures = []
+    for col in beta_cols:
+        val = row.get(col)
+        if pd.notna(val):
+            name = col.replace("beta_", "").replace("_60", "")
+            exposures.append({"name": name, "beta": float(abs(val)), "sign": "positive" if val >= 0 else "negative"})
+    exposures.sort(key=lambda x: x["beta"], reverse=True)
+    return exposures[:top_n]
+
+
+def build_proxy_exposure_summary(df: pd.DataFrame) -> dict:
+    if df.empty:
+        return {"top_exposures": [], "proxy_r2_60": None, "tracking_error_60": None, "proxy_quality_flag": "low"}
+
+    latest = df.iloc[-1]
+    beta_cols = [c for c in df.columns if c.startswith("beta_") and c.endswith("_60")]
+    top_exposures = _get_top_exposures(latest, beta_cols)
+
+    proxy_r2 = latest.get("proxy_r2_60")
+    tracking_error = latest.get("tracking_error_60")
+    quality = latest.get("proxy_quality_flag", "low")
+
+    return {
+        "top_exposures": top_exposures,
+        "proxy_r2_60": float(proxy_r2) if pd.notna(proxy_r2) else None,
+        "tracking_error_60": float(tracking_error) if pd.notna(tracking_error) else None,
+        "proxy_quality_flag": quality if pd.notna(quality) else "low",
+    }
 
 
 def build_proxy_features(fund_code: str, base_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
@@ -237,13 +308,17 @@ def build_proxy_features(fund_code: str, base_df: pd.DataFrame) -> tuple[pd.Data
         out = add_theme_relative_features(out)
         exposure = fit_rolling_proxy_exposure(out)
         out = pd.concat([out, exposure], axis=1)
+
+        exposure_summary = build_proxy_exposure_summary(out)
+
         meta = {
             "proxy_available": bool((not top10.empty) or (not theme.empty)),
             **holding_meta,
             **theme_meta,
+            "exposure_summary": exposure_summary,
         }
         set_log_context(stage="proxy_feature_merge_success")
-        logger.info("proxy_feature_merge_success proxy_available=%s", meta["proxy_available"])
+        logger.info("proxy_feature_merge_success proxy_available=%s top10_status=%s proxy_r2_60=%s", meta["proxy_available"], holding_meta.get("top10_proxy_status"), exposure_summary.get("proxy_r2_60"))
         return out, meta
     except Exception as exc:
         logger.exception("proxy_portfolio_failed")

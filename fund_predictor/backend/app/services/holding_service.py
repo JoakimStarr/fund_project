@@ -100,38 +100,6 @@ def get_fund_holdings(fund_code: str) -> tuple[pd.DataFrame, dict]:
 
 
 def get_stock_daily(stock_code: str) -> tuple[pd.DataFrame, dict]:
-    set_log_context(stage="stock_price_fetch_start")
-    logger.info("stock_price_fetch_start stock_code=%s", stock_code)
-    path = RAW_DIR / "stocks" / f"{stock_code}.csv"
-    try:
-        if path.exists():
-            df = pd.read_csv(path, parse_dates=["date"])
-            if not df.empty:
-                return df, {"source": "cache", "stock_code": stock_code}
+    from backend.app.services.stock_price_service import get_stock_daily_multi_source
 
-        import akshare as ak
-
-        raw = ak.stock_zh_a_hist(symbol=stock_code, period="daily", start_date="20200101", end_date="20500101", adjust="qfq")
-        if raw is None or raw.empty:
-            raise RuntimeError("empty stock price data")
-        out = pd.DataFrame(
-            {
-                "date": pd.to_datetime(raw["日期"], errors="coerce"),
-                "open": pd.to_numeric(raw["开盘"], errors="coerce"),
-                "high": pd.to_numeric(raw["最高"], errors="coerce"),
-                "low": pd.to_numeric(raw["最低"], errors="coerce"),
-                "close": pd.to_numeric(raw["收盘"], errors="coerce"),
-                "volume": pd.to_numeric(raw["成交量"], errors="coerce"),
-                "source": "akshare_stock_zh_a_hist",
-            }
-        ).dropna(subset=["date", "close"]).sort_values("date")
-        out["ret"] = out["close"].pct_change()
-        path.parent.mkdir(parents=True, exist_ok=True)
-        out.to_csv(path, index=False, encoding="utf-8")
-        set_log_context(stage="stock_price_fetch_success")
-        logger.info("stock_price_fetch_success stock_code=%s rows=%s", stock_code, len(out))
-        return out, {"source": "akshare_stock_zh_a_hist", "stock_code": stock_code}
-    except Exception as exc:
-        set_log_context(stage="stock_price_fetch_failed")
-        logger.exception("stock_price_fetch_failed stock_code=%s", stock_code)
-        return pd.DataFrame(), {"source": "akshare_stock_zh_a_hist", "stock_code": stock_code, "reason": str(exc)}
+    return get_stock_daily_multi_source(stock_code)

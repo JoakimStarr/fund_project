@@ -148,8 +148,9 @@ def _align_model_features(model, latest: pd.DataFrame, fallback_cols: list[str])
     aligned = latest.copy()
     for col in cols:
         if col not in aligned.columns:
-            aligned[col] = pd.NA
-    return aligned[cols]
+            aligned[col] = 0.0
+    aligned = aligned[cols].fillna(0.0)
+    return aligned
 
 
 def _direction_classes(model) -> list:
@@ -229,6 +230,7 @@ def predict_next(fund_code: str, request_id: str) -> dict:
         proxy_quality = latest["proxy_quality_flag"].iloc[0] if "proxy_quality_flag" in latest.columns else "low"
         proxy_meta = meta.get("proxy") or {}
         proxy_features_helpful = bool(point_metrics.get("proxy_features_helpful") or metrics.get("proxy_features_helpful"))
+        exposure_summary = proxy_meta.get("exposure_summary", {})
 
         result = {
             "fund_code": fund_code,
@@ -270,11 +272,21 @@ def predict_next(fund_code: str, request_id: str) -> dict:
             "holding_scope": proxy_meta.get("holding_scope", "unavailable"),
             "top10_proxy_available_count": proxy_meta.get("top10_proxy_available_count", 0),
             "top10_proxy_missing_count": proxy_meta.get("top10_proxy_missing_count", 0),
+            "top10_proxy_status": proxy_meta.get("top10_proxy_status", "unavailable"),
+            "failed_stock_codes": proxy_meta.get("failed_stock_codes", []),
+            "stock_sources_used": proxy_meta.get("stock_sources_used", {}),
             "theme_available_count": proxy_meta.get("theme_available_count", 0),
             "failed_themes": proxy_meta.get("failed_themes", []),
+            "top_exposures": exposure_summary.get("top_exposures", []),
             "proxy_disclaimer": "代理组合根据公开披露持仓、主题指数和历史收益拟合构建，不代表基金真实实时持仓。",
             "point_prediction_health": _point_health(point_metrics),
             "direction_health": _direction_health(direction_metrics, signal),
+            # V2.6 相对收益信号
+            "excess_signals": _build_excess_signals(metrics),
+            "exposure_shift_flag": metrics.get("exposure_shift_flag", False),
+            "exposure_shift_details": metrics.get("exposure_shift_details", {}),
+            # V2.6 模型监控
+            "model_monitoring": _load_model_monitoring(fund_code),
             "baseline": {
                 "baseline_zero_rmse_bp": point_metrics.get("baseline_zero_rmse_bp"),
                 "baseline_mean_rmse_bp": point_metrics.get("baseline_mean_rmse_bp"),
@@ -346,3 +358,89 @@ def predict_next(fund_code: str, request_id: str) -> dict:
         set_log_context(stage="predict_failed")
         logger.exception("predict_failed")
         raise
+
+
+def _build_excess_signals(metrics: dict) -> dict:
+    """构建相对收益信号 (V2.6)"""
+    excess = metrics.get("excess", {})
+    signals = {
+        "outperform_cyb": None,
+        "outperform_kcb50": None,
+        "outperform_top10": None,
+        "outperform_theme": None,
+        "stronger_than_absolute": False,
+        "reliable_count": 0,
+    }
+    
+    reliable_models = 0
+    
+    for name, data in excess.items():
+        if not data.get("model_available"):
+            continue
+        
+        outperform_prob = data.get("outperform_prob", 0.5)
+        corr = data.get("excess_corr", 0)
+        auc = data.get("excess_auc")
+        
+        # 只有当相关性 > 0.1 且 AUC > 0.55 时才认为可靠
+        is_reliable = corr > 0.1 and (auc is None or auc > 0.55)
+        
+        if name == "excess_cyb":
+            signals["outperform_cyb"] = {
+                "prob": outperform_prob,
+                "direction": "outperform" if outperform_prob > 0.5 else "underperform",
+                "reliable": is_reliable,
+                "corr": corr,
+                "auc": auc,
+            }
+        elif name == "excess_kcb50":
+            signals["outperform_kcb50"] = {
+                "prob": outperform_prob,
+                "direction": "outperform" if outperform_prob > 0.5 else "underperform",
+                "reliable": is_reliable,
+                "corr": corr,
+                "auc": auc,
+            }
+        elif name == "excess_top10":
+            signals["outperform_top10"] = {
+                "prob": outperform_prob,
+                "direction": "outperform" if outperform_prob > 0.5 else "underperform",
+                "reliable": is_reliable,
+                "corr": corr,
+                "auc": auc,
+            }
+        elif name == "excess_theme":
+            signals["outperform_theme"] = {
+                "prob": outperform_prob,
+                "direction": "outperform" if outperform_prob > 0.5 else "underperform",
+                "reliable": is_reliable,
+                "corr": corr,
+                "auc": auc,
+            }
+        
+        if is_reliable:
+            reliable_models += 1
+    
+    signals["reliable_count"] = reliable_models
+    
+    # 判断相对收益信号是否强于绝对收益信号
+    point_corr = metrics.get("point", {}).get("pred_real_corr", 0)
+    if reliable_models > 0:
+        avg_excess_corr = np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")])
+        signals["stronger_than_absolute"] = avg_excess_corr > point_corr + 0.05
+    
+    return signals
+
+
+def _load_model_monitoring(fund_code: str) -> dict:
+    """加载模型监控记录 (V2.6)"""
+    import json
+    from pathlib import Path
+    
+    monitor_path = Path("models") / fund_code / "t_plus_1_close" / "model_monitoring.json"
+    
+    if monitor_path.exists():
+        with open(monitor_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    
+    return {"predictions": [], "degradation_flag": False}
