@@ -6,9 +6,9 @@ from typing import Any
 import joblib
 import pandas as pd
 
-from backend.app.core.config import MODEL_DIR
-from backend.app.core.errors import ModelNotFoundError
-from backend.app.services.model_selection_service import PREDICTION_MODE
+from app.core.config import MODEL_DIR
+from app.core.errors import ModelNotFoundError
+from app.services.model_selection_service import PREDICTION_MODE
 
 
 def fund_model_dir(fund_code: str) -> Path:

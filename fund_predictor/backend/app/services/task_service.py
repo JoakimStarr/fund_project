@@ -3,12 +3,12 @@ import logging
 import uuid
 from datetime import datetime
 
-from backend.app.core.errors import AppError
-from backend.app.core.logging_config import set_log_context
-from backend.app.db.database import get_conn
-from backend.app.services.feature_service import build_features
-from backend.app.services.model_registry_service import save_model_archive
-from backend.app.services.model_selection_service import select_and_train
+from app.core.errors import AppError
+from app.core.logging_config import set_log_context
+from app.db.database import get_conn
+from app.services.feature_service import build_features
+from app.services.model_registry_service import save_model_archive
+from app.services.model_selection_service import select_and_train
 
 logger = logging.getLogger("train")
 
@@ -99,7 +99,7 @@ def run_training_task(task_id: str, fund_code: str, force: bool = True) -> None:
             set_log_context(stage=stage)
             update_task(task_id, progress=progress, stage=stage, message=message)
 
-        bundle, metrics, backtest, direction_backtest = select_and_train(data_train, progress_cb=progress_cb)
+        bundle, metrics, backtest, direction_backtest = select_and_train(data_train, fund_code=fund_code, progress_cb=progress_cb)
         update_task(task_id, progress=88, stage="model_save", message="Saving model archive")
         config = {
             "last_train_date": str(data_train["date"].max().date()),

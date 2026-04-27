@@ -47,15 +47,32 @@ except ImportError:
     LGBM_AVAILABLE = False
     logger.warning("lightgbm_not_available")
 
-from backend.app.core.config import INTERVAL_ALPHA
-from backend.app.core.errors import BaselineEvalError, ModelSelectionError, ProbabilityCalibrationError, RegimeIntervalError
-from backend.app.core.logging_config import set_log_context
-from backend.app.services.feature_service import model_feature_columns
+from app.core.config import INTERVAL_ALPHA
+from app.core.errors import BaselineEvalError, ModelSelectionError, ProbabilityCalibrationError, RegimeIntervalError
+from app.core.logging_config import set_log_context
+from app.services.feature_service import model_feature_columns, validate_no_leakage_columns
 
 logger = logging.getLogger("train")
 
 PREDICTION_MODE = "t_plus_1_close"
 TRAIN_WINDOW = 180
+
+# 训练模式配置 (P0修复)
+TRAINING_MODES = {
+    "fast": {
+        "REFINE_TOP_K": 5,
+        "WALK_FORWARD_STEP": 5,
+        "MAX_WALK_FORWARD_POINTS": 40,
+    },
+    "strict": {
+        "REFINE_TOP_K": 20,
+        "WALK_FORWARD_STEP": 1,
+        "MAX_WALK_FORWARD_POINTS": None,  # 无限制
+    },
+}
+
+# 默认使用 fast 模式
+DEFAULT_TRAINING_MODE = "fast"
 
 
 @dataclass
@@ -205,9 +222,16 @@ def _rolling_baselines(data_train: pd.DataFrame, test: pd.DataFrame) -> pd.DataF
         raise BaselineEvalError("Baseline evaluation failed", details={"reason": str(exc)}) from exc
 
 
-def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=None):
+def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=None, training_mode: str = "fast"):
     set_log_context(stage="point_model_train_start")
-    logger.info("point_model_train_start")
+    logger.info("point_model_train_start mode=%s", training_mode)
+    
+    # 获取训练模式配置
+    mode_config = TRAINING_MODES.get(training_mode, TRAINING_MODES["fast"])
+    refine_top_k = mode_config["REFINE_TOP_K"]
+    walk_forward_step = mode_config["WALK_FORWARD_STEP"]
+    max_walk_forward_points = mode_config["MAX_WALK_FORWARD_POINTS"]
+    
     train_base, valid, test = _split_train_valid_test(data_train)
     X_train, y_train = train_base[feature_cols], train_base["target_next"]
     X_valid, y_valid = valid[feature_cols], valid["target_next"]
@@ -230,10 +254,19 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
     combined = pd.concat([train_base, valid])
     if progress_cb:
         progress_cb(50, "point_model_train_start", "Refining point model with walk-forward")
+    
+    # 根据训练模式调整 walk-forward 参数
     for item in top20:
         preds, trues = [], []
         start = max(120, len(combined) - 120)
+        eval_points = 0
         for i in range(start, len(combined)):
+            # 检查是否达到最大评估点数
+            if max_walk_forward_points and eval_points >= max_walk_forward_points:
+                break
+            # 根据步长跳过一些点
+            if (i - start) % walk_forward_step != 0:
+                continue
             w = combined.iloc[max(0, i - TRAIN_WINDOW) : i]
             if len(w) < 120:
                 continue
@@ -241,14 +274,15 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
             pipe.fit(w[feature_cols], w["target_next"])
             preds.append(float(pipe.predict(combined.iloc[[i]][feature_cols])[0]))
             trues.append(float(combined.iloc[i]["target_next"]))
+            eval_points += 1
         if preds:
             rolling.append({**item, "rolling_metrics": _regression_metrics(np.array(trues), np.array(preds))})
-    top5 = sorted(rolling or top20, key=lambda x: x.get("rolling_metrics", x["metrics"])["score"])[:5]
+    top_k = sorted(rolling or top20, key=lambda x: x.get("rolling_metrics", x["metrics"])["score"])[:refine_top_k]
 
     baselines = _rolling_baselines(data_train, test)
     final = []
     train_valid = pd.concat([train_base, valid])
-    for item in top5:
+    for item in top_k:
         try:
             pipe = _make_pipeline(item["selector"], item["scaler"], clone(_regressors()[item["model"]]), len(feature_cols), "regression")
             pipe.fit(train_valid[feature_cols], train_valid["target_next"])
@@ -507,15 +541,35 @@ def _regime_intervals(test: pd.DataFrame, pred: np.ndarray) -> tuple[dict[str, A
         raise RegimeIntervalError("Regime interval failed", details={"reason": str(exc)}) from exc
 
 
-def select_and_train(data_train: pd.DataFrame, progress_cb=None) -> tuple[ModelBundle, dict, pd.DataFrame, pd.DataFrame]:
+def select_and_train(data_train: pd.DataFrame, fund_code: str = "", progress_cb=None, training_mode: str = "fast") -> tuple[ModelBundle, dict, pd.DataFrame, pd.DataFrame]:
     try:
         feature_cols = model_feature_columns(data_train)
+        
+        # 硬检查：确保没有泄露列
+        validate_no_leakage_columns(feature_cols, fund_code)
+        
         if len(feature_cols) == 0:
             raise ModelSelectionError("No model features are available")
-        point_best, point_pipeline, selected_point, test, baselines = _point_model(data_train, feature_cols, progress_cb)
+        
+        # 打印特征列用于验收
+        logger.info("model_feature_columns_selected count=%s cols=%s", len(feature_cols), feature_cols[:30])
+        logger.info("leakage_check_passed fund_code=%s", fund_code)
+        
+        # 获取训练模式配置
+        mode_config = TRAINING_MODES.get(training_mode, TRAINING_MODES["fast"])
+        
+        point_best, point_pipeline, selected_point, test, baselines = _point_model(data_train, feature_cols, progress_cb, training_mode)
         proxy_eval = _proxy_gain_eval(data_train, feature_cols, point_best, test, baselines)
         direction_best, direction_pipeline, selected_direction, direction_test, p_test = _direction_model(data_train, feature_cols, progress_cb)
         interval_config, backtest = _regime_intervals(test, point_best["pred"])
+        
+        # 修复回测日期口径：明确区分特征日期和目标日期
+        # feature_date = T（用于预测的特征日期）
+        # target_date = T+1（被预测的收益日期）
+        backtest["feature_date"] = backtest["date"]
+        # 目标日期是特征日期的下一个交易日
+        backtest["target_date"] = backtest["date"].shift(-1)
+        
         backtest["zero_baseline"] = 0.0
         backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
         backtest["rolling_median_baseline"] = baselines["rolling_median"].to_numpy()
@@ -585,8 +639,16 @@ def select_and_train(data_train: pd.DataFrame, progress_cb=None) -> tuple[ModelB
             "width_99_bp": interval_config["width_99_bp"],
             "residual_group_used": None,
         }
+        # 计算 walk-forward 评估点数
+        walk_forward_eval_points = len(test)
+        
         metrics = {
             "prediction_mode": PREDICTION_MODE,
+            "training_mode": training_mode,
+            "refine_top_k": mode_config["REFINE_TOP_K"],
+            "walk_forward_step": mode_config["WALK_FORWARD_STEP"],
+            "max_walk_forward_points": mode_config["MAX_WALK_FORWARD_POINTS"],
+            "walk_forward_eval_points": walk_forward_eval_points,
             "point": point_metrics,
             "direction": direction_metrics,
             "interval": interval_metrics,
@@ -622,6 +684,14 @@ def select_and_train(data_train: pd.DataFrame, progress_cb=None) -> tuple[ModelB
         exposure_shift = _check_exposure_shift(test)
         metrics["exposure_shift_flag"] = exposure_shift.get("shift_flag", False)
         metrics["exposure_shift_details"] = exposure_shift
+        
+        # Lead-lag 诊断 (P0修复)
+        lead_lag_diag = compute_lead_lag_diagnostics(backtest)
+        metrics["lead_lag_diagnostics"] = lead_lag_diag
+        
+        # 拐点诊断 (P0修复)
+        turning_point_diag = compute_turning_point_diagnostics(backtest)
+        metrics["turning_point_diagnostics"] = turning_point_diag
         
         return bundle, metrics, backtest, direction_backtest
     except ModelSelectionError:
@@ -805,3 +875,179 @@ def load_model_monitoring(fund_code: str) -> dict[str, Any]:
             return json.load(f)
     
     return {"predictions": [], "degradation_flag": False}
+
+
+def compute_lead_lag_diagnostics(backtest_df: pd.DataFrame) -> dict[str, Any]:
+    """
+    计算 lead-lag 诊断：检查预测与目标的相关性在不同滞后下的表现
+    
+    用于检测：
+    - 数据泄露（lag_minus 高）
+    - 正常同步（lag_0 高）
+    - 领先性（lag_plus 高）
+    """
+    set_log_context(stage="lead_lag_diagnostics_start")
+    logger.info("lead_lag_diagnostics_start")
+    
+    try:
+        # 确保数据足够
+        if len(backtest_df) < 10:
+            return {"error": "Insufficient data for lead-lag diagnostics"}
+        
+        pred = backtest_df["pred"].to_numpy()
+        target = backtest_df["target_next"].to_numpy()
+        
+        # 计算不同滞后的相关性
+        correlations = {}
+        
+        # lag -2: 预测 vs 目标往前2期（检查是否泄露了未来信息）
+        if len(target) > 2:
+            corr_minus_2 = np.corrcoef(pred[2:], target[:-2])[0, 1] if np.std(target[:-2]) > 0 else 0
+            correlations["corr_lag_minus_2"] = float(corr_minus_2)
+        
+        # lag -1: 预测 vs 目标往前1期
+        if len(target) > 1:
+            corr_minus_1 = np.corrcoef(pred[1:], target[:-1])[0, 1] if np.std(target[:-1]) > 0 else 0
+            correlations["corr_lag_minus_1"] = float(corr_minus_1)
+        
+        # lag 0: 预测 vs 目标同期（正常情况应该最高）
+        corr_0 = np.corrcoef(pred, target)[0, 1] if np.std(target) > 0 else 0
+        correlations["corr_lag_0"] = float(corr_0)
+        
+        # lag +1: 预测 vs 目标往后1期（检查预测是否有领先性）
+        if len(target) > 1:
+            corr_plus_1 = np.corrcoef(pred[:-1], target[1:])[0, 1] if np.std(target[1:]) > 0 else 0
+            correlations["corr_lag_plus_1"] = float(corr_plus_1)
+        
+        # lag +2: 预测 vs 目标往后2期
+        if len(target) > 2:
+            corr_plus_2 = np.corrcoef(pred[:-2], target[2:])[0, 1] if np.std(target[2:]) > 0 else 0
+            correlations["corr_lag_plus_2"] = float(corr_plus_2)
+        
+        # 找出最佳滞后
+        lag_values = {
+            "minus_2": correlations.get("corr_lag_minus_2", -999),
+            "minus_1": correlations.get("corr_lag_minus_1", -999),
+            "0": correlations["corr_lag_0"],
+            "plus_1": correlations.get("corr_lag_plus_1", -999),
+            "plus_2": correlations.get("corr_lag_plus_2", -999),
+        }
+        best_lag = max(lag_values, key=lag_values.get)
+        
+        # 解释结果
+        interpretation = []
+        if lag_values.get("minus_1", 0) > 0.3 or lag_values.get("minus_2", 0) > 0.3:
+            interpretation.append("警告：lag_minus 相关性高，可能存在数据泄露或目标变量计算错误")
+        if lag_values["0"] > 0.2:
+            interpretation.append("lag_0 相关性正常，预测与目标同步对齐良好")
+        if lag_values.get("plus_1", 0) > lag_values["0"]:
+            interpretation.append("lag_plus_1 高于 lag_0，预测可能存在领先性")
+        if lag_values["0"] < 0.1 and max(lag_values.values()) < 0.1:
+            interpretation.append("所有滞后相关性都很低，模型预测能力弱")
+        
+        result = {
+            **correlations,
+            "best_lag": best_lag,
+            "best_lag_corr": lag_values[best_lag],
+            "interpretation": "; ".join(interpretation) if interpretation else "无明显异常",
+        }
+        
+        set_log_context(stage="lead_lag_diagnostics_success")
+        logger.info("lead_lag_diagnostics_success best_lag=%s corr=%.3f", best_lag, lag_values[best_lag])
+        
+        return result
+        
+    except Exception as exc:
+        logger.exception("lead_lag_diagnostics_failed")
+        return {"error": str(exc)}
+
+
+def compute_turning_point_diagnostics(backtest_df: pd.DataFrame) -> dict[str, Any]:
+    """
+    计算拐点诊断：检查模型在拐点处的预测能力
+    
+    计算：
+    - 提前1天拐点命中率
+    - 当天拐点命中率
+    - 滞后1天拐点命中率
+    """
+    set_log_context(stage="turning_point_diagnostics_start")
+    logger.info("turning_point_diagnostics_start")
+    
+    try:
+        if len(backtest_df) < 10:
+            return {"error": "Insufficient data for turning point diagnostics"}
+        
+        target = backtest_df["target_next"].to_numpy()
+        pred = backtest_df["pred"].to_numpy()
+        
+        # 识别拐点：收益方向发生变化的位置
+        target_sign = np.sign(target)
+        pred_sign = np.sign(pred)
+        
+        # 找到实际拐点位置（方向变化）
+        turning_points = []
+        for i in range(1, len(target_sign)):
+            if target_sign[i] != target_sign[i-1] and target_sign[i] != 0 and target_sign[i-1] != 0:
+                turning_points.append(i)
+        
+        if len(turning_points) < 3:
+            return {
+                "turning_point_count": len(turning_points),
+                "error": "Too few turning points for reliable diagnostics",
+            }
+        
+        # 计算不同提前量的命中率
+        one_day_early_hits = 0
+        same_day_hits = 0
+        one_day_late_hits = 0
+        
+        for tp in turning_points:
+            actual_sign_at_tp = target_sign[tp]
+            
+            # 提前1天预测（用 T-1 的预测判断 T 的拐点）
+            if tp > 0:
+                pred_sign_early = pred_sign[tp - 1]
+                if pred_sign_early == actual_sign_at_tp:
+                    one_day_early_hits += 1
+            
+            # 当天预测
+            pred_sign_same = pred_sign[tp]
+            if pred_sign_same == actual_sign_at_tp:
+                same_day_hits += 1
+            
+            # 滞后1天预测（用 T+1 的预测判断 T 的拐点 - 仅用于诊断）
+            if tp < len(pred_sign) - 1:
+                pred_sign_late = pred_sign[tp + 1]
+                if pred_sign_late == actual_sign_at_tp:
+                    one_day_late_hits += 1
+        
+        n = len(turning_points)
+        result = {
+            "turning_point_count": n,
+            "one_day_early_turn_hit_rate": round(one_day_early_hits / n, 3),
+            "same_day_turn_hit_rate": round(same_day_hits / n, 3),
+            "one_day_late_turn_hit_rate": round(one_day_late_hits / n, 3),
+            "interpretation": (
+                f"提前1天命中率: {one_day_early_hits}/{n}={round(one_day_early_hits/n, 3):.1%}; "
+                f"当天命中率: {same_day_hits}/{n}={round(same_day_hits/n, 3):.1%}; "
+                f"滞后1天命中率: {one_day_late_hits}/{n}={round(one_day_late_hits/n, 3):.1%}"
+            ),
+        }
+        
+        # 诊断建议
+        if result["one_day_early_turn_hit_rate"] > result["same_day_turn_hit_rate"] + 0.1:
+            result["diagnosis"] = "提前1天命中率显著高于当天，可能存在泄露或预测有领先性"
+        elif result["same_day_turn_hit_rate"] < 0.5:
+            result["diagnosis"] = "当天拐点命中率低于50%，模型在拐点处表现不佳"
+        else:
+            result["diagnosis"] = "拐点预测表现正常"
+        
+        set_log_context(stage="turning_point_diagnostics_success")
+        logger.info("turning_point_diagnostics_success count=%s same_day_rate=%.3f", n, result["same_day_turn_hit_rate"])
+        
+        return result
+        
+    except Exception as exc:
+        logger.exception("turning_point_diagnostics_failed")
+        return {"error": str(exc)}

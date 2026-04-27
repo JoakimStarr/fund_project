@@ -8,9 +8,9 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-from backend.app.core.config import INDEX_SYMBOLS, MIN_TRAIN_ROWS, RAW_DIR, STALE_DAYS
-from backend.app.core.errors import AppError, DataFetchError, DataStaleError
-from backend.app.core.logging_config import set_log_context
+from app.core.config import INDEX_SYMBOLS, MIN_TRAIN_ROWS, RAW_DIR, STALE_DAYS
+from app.core.errors import AppError, DataFetchError, DataStaleError
+from app.core.logging_config import set_log_context
 
 logger = logging.getLogger(__name__)
 

@@ -5,11 +5,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend.app.api import backtest, fund, model, task, train
-from backend.app.core.config import STATIC_DIR, ensure_dirs
-from backend.app.core.errors import AppError
-from backend.app.core.logging_config import request_id_var, set_log_context, setup_logging
-from backend.app.db.database import init_db
+from app.api import backtest, fund, model, task, train
+from app.core.config import STATIC_DIR, ensure_dirs
+from app.core.errors import AppError
+from app.core.logging_config import request_id_var, set_log_context, setup_logging
+from app.db.database import init_db
 
 ensure_dirs()
 setup_logging()

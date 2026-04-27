@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from backend.app.core.errors import AppError
-from backend.app.services.task_service import get_task
+from app.core.errors import AppError
+from app.services.task_service import get_task
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 

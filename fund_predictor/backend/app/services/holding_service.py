@@ -4,8 +4,8 @@ from datetime import datetime
 
 import pandas as pd
 
-from backend.app.core.config import RAW_DIR
-from backend.app.core.logging_config import set_log_context
+from app.core.config import RAW_DIR
+from app.core.logging_config import set_log_context
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +100,6 @@ def get_fund_holdings(fund_code: str) -> tuple[pd.DataFrame, dict]:
 
 
 def get_stock_daily(stock_code: str) -> tuple[pd.DataFrame, dict]:
-    from backend.app.services.stock_price_service import get_stock_daily_multi_source
+    from app.services.stock_price_service import get_stock_daily_multi_source
 
     return get_stock_daily_multi_source(stock_code)

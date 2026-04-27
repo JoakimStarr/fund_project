@@ -4,11 +4,11 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from backend.app.core.errors import DirectionModelError, PredictionFeatureMissingError
-from backend.app.core.logging_config import set_log_context
-from backend.app.services.feature_service import build_features, model_feature_columns
-from backend.app.services.model_registry_service import append_prediction, load_model_archive
-from backend.app.services.model_selection_service import PREDICTION_MODE
+from app.core.errors import DirectionModelError, PredictionFeatureMissingError
+from app.core.logging_config import set_log_context
+from app.services.feature_service import build_features, model_feature_columns
+from app.services.model_registry_service import append_prediction, load_model_archive
+from app.services.model_selection_service import PREDICTION_MODE
 
 logger = logging.getLogger(__name__)
 
@@ -236,6 +236,7 @@ def predict_next(fund_code: str, request_id: str) -> dict:
         result = {
             "fund_code": fund_code,
             "prediction_mode": PREDICTION_MODE,
+            "prediction_target_description": "使用截至 asof_date 的基金净值和市场数据预测下一交易日收益",
             "asof_date": str(latest["date"].iloc[0].date()),
             "pred": pred,
             "pred_return": pred,
@@ -279,6 +280,8 @@ def predict_next(fund_code: str, request_id: str) -> dict:
             "theme_available_count": proxy_meta.get("theme_available_count", 0),
             "failed_themes": proxy_meta.get("failed_themes", []),
             "top_exposures": exposure_summary.get("top_exposures", []),
+            "holding_lookahead_risk": proxy_meta.get("holding_lookahead_risk", True),
+            "top10_proxy_backtest_not_strict": proxy_meta.get("top10_proxy_backtest_not_strict", True),
             "proxy_disclaimer": "代理组合根据公开披露持仓、主题指数和历史收益拟合构建，不代表基金真实实时持仓。",
             "theme_proxy_disclaimer": "当前主题因子为宽基代理，解释力有限。" if proxy_meta.get("theme_available_count", 0) > 0 else None,
             "point_prediction_health": _point_health(point_metrics),

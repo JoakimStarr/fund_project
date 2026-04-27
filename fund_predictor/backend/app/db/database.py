@@ -1,7 +1,7 @@
 import sqlite3
 from contextlib import contextmanager
 
-from backend.app.core.config import DB_PATH, ensure_dirs
+from app.core.config import DB_PATH, ensure_dirs
 
 
 def init_db() -> None:

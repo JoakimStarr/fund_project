@@ -3,11 +3,11 @@ import logging
 import numpy as np
 import pandas as pd
 
-from backend.app.core.config import MIN_TRAIN_ROWS, PROCESSED_DIR
-from backend.app.core.errors import AppError, DuplicateFeatureColumnsError, FeatureBuildError, InsufficientDataError
-from backend.app.core.logging_config import set_log_context
-from backend.app.services.data_service import get_fund_nav, load_market_data
-from backend.app.services.proxy_portfolio_service import build_proxy_features
+from app.core.config import MIN_TRAIN_ROWS, PROCESSED_DIR
+from app.core.errors import AppError, DuplicateFeatureColumnsError, FeatureBuildError, InsufficientDataError
+from app.core.logging_config import set_log_context
+from app.services.data_service import get_fund_nav, load_market_data
+from app.services.proxy_portfolio_service import build_proxy_features
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +134,10 @@ def build_features(fund_code: str, require_fresh: bool = False) -> tuple[pd.Data
                 details={"fund_code": fund_code, "duplicated_columns": duplicated_cols[:20]},
             )
 
+        # 修复日期口径：明确区分特征日期和目标日期
+        df["feature_date"] = df["date"]
+        df["target_date"] = df["date"].shift(-1)
+        
         df["target_next"] = df["fund_ret"].shift(-1)
 
         # 相对收益目标 (V2.6)
@@ -222,13 +226,98 @@ def build_features(fund_code: str, require_fresh: bool = False) -> tuple[pd.Data
 
 
 def model_feature_columns(df: pd.DataFrame) -> list[str]:
-    excluded = {"date", "target_next", "nav", "acc_nav"}
+    """
+    筛选模型特征列，严格排除所有未来标签列以防止数据泄露
+    
+    排除规则：
+    - date: 日期列
+    - feature_date: 特征日期（与date相同）
+    - target_date: 目标日期（T+1）
+    - target_next: 下一期收益目标
+    - target_*: 所有目标列（包括 target_excess_*）
+    - nav/acc_nav: 原始净值列
+    - open/high/low/close/volume: 原始价格量列
+    - 包含 target/next/future/label 的列名
+    """
+    # 基础排除集合
+    excluded_exact = {
+        "date", "feature_date", "target_date", 
+        "target_next", "nav", "acc_nav"
+    }
+    
+    # 禁止的后缀
     banned_suffixes = ("_open", "_close", "_high", "_low", "_volume")
-    return [
-        c
-        for c in df.columns
-        if c not in excluded
-        and not c.endswith(banned_suffixes)
-        and pd.api.types.is_numeric_dtype(df[c])
-        and df[c].notna().any()
-    ]
+    
+    # 禁止的子字符串（用于检测泄露相关列）
+    # 注意：这里检查整个列名是否包含这些关键词
+    banned_keywords = ("target", "next", "future", "label")
+    
+    feature_cols = []
+    for c in df.columns:
+        # 检查是否精确匹配排除项
+        if c in excluded_exact:
+            continue
+        
+        # 检查后缀
+        if c.endswith(banned_suffixes):
+            continue
+        
+        # 检查是否包含泄露相关关键词（不区分大小写）
+        col_lower = c.lower()
+        if any(keyword in col_lower for keyword in banned_keywords):
+            continue
+        
+        # 检查是否为数值类型且有有效值
+        if not pd.api.types.is_numeric_dtype(df[c]):
+            continue
+        if not df[c].notna().any():
+            continue
+        
+        feature_cols.append(c)
+    
+    return feature_cols
+
+
+def validate_no_leakage_columns(feature_cols: list[str], fund_code: str) -> None:
+    """
+    训练前硬检查：确保没有泄露列进入特征
+    
+    如果发现有 target/next/future/label 相关列，立即抛出异常
+    """
+    # 泄露检测关键词（与 model_feature_columns 保持一致）
+    leakage_keywords = {
+        "target": "目标列",
+        "next": "未来值列", 
+        "future": "未来值列",
+        "label": "标签列",
+    }
+    
+    bad_cols = []
+    leakage_reasons = {}
+    
+    for col in feature_cols:
+        col_lower = col.lower()
+        for keyword, reason in leakage_keywords.items():
+            if keyword in col_lower:
+                bad_cols.append(col)
+                leakage_reasons[col] = reason
+                break
+    
+    if bad_cols:
+        logger.error(
+            "data_leakage_detected fund_code=%s bad_cols=%s",
+            fund_code,
+            bad_cols[:20]
+        )
+        raise FeatureBuildError(
+            "发现未来标签列进入特征，存在数据泄露风险",
+            details={
+                "fund_code": fund_code,
+                "bad_feature_cols": bad_cols[:50],
+                "leakage_reasons": leakage_reasons,
+                "total_bad_cols": len(bad_cols),
+                "suggestion": "请检查 feature_service 中的 model_feature_columns 函数，确保正确排除所有 target/next/future/label 列",
+            },
+        )
+    
+    logger.info("leakage_check_passed fund_code=%s feature_count=%s", fund_code, len(feature_cols))

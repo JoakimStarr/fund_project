@@ -3,12 +3,12 @@ import logging
 import pandas as pd
 from fastapi import APIRouter
 
-from backend.app.core.errors import AppError, ModelNotFoundError, ModelTrainingFailedError
-from backend.app.core.logging_config import request_id_var, set_log_context
-from backend.app.schemas.fund import PredictRequest
-from backend.app.services.model_registry_service import get_model_info, model_exists
-from backend.app.services.prediction_service import predict_next
-from backend.app.services.task_service import get_latest_task
+from app.core.errors import AppError, ModelNotFoundError, ModelTrainingFailedError
+from app.core.logging_config import request_id_var, set_log_context
+from app.schemas.fund import PredictRequest
+from app.services.model_registry_service import get_model_info, model_exists
+from app.services.prediction_service import predict_next
+from app.services.task_service import get_latest_task
 
 router = APIRouter(prefix="/api/fund", tags=["fund"])
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ def model_info(fund_code: str):
 
 @router.get("/{fund_code}/backtest")
 def backtest(fund_code: str):
-    from backend.app.services.model_registry_service import fund_model_dir
+    from app.services.model_registry_service import fund_model_dir
 
     path = fund_model_dir(fund_code) / "backtest.csv"
     if not path.exists():

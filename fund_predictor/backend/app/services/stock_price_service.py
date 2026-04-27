@@ -3,8 +3,8 @@ from datetime import datetime
 
 import pandas as pd
 
-from backend.app.core.config import RAW_DIR
-from backend.app.core.logging_config import set_log_context
+from app.core.config import RAW_DIR
+from app.core.logging_config import set_log_context
 
 logger = logging.getLogger(__name__)
 

@@ -5,12 +5,12 @@ import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression, Ridge
 
-from backend.app.core.config import RAW_DIR
-from backend.app.core.errors import DuplicateFeatureColumnsError, ProxyPortfolioError
-from backend.app.core.logging_config import set_log_context
-from backend.app.services.data_service import get_index_daily
-from backend.app.services.holding_service import get_fund_holdings
-from backend.app.services.stock_price_service import get_stock_daily_multi_source
+from app.core.config import RAW_DIR
+from app.core.errors import DuplicateFeatureColumnsError, ProxyPortfolioError
+from app.core.logging_config import set_log_context
+from app.services.data_service import get_index_daily
+from app.services.holding_service import get_fund_holdings
+from app.services.stock_price_service import get_stock_daily_multi_source
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +133,11 @@ def build_top10_proxy(fund_code: str) -> tuple[pd.DataFrame, dict]:
     set_log_context(stage=stage)
     logger.info("%s fund_code=%s available=%s missing=%s status=%s", stage, fund_code, available_count, missing_count, top10_status)
 
+    # 持仓穿越风险检查
+    # 如果使用的是最新持仓报告，则历史回测存在持仓穿越风险
+    # 严格回测要求：每个历史日期只能使用当时已披露的最近一期持仓
+    holding_lookahead_risk = True  # 当前实现使用最新持仓，存在穿越风险
+    
     return out, {
         **holding_meta,
         "proxy_method": "top10_proxy" if top10_status == "usable" else "partial_top10_proxy" if top10_status == "partial" else "return_inferred_only",
@@ -143,6 +148,8 @@ def build_top10_proxy(fund_code: str) -> tuple[pd.DataFrame, dict]:
         "stock_sources_used": sources_used,
         "holding_report_date": latest_date,
         "holding_scope": holding_meta.get("holding_scope", "top10"),
+        "holding_lookahead_risk": holding_lookahead_risk,
+        "top10_proxy_backtest_not_strict": holding_lookahead_risk,
     }
 
 
