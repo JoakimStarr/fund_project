@@ -1,5 +1,128 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>模型档案</title><link rel="stylesheet" href="/assets/style.css"></head>
-<body><main class="shell"><section class="topbar"><h1>模型档案</h1><a class="navlink" href="/">返回首页</a></section><section class="panel"><label class="field"><span>基金代码</span><input id="modelFundCode" value="018956"></label><button id="loadModelBtn">加载档案</button><pre id="modelJson" class="jsonbox"></pre></section></main><script src="/assets/app.js"></script></body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>模型系统 - Quant Dashboard</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">QuantDesk</div>
+        <div class="logo-subtitle">量化决策系统</div>
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item" data-page="dashboard"><a href="/index.html"><span class="nav-icon">🎯</span><span class="nav-text">决策中心</span></a></li>
+        <li class="nav-item" data-page="exposure"><a href="/exposure.html"><span class="nav-icon">📊</span><span class="nav-text">资产暴露</span></a></li>
+        <li class="nav-item" data-page="backtest"><a href="/backtest.html"><span class="nav-icon">📈</span><span class="nav-text">回测诊断</span></a></li>
+        <li class="nav-item active" data-page="model"><a href="/model.html"><span class="nav-icon">⚙️</span><span class="nav-text">模型系统</span></a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>模型系统</h1>
+          <div class="topbar-subtitle">模型训练、特征诊断与系统状态</div>
+        </div>
+      </header>
+
+      <section class="control-section">
+        <div class="control-row">
+          <div class="input-field">
+            <label>基金代码</label>
+            <input id="fundCode" type="text" value="018956" maxlength="12">
+          </div>
+          <button id="loadBtn" class="btn btn-secondary">加载诊断</button>
+          <button id="trainBtn" class="btn btn-primary">开始训练</button>
+          <label class="switch-label">
+            <input id="forceRetrain" type="checkbox" checked>
+            <span class="switch-slider"></span>
+            <span>强制重训</span>
+          </label>
+        </div>
+        <div id="errorBox" class="error-card hidden"></div>
+        <div id="statusBox" class="text-muted mt-4"></div>
+        <div id="progressWrap" class="card hidden" style="margin-top: 16px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span id="progressStage">准备训练</span>
+            <span id="progressText">0%</span>
+          </div>
+          <div class="interval-bar" style="height:8px;">
+            <div id="progressBar" class="interval-range" style="left:0;width:0%;height:100%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="emptyState" class="empty-state">
+        <div class="empty-icon">⚙️</div>
+        <div class="empty-title">输入基金代码查看模型诊断</div>
+        <div class="empty-desc">或开始训练新模型</div>
+      </section>
+
+      <section id="resultSection" class="hidden">
+        <div class="content-grid">
+          <div class="metric-item">
+            <div class="metric-name">训练模式</div>
+            <div id="trainingMode" class="metric-number">-</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Refine Top K</div>
+            <div id="refineTopK" class="metric-number">-</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Walk Forward Step</div>
+            <div id="walkForwardStep" class="metric-number">-</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">点预测特征数</div>
+            <div id="pointFeatureCount" class="metric-number">-</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">方向预测特征数</div>
+            <div id="directionFeatureCount" class="metric-number">-</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">泄露检查</div>
+            <div id="leakageStatus" class="metric-number">-</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">核心指标</div>
+          <div class="content-grid">
+            <div class="metric-item">
+              <div class="metric-name">Model vs Mean Improvement</div>
+              <div id="modelVsMeanImprovement" class="metric-number">-</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">Pred-Real Corr</div>
+              <div id="predRealCorr" class="metric-number">-</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">AUC</div>
+              <div id="auc" class="metric-number">-</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">Brier Score</div>
+              <div id="brier" class="metric-number">-</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="disclaimer">
+        本系统仅用于量化研究和模型实验，不构成投资建议。
+      </footer>
+    </main>
+  </div>
+
+  <script src="/assets/common.js"></script>
+  <script src="/assets/api.js"></script>
+  <script src="/assets/model.js"></script>
+</body>
 </html>

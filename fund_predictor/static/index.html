@@ -3,141 +3,184 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>基金 T+1 净值涨跌幅区间预测</title>
+  <title>决策中心 - Quant Dashboard</title>
   <link rel="stylesheet" href="/assets/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <main class="app-shell">
-    <header class="topbar">
-      <div>
-        <span class="eyebrow">Quant Research Dashboard</span>
-        <h1>基金 T+1 净值涨跌幅区间预测</h1>
-        <p>基于公开净值、市场因子、代理资产组合和时间序列验证的风险预测工具。</p>
+  <div class="app-container">
+    <!-- 侧边导航 -->
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">QuantDesk</div>
+        <div class="logo-subtitle">量化决策系统</div>
       </div>
-      <div class="topbar-meta">
-        <span id="serviceStatus" class="badge badge-success">服务在线</span>
-        <span class="badge badge-neutral">t_plus_1_close</span>
-        <details class="request-details">
-          <summary>request_id</summary>
-          <code id="latestRequestId">暂无</code>
-        </details>
-      </div>
-    </header>
+      <ul class="nav-menu">
+        <li class="nav-item active" data-page="dashboard">
+          <a href="/index.html">
+            <span class="nav-icon">🎯</span>
+            <span class="nav-text">决策中心</span>
+          </a>
+        </li>
+        <li class="nav-item" data-page="exposure">
+          <a href="/exposure.html">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text">资产暴露</span>
+          </a>
+        </li>
+        <li class="nav-item" data-page="backtest">
+          <a href="/backtest.html">
+            <span class="nav-icon">📈</span>
+            <span class="nav-text">回测诊断</span>
+          </a>
+        </li>
+        <li class="nav-item" data-page="model">
+          <a href="/model.html">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-text">模型系统</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
 
-    <section class="card control-card">
-      <div class="control-copy">
-        <div class="section-title">基金预测工作台</div>
-        <p class="subtle-text">输入基金代码后可直接预测；如模型不存在或需要刷新，可训练并预测。</p>
-      </div>
-      <div class="control-row">
-        <label class="field">
-          <span>基金代码</span>
-          <input id="fundCode" value="018956" maxlength="12" autocomplete="off" inputmode="numeric">
-        </label>
-        <button id="predictBtn" class="btn btn-primary">预测</button>
-        <button id="trainBtn" class="btn btn-secondary">训练并预测</button>
-        <label class="switch">
-          <input id="forceRetrain" type="checkbox">
-          <span></span>
-          <b>强制重训</b>
-        </label>
-      </div>
-      <div class="control-foot">
-        <p class="subtle-text">强制重训会重新获取数据并重选模型。系统仅做收盘后 T+1 风险预测，不构成投资建议。</p>
-        <div id="statusBox" class="status-line">等待输入基金代码。</div>
-      </div>
-      <div id="progressWrap" class="progress-panel idle">
-        <div class="progress-label">
-          <span id="progressStage">暂无训练任务</span>
-          <span id="progressText"></span>
+    <!-- 主内容区 -->
+    <main class="main-content">
+      <!-- 顶部栏 -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>决策中心</h1>
+          <div class="topbar-subtitle">T+1 风险预测与方向判断</div>
         </div>
-        <div class="progress-bar"><div id="progressBar"></div></div>
-      </div>
-      <div id="errorBox" class="error-card hidden"></div>
-    </section>
+      </header>
 
-    <section id="usabilityCard" class="card risk-banner muted-card">
-      <div class="risk-strip"></div>
-      <div>
-        <span class="badge badge-neutral">暂无预测</span>
-        <h2>请先预测或训练基金模型</h2>
-        <p>训练完成后将展示主结论、净值区间、方向信号和代理组合解释力。</p>
-      </div>
-    </section>
-
-    <section id="priorityMetrics" class="priority-grid"></section>
-    <section id="coreMetrics" class="metric-grid secondary-metrics"></section>
-
-    <section class="layout-grid">
-      <section class="card" id="directionCard">
-        <div class="section-title">方向信号</div>
-        <div class="empty-state">暂无方向概率结果。</div>
+      <!-- 控制区 -->
+      <section class="control-section">
+        <div class="control-row">
+          <div class="input-field">
+            <label>基金代码</label>
+            <input id="fundCode" type="text" value="018956" maxlength="12">
+          </div>
+          <button id="predictBtn" class="btn btn-primary">预测</button>
+          <button id="trainBtn" class="btn btn-secondary">训练并预测</button>
+          <label class="switch-label">
+            <input id="forceRetrain" type="checkbox">
+            <span class="switch-slider"></span>
+            <span>强制重训</span>
+          </label>
+        </div>
+        <div id="errorBox" class="error-card hidden"></div>
+        <div id="statusBox" class="text-muted mt-4"></div>
       </section>
 
-      <section class="card" id="proxyCard">
-        <div class="section-title">基金代理资产组合</div>
-        <div class="empty-state">代理组合暂不可用，当前结果基于历史收益和市场因子。</div>
-      </section>
-    </section>
-
-    <section class="layout-grid">
-      <section class="card" id="excessSignalsCard">
-        <div class="section-title">相对收益信号</div>
-        <div class="empty-state">相对收益模型暂不可用，需要更多训练数据。</div>
+      <!-- 空状态 -->
+      <section id="emptyState" class="empty-state">
+        <div class="empty-icon">🎯</div>
+        <div class="empty-title">输入基金代码开始预测</div>
+        <div class="empty-desc">系统将分析模型可信度、方向信号和风险区间，辅助您的投资决策</div>
       </section>
 
-      <section class="card" id="modelMonitoringCard">
-        <div class="section-title">模型监控</div>
-        <div class="empty-state">暂无模型监控数据。</div>
+      <!-- 预测结果 -->
+      <section id="resultSection" class="hidden">
+        <!-- 主结论卡 -->
+        <div class="conclusion-card">
+          <div class="conclusion-main">
+            <div class="conclusion-label">当前结论</div>
+            <div id="conclusionValue" class="conclusion-value">-</div>
+            <div id="conclusionSubtitle" class="conclusion-subtitle">-</div>
+            <div id="reliabilityBadge" class="reliability-badge">-</div>
+          </div>
+        </div>
+
+        <!-- 方向信号 -->
+        <div class="direction-grid">
+          <div class="direction-item" id="upItem">
+            <div class="direction-label">上涨概率</div>
+            <div id="upProbability" class="direction-value">-</div>
+          </div>
+          <div class="direction-item" id="downItem">
+            <div class="direction-label">下跌概率</div>
+            <div id="downProbability" class="direction-value">-</div>
+          </div>
+          <div class="direction-item" id="neutralItem">
+            <div class="direction-label">中性区间</div>
+            <div id="neutralRange" class="direction-value">-</div>
+          </div>
+        </div>
+
+        <!-- 核心区间 -->
+        <div class="interval-section">
+          <div class="interval-card">
+            <div class="interval-header">
+              <span class="interval-title">80% 收益区间</span>
+              <span class="interval-confidence">置信度 80%</span>
+            </div>
+            <div class="interval-bar">
+              <div id="interval80Range" class="interval-range" style="left: 30%; width: 40%;"></div>
+              <div id="interval80Center" class="interval-center" style="left: 50%;"></div>
+            </div>
+            <div class="interval-labels">
+              <span id="interval80Lower" class="negative">-</span>
+              <span id="interval80Upper" class="positive">-</span>
+            </div>
+          </div>
+
+          <div class="interval-card">
+            <div class="interval-header">
+              <span class="interval-title">90% 收益区间</span>
+              <span class="interval-confidence">置信度 90%</span>
+            </div>
+            <div class="interval-bar">
+              <div id="interval90Range" class="interval-range" style="left: 25%; width: 50%;"></div>
+              <div id="interval90Center" class="interval-center" style="left: 50%;"></div>
+            </div>
+            <div class="interval-labels">
+              <span id="interval90Lower" class="negative">-</span>
+              <span id="interval90Upper" class="positive">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 辅助点预测 -->
+        <div class="auxiliary-prediction">
+          <span class="auxiliary-label">辅助点预测</span>
+          <span id="pointPrediction" class="auxiliary-value">-</span>
+        </div>
+
+        <!-- 关键可信度指标 -->
+        <div class="card" style="margin-top: 24px;">
+          <div class="card-title">关键可信度指标</div>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-name">模型改进度</div>
+              <div id="metricImprovement" class="metric-number">-</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">预测-真实相关</div>
+              <div id="metricCorr" class="metric-number">-</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">方向 AUC</div>
+              <div id="metricAuc" class="metric-number">-</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">Proxy R²</div>
+              <div id="metricProxyR2" class="metric-number">-</div>
+            </div>
+          </div>
+        </div>
       </section>
-    </section>
 
-    <section class="card" id="healthCard">
-      <div class="section-title">模型健康</div>
-      <div class="empty-state">暂无模型健康指标。</div>
-    </section>
+      <!-- 免责声明 -->
+      <footer class="disclaimer">
+        本系统仅用于量化研究和模型实验，不构成投资建议。预测结果仅供参考，投资有风险，决策需谨慎。
+      </footer>
+    </main>
+  </div>
 
-    <section class="card collapsible compact-card">
-      <details>
-        <summary><span>99% 极端风险区间</span><em>默认折叠</em></summary>
-        <div id="interval99" class="extreme-grid"></div>
-        <p class="subtle-text">置信水平越高，区间越宽。99% 区间用于观察极端风险，不代表更精确预测。</p>
-      </details>
-    </section>
-
-    <section class="card chart-card">
-      <div class="chart-head">
-        <div>
-          <div class="section-title">回测图</div>
-          <p class="subtle-text">对比实际收益、点预测、均值基准和方向概率。</p>
-        </div>
-        <div class="chart-toggles">
-          <label><input type="checkbox" data-series="实际收益" checked> 实际收益</label>
-          <label><input type="checkbox" data-series="点预测" checked> 点预测</label>
-          <label><input type="checkbox" data-series="rolling_mean" checked> baseline</label>
-          <label><input type="checkbox" data-series="p_up" checked> p_up</label>
-        </div>
-      </div>
-      <div id="chart" class="chart"></div>
-    </section>
-
-    <section class="card">
-      <div class="table-head">
-        <div>
-          <div class="section-title">历史记录</div>
-          <p class="subtle-text">最近预测会写入本地模型档案，用于后续误差跟踪。</p>
-        </div>
-      </div>
-      <div id="historyWrap" class="table-wrap">
-        <div class="empty-state">暂无历史预测记录，请先完成一次预测。</div>
-      </div>
-    </section>
-
-    <section class="disclaimer">
-      本系统仅用于量化研究和模型实验，不构成投资建议。
-    </section>
-  </main>
-  <script src="/assets/app.js"></script>
+  <!-- 脚本 -->
+  <script src="/assets/common.js"></script>
+  <script src="/assets/api.js"></script>
+  <script src="/assets/dashboard.js"></script>
 </body>
 </html>

@@ -117,6 +117,27 @@ def _safe_float(value):
     return float(value)
 
 
+def _clean_nan(obj):
+    """递归清理对象中的NaN值，将其转换为None"""
+    if isinstance(obj, dict):
+        return {k: _clean_nan(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [_clean_nan(item) for item in obj]
+    elif isinstance(obj, float):
+        if pd.isna(obj) or np.isnan(obj):
+            return None
+        return obj
+    elif isinstance(obj, np.floating):
+        if pd.isna(obj) or np.isnan(obj):
+            return None
+        return float(obj)
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.ndarray):
+        return _clean_nan(obj.tolist())
+    return obj
+
+
 def _proxy_confidence(proxy_r2, point_metrics: dict) -> str:
     if proxy_r2 is not None and proxy_r2 >= 0.60 and point_metrics.get("model_vs_mean_improvement", 0) > 0.05 and point_metrics.get("pred_real_corr", 0) > 0.10:
         return "high"
@@ -358,7 +379,8 @@ def predict_next(fund_code: str, request_id: str) -> dict:
         )
         set_log_context(stage="predict_success")
         logger.info("predict_success asof=%s pred=%.8f p_up=%s", result["asof_date"], pred, p_up)
-        return result
+        # 清理所有NaN值，确保JSON序列化成功
+        return _clean_nan(result)
     except Exception:
         set_log_context(stage="predict_failed")
         logger.exception("predict_failed")
@@ -431,7 +453,11 @@ def _build_excess_signals(metrics: dict) -> dict:
     # 判断相对收益信号是否强于绝对收益信号
     point_corr = metrics.get("point", {}).get("pred_real_corr", 0)
     if reliable_models > 0:
-        avg_excess_corr = float(np.mean([d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")]))
+        excess_corrs = [d.get("excess_corr", 0) for d in excess.values() if d.get("model_available")]
+        avg_excess_corr = float(np.nanmean(excess_corrs)) if excess_corrs else 0.0
+        # 处理NaN值
+        if pd.isna(avg_excess_corr):
+            avg_excess_corr = 0.0
         signals["stronger_than_absolute"] = bool(avg_excess_corr > point_corr + 0.05)
     
     return signals
