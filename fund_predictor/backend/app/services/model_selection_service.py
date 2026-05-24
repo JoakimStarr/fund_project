@@ -291,7 +291,8 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
             rolling.append({**item, "rolling_metrics": _regression_metrics(np.array(trues), np.array(preds))})
     top_k = sorted(rolling or top20, key=lambda x: x.get("rolling_metrics", x["metrics"])["score"])[:refine_top_k]
 
-    baselines = _rolling_baselines(data_train, test_select)
+    baselines_select = _rolling_baselines(data_train, test_select)
+    baselines_final = _rolling_baselines(data_train, test_final)
     final = []
     train_valid = pd.concat([train_base, valid])
     for item in top_k:
@@ -299,7 +300,7 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
             pipe = _make_pipeline(item["selector"], item["scaler"], clone(_regressors()[item["model"]]), len(feature_cols), "regression")
             pipe.fit(train_valid[feature_cols], train_valid["target_next"])
             pred = pipe.predict(test_select[feature_cols])
-            metrics = _regression_metrics(test_select["target_next"].to_numpy(), pred, baseline_mean=baselines["rolling_mean"].to_numpy())
+            metrics = _regression_metrics(test_select["target_next"].to_numpy(), pred, baseline_mean=baselines_select["rolling_mean"].to_numpy())
             final.append({**item, "pipeline": pipe, "pred": pred, "final_metrics": metrics})
         except Exception:
             logger.exception("point_candidate_failed final model=%s", item["model"])
@@ -310,7 +311,7 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
     final_pipe.fit(data_train[feature_cols], data_train["target_next"])
     set_log_context(stage="point_model_train_success")
     logger.info("point_model_train_success model=%s selector=%s", best["model"], best["selector"])
-    return best, final_pipe, _selected_features(final_pipe, feature_cols), test_final, baselines
+    return best, final_pipe, _selected_features(final_pipe, feature_cols), test_final, baselines_final
 
 
 def _is_proxy_feature(col: str) -> bool:
