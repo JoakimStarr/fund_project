@@ -4,7 +4,8 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from app.core.errors import DirectionModelError, PredictionFeatureMissingError
+from app.core.config import MODEL_DIR
+from app.core.errors import DirectionModelError
 from app.core.logging_config import set_log_context
 from app.services.feature_service import build_features, model_feature_columns
 from app.services.model_registry_service import append_prediction, load_model_archive
@@ -197,9 +198,11 @@ def predict_next(fund_code: str, request_id: str) -> dict:
         latest = data_full.iloc[[-1]]
         missing_rate = float(latest[feature_cols].isna().mean(axis=1).iloc[0])
         if missing_rate > 0.35:
-            raise PredictionFeatureMissingError(
-                "Latest feature row has too many missing values",
-                details={"missing_rate": missing_rate, "asof_date": str(latest["date"].iloc[0].date())},
+            logger.warning(
+                "latest_feature_row_missing fund_code=%s missing_rate=%.3f asof_date=%s",
+                fund_code,
+                missing_rate,
+                str(latest["date"].iloc[0].date()),
             )
 
         point_x = _align_model_features(point_model, latest, feature_cols)
@@ -259,6 +262,8 @@ def predict_next(fund_code: str, request_id: str) -> dict:
             "prediction_mode": PREDICTION_MODE,
             "prediction_target_description": "使用截至 asof_date 的基金净值和市场数据预测下一交易日收益",
             "asof_date": str(latest["date"].iloc[0].date()),
+            "feature_missing_rate": missing_rate,
+            "feature_quality_flag": "degraded" if missing_rate > 0.35 else "normal",
             "pred": pred,
             "pred_return": pred,
             "today_nav": today_nav,
@@ -468,7 +473,7 @@ def _load_model_monitoring(fund_code: str) -> dict:
     import json
     from pathlib import Path
     
-    monitor_path = Path("models") / fund_code / "t_plus_1_close" / "model_monitoring.json"
+    monitor_path = MODEL_DIR / fund_code / "t_plus_1_close" / "model_monitoring.json"
     
     if monitor_path.exists():
         with open(monitor_path, "r", encoding="utf-8") as f:

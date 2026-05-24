@@ -231,7 +231,7 @@ def _fetch_index_sohu(symbol: str) -> pd.DataFrame:
 def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFrame, dict]:
     path = RAW_DIR / "index" / f"{symbol}.csv"
     cached = _read_cache(path)
-    if cached is not None and not _is_stale(cached):
+    if cached is not None and not require_fresh and not _is_stale(cached):
         return cached, {"source_used": "cache", "fallback_used": False, "stale": False}
     try:
         url = "https://push2his.eastmoney.com/api/qt/stock/kline/get"

@@ -30,6 +30,8 @@ from sklearn.metrics import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import RobustScaler, StandardScaler
 
+logger = logging.getLogger("train")
+
 # XGB/LightGBM 可选导入 (V2.6)
 try:
     import xgboost as xgb
@@ -47,12 +49,10 @@ except ImportError:
     LGBM_AVAILABLE = False
     logger.warning("lightgbm_not_available")
 
-from app.core.config import INTERVAL_ALPHA
+from app.core.config import INTERVAL_ALPHA, MODEL_DIR
 from app.core.errors import BaselineEvalError, ModelSelectionError, ProbabilityCalibrationError, RegimeIntervalError
 from app.core.logging_config import set_log_context
 from app.services.feature_service import model_feature_columns, validate_no_leakage_columns
-
-logger = logging.getLogger("train")
 
 PREDICTION_MODE = "t_plus_1_close"
 TRAIN_WINDOW = 180
@@ -86,11 +86,23 @@ class ModelBundle:
     interval_config: dict[str, Any]
 
 
-def _split_train_valid_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def _split_train_valid_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """四段划分：train(55%) / valid(22%) / test_select(13%) / test_final(10%)
+    
+    - train + valid: 粗筛和 walk-forward 精排
+    - test_select: final_metrics 选最佳模型
+    - test_final: 独立回测报告，不参与任何选模
+    """
     n = len(df)
-    train_end = int(n * 0.65)
-    valid_end = int(n * 0.82)
-    return df.iloc[:train_end].copy(), df.iloc[train_end:valid_end].copy(), df.iloc[valid_end:].copy()
+    train_end = int(n * 0.55)
+    valid_end = train_end + int(n * 0.22)
+    test_sel_end = valid_end + int(n * 0.13)
+    return (
+        df.iloc[:train_end].copy(),
+        df.iloc[train_end:valid_end].copy(),
+        df.iloc[valid_end:test_sel_end].copy(),
+        df.iloc[test_sel_end:].copy(),
+    )
 
 
 def _selector(selector: str, n_features: int, task: str):
@@ -279,15 +291,15 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
             rolling.append({**item, "rolling_metrics": _regression_metrics(np.array(trues), np.array(preds))})
     top_k = sorted(rolling or top20, key=lambda x: x.get("rolling_metrics", x["metrics"])["score"])[:refine_top_k]
 
-    baselines = _rolling_baselines(data_train, test)
+    baselines = _rolling_baselines(data_train, test_final)
     final = []
     train_valid = pd.concat([train_base, valid])
     for item in top_k:
         try:
             pipe = _make_pipeline(item["selector"], item["scaler"], clone(_regressors()[item["model"]]), len(feature_cols), "regression")
             pipe.fit(train_valid[feature_cols], train_valid["target_next"])
-            pred = pipe.predict(test[feature_cols])
-            metrics = _regression_metrics(test["target_next"].to_numpy(), pred, baseline_mean=baselines["rolling_mean"].to_numpy())
+            pred = pipe.predict(test_select[feature_cols])
+            metrics = _regression_metrics(test_select["target_next"].to_numpy(), pred, baseline_mean=baselines["rolling_mean"].to_numpy())
             final.append({**item, "pipeline": pipe, "pred": pred, "final_metrics": metrics})
         except Exception:
             logger.exception("point_candidate_failed final model=%s", item["model"])
@@ -298,7 +310,7 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
     final_pipe.fit(data_train[feature_cols], data_train["target_next"])
     set_log_context(stage="point_model_train_success")
     logger.info("point_model_train_success model=%s selector=%s", best["model"], best["selector"])
-    return best, final_pipe, _selected_features(final_pipe, feature_cols), test, baselines
+    return best, final_pipe, _selected_features(final_pipe, feature_cols), test_final, baselines
 
 
 def _is_proxy_feature(col: str) -> bool:
@@ -332,7 +344,7 @@ def _proxy_gain_eval(data_train: pd.DataFrame, feature_cols: list[str], point_be
             "proxy_features_helpful": False,
             "proxy_feature_count": len(proxy_cols),
         }
-    train_base, valid, _ = _split_train_valid_test(data_train)
+    train_base, valid, _, _ = _split_train_valid_test(data_train)
     train_valid = pd.concat([train_base, valid])
     try:
         before_pipe = _make_pipeline(point_best["selector"], point_best["scaler"], clone(_regressors()[point_best["model"]]), len(no_proxy_cols), "regression")
@@ -436,7 +448,7 @@ def _direction_metrics(y_true: np.ndarray, p_up: np.ndarray, baseline_acc: float
 def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=None):
     set_log_context(stage="direction_model_train_start")
     logger.info("direction_model_train_start")
-    train_base, valid, test = _split_train_valid_test(data_train)
+    train_base, valid, test_select, _ = _split_train_valid_test(data_train)
     if progress_cb:
         progress_cb(65, "direction_model_train_start", "Training calibrated direction model")
     y_train = (train_base["target_next"] > 0).astype(int)
@@ -444,7 +456,7 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
     if y_train.nunique() < 2 or y_valid.nunique() < 2:
         logger.warning("direction_model_skipped_single_class train_classes=%s valid_classes=%s", y_train.nunique(), y_valid.nunique())
         return None, None, [], None, None
-    baseline_acc = float(max((test["target_next"] > 0).mean(), (test["target_next"] <= 0).mean()))
+    baseline_acc = float(max((test_select["target_next"] > 0).mean(), (test_select["target_next"] <= 0).mean()))
     rough = []
     for model_name, selector, scaler, model in _candidates(_classifiers()):
         try:
@@ -477,8 +489,8 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
             base = _make_pipeline(item["selector"], item["scaler"], clone(_classifiers()[item["model"]]), len(feature_cols), "classification")
             base.fit(fit_part[feature_cols], y_fit)
             calibrated = _calibrated_direction_pipeline(base, calib_part[feature_cols], y_calib)
-            p_test = _predict_p_up(calibrated, test[feature_cols])
-            m = _direction_metrics(test["target_next"].to_numpy(), p_test, baseline_acc)
+            p_test = _predict_p_up(calibrated, test_select[feature_cols])
+            m = _direction_metrics(test_select["target_next"].to_numpy(), p_test, baseline_acc)
             final.append({**item, "pipeline": calibrated, "p_test": p_test, "final_metrics": m})
         except Exception:
             logger.exception("direction_candidate_failed final model=%s", item["model"])
@@ -490,7 +502,7 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
     logger.info("direction_model_train_success model=%s selector=%s", best["model"], best["selector"])
     # Keep the calibrated model fit on train_valid/calib split; do not refit on all data without calibration holdout.
     selected = _selected_features(best["pipeline"].estimator.estimator, feature_cols)
-    return best, best["pipeline"], selected, test, best["p_test"]
+    return best, best["pipeline"], selected, test_select, best["p_test"]
 
 
 def _regime_intervals(test: pd.DataFrame, pred: np.ndarray) -> tuple[dict[str, Any], pd.DataFrame]:
@@ -558,10 +570,13 @@ def select_and_train(data_train: pd.DataFrame, fund_code: str = "", progress_cb=
         # 获取训练模式配置
         mode_config = TRAINING_MODES.get(training_mode, TRAINING_MODES["fast"])
         
-        point_best, point_pipeline, selected_point, test, baselines = _point_model(data_train, feature_cols, progress_cb, training_mode)
-        proxy_eval = _proxy_gain_eval(data_train, feature_cols, point_best, test, baselines)
+        point_best, point_pipeline, selected_point, test_final, baselines = _point_model(data_train, feature_cols, progress_cb, training_mode)
+        # 用最终模型在独立 test_final 上重新预测（test_select 仅用于选模）
+        test_final_pred = point_pipeline.predict(test_final[feature_cols])
+        point_best["pred"] = test_final_pred
+        proxy_eval = _proxy_gain_eval(data_train, feature_cols, point_best, test_final, baselines)
         direction_best, direction_pipeline, selected_direction, direction_test, p_test = _direction_model(data_train, feature_cols, progress_cb)
-        interval_config, backtest = _regime_intervals(test, point_best["pred"])
+        interval_config, backtest = _regime_intervals(test_final, point_best["pred"])
         
         # 修复回测日期口径：明确区分特征日期和目标日期
         # feature_date = T（用于预测的特征日期）
@@ -576,7 +591,7 @@ def select_and_train(data_train: pd.DataFrame, fund_code: str = "", progress_cb=
         backtest["last_ret_baseline"] = baselines["last_ret"].to_numpy()
         backtest["abs_error"] = (backtest["target_next"] - backtest["pred"]).abs()
 
-        direction_backtest = test[["date", "target_next"]].copy()
+        direction_backtest = test_final[["date", "target_next"]].copy()
         direction_metrics = {
             "direction_available": False,
             "direction_failure_reason": "No calibrated direction model was selected",
@@ -615,7 +630,7 @@ def select_and_train(data_train: pd.DataFrame, fund_code: str = "", progress_cb=
             backtest["p_down"] = np.nan
             backtest["strong_signal"] = False
 
-        y = test["target_next"].to_numpy()
+        y = test_final["target_next"].to_numpy()
         baseline_median_rmse = float(np.sqrt(mean_squared_error(y, baselines["rolling_median"].to_numpy()))) * 10000
         baseline_last_rmse = float(np.sqrt(mean_squared_error(y, baselines["last_ret"].to_numpy()))) * 10000
         point_metrics = {
@@ -640,7 +655,7 @@ def select_and_train(data_train: pd.DataFrame, fund_code: str = "", progress_cb=
             "residual_group_used": None,
         }
         # 计算 walk-forward 评估点数
-        walk_forward_eval_points = len(test)
+        walk_forward_eval_points = len(test_final)
         
         metrics = {
             "prediction_mode": PREDICTION_MODE,
@@ -677,11 +692,11 @@ def select_and_train(data_train: pd.DataFrame, fund_code: str = "", progress_cb=
         )
         
         # 相对收益模型训练 (V2.6)
-        excess_metrics = _train_excess_models(data_train, feature_cols, test, progress_cb)
+        excess_metrics = _train_excess_models(data_train, feature_cols, test_final, progress_cb)
         metrics["excess"] = excess_metrics
         
         # 暴露稳定性检查 (V2.6)
-        exposure_shift = _check_exposure_shift(test)
+        exposure_shift = _check_exposure_shift(test_final)
         metrics["exposure_shift_flag"] = exposure_shift.get("shift_flag", False)
         metrics["exposure_shift_details"] = exposure_shift
         
@@ -810,7 +825,7 @@ def update_model_monitoring(fund_code: str, prediction: dict, actual_return: flo
     set_log_context(stage="model_monitoring_start")
     logger.info("model_monitoring_start fund_code=%s", fund_code)
     
-    monitor_path = Path("models") / fund_code / "t_plus_1_close" / "model_monitoring.json"
+    monitor_path = MODEL_DIR / fund_code / "t_plus_1_close" / "model_monitoring.json"
     monitor_path.parent.mkdir(parents=True, exist_ok=True)
     
     # 读取现有记录
@@ -868,7 +883,7 @@ def load_model_monitoring(fund_code: str) -> dict[str, Any]:
     import json
     from pathlib import Path
     
-    monitor_path = Path("models") / fund_code / "t_plus_1_close" / "model_monitoring.json"
+    monitor_path = MODEL_DIR / fund_code / "t_plus_1_close" / "model_monitoring.json"
     
     if monitor_path.exists():
         with open(monitor_path, "r", encoding="utf-8") as f:

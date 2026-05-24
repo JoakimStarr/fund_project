@@ -35,7 +35,8 @@ async def request_context(request: Request, call_next):
 @app.exception_handler(AppError)
 async def app_error_handler(request: Request, exc: AppError):
     logger.exception("app_error code=%s", exc.code)
-    return JSONResponse(status_code=400, content={"ok": False, "error": exc.to_dict(request_id=request_id_var.get())})
+    status = getattr(exc, 'http_status', 400)
+    return JSONResponse(status_code=status, content={"ok": False, "error": exc.to_dict(request_id=request_id_var.get())})
 
 
 @app.exception_handler(Exception)

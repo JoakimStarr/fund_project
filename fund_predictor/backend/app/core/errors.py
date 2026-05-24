@@ -4,6 +4,7 @@ from typing import Any
 class AppError(Exception):
     code = "APP_ERROR"
     stage = "unknown"
+    http_status = 400
 
     def __init__(self, message: str, stage: str | None = None, details: dict[str, Any] | None = None):
         super().__init__(message)
@@ -26,31 +27,37 @@ class AppError(Exception):
 class DataFetchError(AppError):
     code = "DATA_FETCH_FAILED"
     stage = "data_fetch"
+    http_status = 502
 
 
 class DataStaleError(AppError):
     code = "DATA_STALE"
     stage = "data_fetch"
+    http_status = 502
 
 
 class InsufficientDataError(AppError):
     code = "INSUFFICIENT_DATA"
     stage = "data_validation"
+    http_status = 422
 
 
 class FeatureBuildError(AppError):
     code = "FEATURE_BUILD_FAILED"
     stage = "feature_build"
+    http_status = 400
 
 
 class ModelSelectionError(AppError):
     code = "MODEL_SELECTION_FAILED"
     stage = "model_selection"
+    http_status = 400
 
 
 class ModelNotFoundError(AppError):
     code = "MODEL_NOT_FOUND"
     stage = "model_registry"
+    http_status = 404
 
 
 class PredictionError(AppError):
