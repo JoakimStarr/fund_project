@@ -116,6 +116,8 @@ def setup_logging() -> None:
     logger_handlers = ["console"]
     train_logger_handlers = []
 
+    _json_handler_specs = {}
+
     app_handler = handlers_cfg.get("app", {})
     if app_handler.get("filename"):
         handler_defs["app_file"] = {
@@ -132,12 +134,8 @@ def setup_logging() -> None:
 
     api_handler = handlers_cfg.get("api", {})
     if api_handler.get("filename") and api_handler.get("format") == "json":
-        handler_defs["api_json"] = {
-            "class": "backend.app.core.logging_config.StructuredJSONHandler",
+        _json_handler_specs["api_json"] = {
             "filename": str(log_dir / api_handler["filename"]),
-            "maxBytes": max_bytes,
-            "backupCount": backup_count,
-            "encoding": encoding,
             "level": api_handler.get("level", "INFO"),
         }
         logger_handlers.append("api_json")
@@ -173,23 +171,15 @@ def setup_logging() -> None:
 
     audit_handler = handlers_cfg.get("audit", {})
     if audit_handler.get("filename") and audit_handler.get("format") == "json":
-        handler_defs["audit_json"] = {
-            "class": "backend.app.core.logging_config.StructuredJSONHandler",
+        _json_handler_specs["audit_json"] = {
             "filename": str(log_dir / audit_handler["filename"]),
-            "maxBytes": max_bytes,
-            "backupCount": backup_count,
-            "encoding": encoding,
             "level": audit_handler.get("level", "INFO"),
         }
 
     perf_handler = handlers_cfg.get("perf", {})
     if perf_handler.get("filename") and perf_handler.get("format") == "json":
-        handler_defs["perf_json"] = {
-            "class": "backend.app.core.logging_config.StructuredJSONHandler",
+        _json_handler_specs["perf_json"] = {
             "filename": str(log_dir / perf_handler["filename"]),
-            "maxBytes": max_bytes,
-            "backupCount": backup_count,
-            "encoding": encoding,
             "level": perf_handler.get("level", "INFO"),
         }
 
@@ -214,27 +204,12 @@ def setup_logging() -> None:
         },
         "loggers": {
             "": {
-                "handlers": logger_handlers,
+                "handlers": [h for h in logger_handlers if h not in _json_handler_specs],
                 "level": log_cfg.get("level", "INFO"),
             },
             "train": {
                 "handlers": train_logger_handlers or ["console"],
                 "level": "DEBUG",
-                "propagate": False,
-            },
-            "api.access": {
-                "handlers": ["api_json"] if "api_json" in handler_defs else [],
-                "level": "INFO",
-                "propagate": False,
-            },
-            "audit": {
-                "handlers": ["audit_json"] if "audit_json" in handler_defs else [],
-                "level": "INFO",
-                "propagate": False,
-            },
-            "performance": {
-                "handlers": ["perf_json"] if "perf_json" in handler_defs else [],
-                "level": "INFO",
                 "propagate": False,
             },
         },
@@ -243,8 +218,26 @@ def setup_logging() -> None:
     logging.config.dictConfig(config)
     _setup_third_party_loggers(cfg)
 
+    for name, spec in _json_handler_specs.items():
+        jh = StructuredJSONHandler(
+            filename=spec["filename"],
+            max_bytes=max_bytes,
+            backup_count=backup_count,
+            encoding=encoding,
+        )
+        jh.setLevel(logging.getLevelName(spec.get("level", "INFO")))
+
+        if name == "api_json":
+            api_logger.addHandler(jh)
+            logging.getLogger("").addHandler(jh)
+        elif name == "audit_json":
+            audit_logger.addHandler(jh)
+        elif name == "perf_json":
+            perf_logger.addHandler(jh)
+
     root = logging.getLogger()
-    root.info("logging_system_initialized log_dir=%s handlers=%s", str(log_dir), list(config["handlers"].keys()))
+    all_handler_names = list(config["handlers"].keys()) + list(_json_handler_specs.keys())
+    root.info("logging_system_initialized log_dir=%s handlers=%s", str(log_dir), all_handler_names)
 
 
 def _setup_third_party_loggers(global_cfg: dict) -> None:
