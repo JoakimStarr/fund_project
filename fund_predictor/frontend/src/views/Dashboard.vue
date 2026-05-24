@@ -150,50 +150,51 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   Aim, Top, Bottom, ArrowRight,
-  TrendCharts, Setting, LineChart, Monitor,
-  DataLine, UserFilled, Timer
+  TrendCharts, Setting, DataLine, Monitor,
+  UserFilled, Timer
 } from '@element-plus/icons-vue'
 import BaseChart from '@/components/common/BaseChart.vue'
+import { getDashboardStats, getRecentPredictions } from '@/api/dashboard'
 
 const router = useRouter()
 
-// 统计数据（模拟）
+// 统计数据（从API加载）
 const statsData = ref([
   {
     icon: 'DataAnalysis',
     iconBg: 'rgba(59, 130, 246, 0.15)',
     iconColor: '#3b82f6',
-    value: '12',
+    value: '-',
     label: '已训练模型',
     trend: 'up',
-    change: '+2'
+    change: '-'
   },
   {
     icon: 'TrendCharts',
     iconBg: 'rgba(34, 197, 94, 0.15)',
     iconColor: '#22c55e',
-    value: '86.5%',
+    value: '-',
     label: '平均准确率',
     trend: 'up',
-    change: '+2.3%'
+    change: '-'
   },
   {
     icon: 'SuccessFilled',
     iconBg: 'rgba(239, 68, 68, 0.15)',
     iconColor: '#ef4444',
-    value: '156',
+    value: '-',
     label: '今日预测次数',
     trend: 'up',
-    change: '+23'
+    change: '-'
   },
   {
     icon: 'Clock',
     iconBg: 'rgba(245, 158, 11, 0.15)',
     iconColor: '#f59e0b',
-    value: '< 2s',
+    value: '-',
     label: '平均响应时间',
     trend: 'down',
-    change: '-0.3s'
+    change: '-'
   }
 ])
 
@@ -201,29 +202,22 @@ const statsData = ref([
 const quickActions = [
   { path: '/predict', title: '智能预测', desc: '输入基金代码获取预测结果', icon: 'TrendCharts', bg: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' },
   { path: '/train', title: '模型训练', desc: '为指定基金训练新模型', icon: 'Setting', bg: 'rgba(34, 197, 94, 0.15)', color: '#22c55e' },
-  { path: '/backtest', title: '回测诊断', desc: '查看历史回测表现', icon: 'LineChart', bg: 'rgba(168, 85, 247, 0.15)', color: '#a855f7' },
+  { path: '/backtest', title: '回测诊断', desc: '查看历史回测表现', icon: 'DataLine', bg: 'rgba(168, 85, 247, 0.15)', color: '#a855f7' },
   { path: '/compare', title: '多基金对比', desc: '同时分析多只基金', icon: 'DataLine', bg: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' },
   { path: '/profile', title: '基金画像', desc: '了解基金分类信息', icon: 'UserFilled', bg: 'rgba(236, 72, 153, 0.15)', color: '#ec4899' },
   { path: '/intraday', title: '盘中估算', desc: 'T日实时净值估算', icon: 'Timer', bg: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4' }
 ]
 
-// 最近预测记录（模拟数据）
-const recentPredictions = ref([
-  { id: 1, fundCode: '018956', result: '+0.85%', direction: 'positive', time: '10分钟前' },
-  { id: 2, fundCode: '000001', result: '-0.32%', direction: 'negative', time: '25分钟前' },
-  { id: 3, fundCode: '110011', result: '+0.45%', direction: 'positive', time: '1小时前' },
-  { id: 4, fundCode: '161725', result: '+1.20%', direction: 'positive', time: '2小时前' },
-  { id: 5, fundCode: '519778', result: '-0.18%', direction: 'negative', time: '3小时前' }
-])
+// 最近预测记录（从API加载）
+const recentPredictions = ref([])
 
-// 系统状态
-const systemStatus = ref({ type: 'success', text: '正常运行' })
-
+// 系统状态（从API加载）
+const systemStatus = ref({ type: 'success', text: '加载中...' })
 const systemServices = ref({
-  model: { name: '模型服务', value: 98, status: 'healthy' },
-  api: { name: 'API 服务', value: 99, status: 'healthy' },
-  database: { name: '数据库', value: 95, status: 'healthy' },
-  cache: { name: '缓存服务', value: 92, status: 'warning' }
+  model: { name: '模型服务', value: 0, status: 'unknown' },
+  api: { name: 'API 服务', value: 0, status: 'unknown' },
+  database: { name: '数据库', value: 0, status: 'unknown' },
+  cache: { name: '缓存服务', value: 0, status: 'unknown' }
 })
 
 // 趋势周期
@@ -340,8 +334,54 @@ const viewPrediction = (item) => {
   })
 }
 
+// 加载仪表盘数据
+const loadDashboardData = async () => {
+  try {
+    const [statsRes, predictionsRes] = await Promise.all([
+      getDashboardStats(),
+      getRecentPredictions({ limit: 10 })
+    ])
+    
+    // 更新统计数据
+    if (statsRes.data) {
+      const data = statsRes.data
+      
+      statsData.value[0].value = String(data.total_models || 0)
+      statsData.value[1].value = data.avg_accuracy?.label || '-'
+      statsData.value[2].value = String(data.today_predictions || 0)
+      statsData.value[3].value = data.avg_response_time?.label || '< 2s'
+      
+      // 更新系统状态
+      if (data.system_status) {
+        systemServices.value = data.system_status
+        const allHealthy = Object.values(data.system_status).every(s => s.status === 'healthy')
+        systemStatus.value = { 
+          type: allHealthy ? 'success' : 'warning', 
+          text: allHealthy ? '正常运行' : '部分服务异常' 
+        }
+      }
+    }
+    
+    // 更新最近预测记录
+    if (predictionsRes.data && Array.isArray(predictionsRes.data)) {
+      recentPredictions.value = predictionsRes.data.map((p, idx) => ({
+        id: idx + 1,
+        fundCode: p.fundCode,
+        result: typeof p.result === 'number' ? `${p.result >= 0 ? '+' : ''}${(p.result * 100).toFixed(2)}%` : (p.result || '-'),
+        direction: p.direction === 'bullish' ? 'positive' : (p.direction === 'bearish' ? 'negative' : 'neutral'),
+        time: p.time || '-'
+      }))
+    }
+    
+    console.log('仪表盘数据加载完成')
+  } catch (error) {
+    console.error('加载仪表盘数据失败:', error)
+    systemStatus.value = { type: 'error', text: '加载失败' }
+  }
+}
+
 onMounted(() => {
-  // 可以在这里加载真实数据
+  loadDashboardData()
 })
 </script>
 

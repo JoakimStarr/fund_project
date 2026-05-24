@@ -186,6 +186,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Refresh, Search } from '@element-plus/icons-vue'
 import BaseChart from '@/components/common/BaseChart.vue'
+import { getModelList, getDashboardStats } from '@/api/dashboard'
 
 // 状态
 const refreshing = ref(false)
@@ -202,66 +203,60 @@ const systemHealth = ref({
   type: 'success'
 })
 
-// 服务状态（模拟数据）
+// 服务状态（从API加载）
 const services = ref({
   modelService: {
     name: '模型服务',
     icon: 'Cpu',
     iconBg: 'rgba(59, 130, 246, 0.15)',
     iconColor: '#3b82f6',
-    health: 98,
-    status: 'healthy',
-    statusText: '运行正常',
-    responseTime: '45ms',
-    successRate: '99.8%',
-    lastUpdate: '刚刚'
+    health: 0,
+    status: 'unknown',
+    statusText: '加载中...',
+    responseTime: '-',
+    successRate: '-',
+    lastUpdate: '-'
   },
   apiService: {
     name: 'API 网关',
     icon: 'Connection',
     iconBg: 'rgba(34, 197, 94, 0.15)',
     iconColor: '#22c55e',
-    health: 95,
-    status: 'healthy',
-    statusText: '运行正常',
-    responseTime: '12ms',
-    successRate: '99.9%',
-    lastUpdate: '刚刚'
+    health: 0,
+    status: 'unknown',
+    statusText: '加载中...',
+    responseTime: '-',
+    successRate: '-',
+    lastUpdate: '-'
   },
   database: {
     name: '数据库',
     icon: 'Coin',
     iconBg: 'rgba(168, 85, 247, 0.15)',
     iconColor: '#a855f7',
-    health: 88,
-    status: 'warning',
-    statusText: '轻微延迟',
-    responseTime: '23ms',
-    successRate: '98.5%',
-    lastUpdate: '5秒前'
+    health: 0,
+    status: 'unknown',
+    statusText: '加载中...',
+    responseTime: '-',
+    successRate: '-',
+    lastUpdate: '-'
   },
   cache: {
     name: '缓存服务',
     icon: 'Monitor',
     iconBg: 'rgba(245, 158, 11, 0.15)',
     iconColor: '#f59e0b',
-    health: 75,
-    status: 'warning',
-    statusText: '内存偏高',
-    responseTime: '2ms',
-    successRate: '97.2%',
-    lastUpdate: '10秒前'
+    health: 0,
+    status: 'unknown',
+    statusText: '加载中...',
+    responseTime: '-',
+    successRate: '-',
+    lastUpdate: '-'
   }
 })
 
-// 模型列表（模拟数据）
-const models = ref([
-  { fundCode: '018956', fundName: '财通资管新能源汽车混合A', modelVersion: 'v2.1', accuracy: 87.5, lastTrained: '2024-01-20 14:30', predictions: 1256, status: 'active' },
-  { fundCode: '000001', fundName: '华夏成长混合', modelVersion: 'v1.9', accuracy: 82.3, lastTrained: '2024-01-19 09:15', predictions: 3421, status: 'active' },
-  { fundCode: '110011', fundName: '易方达中小盘混合', modelVersion: 'v2.0', accuracy: 79.8, lastTrained: '2024-01-18 16:45', predictions: 2156, status: 'active' },
-  { fundCode: '161725', fundName: '招商中证白酒指数', modelVersion: 'v1.5', accuracy: 76.2, lastTrained: '2024-01-10 11:20', predictions: 1890, status: 'stale' },
-  { fundCode: '519778', fundName: '交银定期支付双息平衡', modelVersion: 'v1.8', accuracy: 81.5, lastTrained: '2024-01-17 08:00', predictions: 987, status: 'active' }
-])
+// 模型列表（从API加载）
+const models = ref([])
 
 // 过滤后的模型
 const filteredModels = computed(() => {
@@ -429,8 +424,56 @@ const refreshData = async () => {
   refreshing.value = true
 
   try {
-    // 刷新各服务状态...
-    await new Promise(resolve => setTimeout(resolve, 800))
+    const [statsRes, modelsRes] = await Promise.all([
+      getDashboardStats(),
+      getModelList()
+    ])
+    
+    // 更新服务状态
+    if (statsRes.data?.system_status) {
+      const sysStatus = statsRes.data.system_status
+      if (sysStatus.model) {
+        services.value.modelService.health = sysStatus.model.value || 0
+        services.value.modelService.status = sysStatus.model.status || 'unknown'
+        services.value.modelService.statusText = sysStatus.model.status === 'healthy' ? '运行正常' : 
+          sysStatus.model.status === 'warning' ? '轻微异常' : '离线'
+        services.value.modelService.lastUpdate = '刚刚'
+      }
+      if (sysStatus.api) {
+        services.value.apiService.health = sysStatus.api.value || 0
+        services.value.apiService.status = sysStatus.api.status || 'unknown'
+        services.value.apiService.statusText = sysStatus.api.status === 'healthy' ? '运行正常' : '轻微异常'
+        services.value.apiService.lastUpdate = '刚刚'
+      }
+      if (sysStatus.database) {
+        services.value.database.health = sysStatus.database.value || 0
+        services.value.database.status = sysStatus.database.status || 'unknown'
+        services.value.database.statusText = sysStatus.database.status === 'healthy' ? '运行正常' : '轻微延迟'
+        services.value.database.lastUpdate = '刚刚'
+      }
+      if (sysStatus.cache) {
+        services.value.cache.health = sysStatus.cache.value || 0
+        services.value.cache.status = sysStatus.cache.status || 'unknown'
+        services.value.cache.statusText = sysStatus.cache.status === 'healthy' ? '运行正常' : '内存偏高'
+        services.value.cache.lastUpdate = '刚刚'
+      }
+    }
+    
+    // 更新模型列表
+    if (modelsRes.data && Array.isArray(modelsRes.data)) {
+      models.value = modelsRes.data.map(m => ({
+        fundCode: m.fundCode,
+        fundName: `基金 ${m.fundCode}`,
+        modelVersion: '-',
+        accuracy: parseFloat(m.accuracy) || 0,
+        lastTrained: m.trainedAt || '-',
+        predictions: 0,
+        status: m.status === 'active' ? 'active' : 'stale'
+      }))
+    }
+    
+  } catch (error) {
+    console.error('刷新数据失败:', error)
   } finally {
     refreshing.value = false
   }
@@ -473,6 +516,8 @@ function generateMinutes(count) {
 let autoRefreshTimer = null
 
 onMounted(() => {
+  // 初始加载数据
+  refreshData()
   // 每30秒自动刷新一次
   autoRefreshTimer = setInterval(refreshData, 30000)
 })

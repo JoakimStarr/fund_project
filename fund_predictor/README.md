@@ -6,26 +6,40 @@
 
 ## 安装与启动
 
-Windows 双击：
+一键启动：
 
-```bat
-start.bat
+```bash
+bash start.sh
 ```
 
-脚本会自动创建 `.venv`、安装依赖、启动 FastAPI，并打开：
+脚本会自动创建虚拟环境、安装依赖、启动 FastAPI，并打开浏览器。
+
+推荐在 Linux 或 macOS 下使用如下方式启动：
+
+```bash
+cd /home/joakim/Project/fund_project/fund_predictor
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+启动成功后，在浏览器中打开：
 
 ```text
 http://127.0.0.1:8000
 ```
 
-手动启动：
+如果你在 Windows 上运行，可以改用：
 
 ```bat
 python -m venv .venv
 call .venv\Scripts\activate
 pip install -r requirements.txt
-python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
+
+说明：首次运行会自动创建 `data/`、`models/`、`logs/` 和 `output/` 相关目录；数据抓取和模型训练需要网络访问外部行情源。
 
 ## API
 
@@ -67,13 +81,42 @@ python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 
 ```text
 fund_predictor/
-  backend/app/
-  static/
-  data/raw/
-  data/processed/
-  models/
+  backend/
+    app/
+      api/
+      core/
+      db/
+      schemas/
+      services/
+  data/
+    processed/
+    raw/
+      fund_nav/
+      holdings/
+      index/
+      stocks/
+      theme_index/
   logs/
+  models/
+    {fund_code}/
+      t_plus_1_close/
+        point_model.pkl
+        direction_model.pkl
+        interval_config.json
+        config.json
+        metrics.json
+        selected_features.json
+        backtest.csv
+        direction_backtest.csv
+        prediction_history.csv
   output/
+    app.db
+  static/
+    assets/
+      pages/
+  check_task.py
+  README.md
+  requirements.txt
 ```
 
 ## 常见错误
@@ -103,16 +146,19 @@ fund_predictor/
 每只基金保存到：
 
 ```text
-models/{fund_code}/
-  model.pkl
+models/{fund_code}/t_plus_1_close/
+  point_model.pkl
+  direction_model.pkl
+  interval_config.json
   config.json
   metrics.json
   selected_features.json
   backtest.csv
+  direction_backtest.csv
   prediction_history.csv
 ```
 
-`model.pkl` 保存完整 scikit-learn Pipeline。
+`point_model.pkl` 保存点预测的完整 scikit-learn Pipeline，`direction_model.pkl` 保存方向模型（如果训练成功）。
 
 ## 免责声明
 

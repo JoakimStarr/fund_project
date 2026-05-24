@@ -1,0 +1,11 @@
+fund_code,report_date,stock_code,stock_name,shares,market_value,weight_nav,rank,source,holding_scope,created_at
+022771,2026-03-31,600036,招商银行,1.41,55.44,0.024,1,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35
+022771,2026-03-31,300750,宁德时代,0.13,52.22,0.0226,2,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35
+022771,2026-03-31,601899,紫金矿业,1.46,47.77,0.0207,3,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35
+022771,2026-03-31,600519,贵州茅台,0.03,43.5,0.018799999999999997,4,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35
+022771,2026-03-31,002475,立讯精密,0.87,42.86,0.018600000000000002,5,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35
+022771,2026-03-31,603259,药明康德,0.41,40.22,0.0174,6,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35
+022771,2026-03-31,600030,中信证券,1.67,40.15,0.0174,7,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35
+022771,2026-03-31,300308,中际旭创,0.06,34.16,0.0148,8,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35
+022771,2026-03-31,300274,阳光电源,0.22,33.17,0.0144,9,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35
+022771,2026-03-31,300502,新易盛,0.07,31.0,0.0134,10,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:21:35

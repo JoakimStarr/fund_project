@@ -1,0 +1,28 @@
+{
+  "interval_method": "regime_residual_quantile",
+  "vol_col": "fund_ret_std_20",
+  "regime_thresholds": {
+    "low_max": 0.010775344244946956,
+    "high_min": 0.013195582013383137
+  },
+  "global_quantiles": {
+    "70": 0.006910190380439673,
+    "80": 0.009962318094298019,
+    "90": 0.012306009588980982,
+    "99": 0.015440840271515726
+  },
+  "group_quantiles": {},
+  "group_size": {
+    "low_vol": 11,
+    "mid_vol": 10,
+    "high_vol": 11
+  },
+  "coverage_70": 0.6875,
+  "coverage_80": 0.78125,
+  "coverage_90": 0.875,
+  "coverage_99": 0.96875,
+  "width_70_bp": 138.20380760879345,
+  "width_80_bp": 199.24636188596037,
+  "width_90_bp": 246.12019177961963,
+  "width_99_bp": 308.8168054303145
+}

@@ -222,6 +222,7 @@ import {
   Search, VideoPlay, Timer, WarningFilled
 } from '@element-plus/icons-vue'
 import BaseChart from '@/components/common/BaseChart.vue'
+import { getLatestIntraday } from '@/api/intraday'
 
 // 状态
 const fundCode = ref('018956')
@@ -237,28 +238,22 @@ const isMarketOpen = ref(true)
 let autoRefreshTimer = null
 let timeUpdateTimer = null
 
-// 估算数据（模拟）
+// 估算数据（从API加载）
 const estimateData = reactive({
-  fundCode: '018956',
-  fundName: '财通资管新能源汽车混合A',
-  estimatedNav: '1.2458',
-  estimatedChange: '+0.0124',
-  changePercent: '+1.01%',
-  changeClass: 'positive',
-  confidence: 85,
-  topHoldings: [
-    { name: '宁德时代', code: '300750', weight: 9.82, change: 2.35, contribution: 23.1 },
-    { name: '比亚迪', code: '002594', weight: 8.45, change: 1.87, contribution: 15.8 },
-    { name: '汇川技术', code: '300124', weight: 7.23, change: -0.52, contribution: -3.8 },
-    { name: '璞泰来', code: '603659', weight: 6.18, change: 1.24, contribution: 7.7 },
-    { name: '恩捷股份', code: '002812', weight: 5.56, change: -1.15, contribution: -6.4 }
-  ],
+  fundCode: '',
+  fundName: '',
+  estimatedNav: '-',
+  estimatedChange: '-',
+  changePercent: '-',
+  changeClass: 'neutral',
+  confidence: 0,
+  topHoldings: [],
   contributions: {
-    stocks: 42.5,
-    bonds: 2.1,
-    cash: 0.3,
-    other: -0.5,
-    fee: -0.4
+    stocks: 0,
+    bonds: 0,
+    cash: 0,
+    other: 0,
+    fee: 0
   }
 })
 
@@ -397,12 +392,37 @@ const startEstimate = async () => {
   loading.value = true
 
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 800))
-
-    // 更新估算数据
-    estimateData.fundCode = fundCode.value
-    updateEstimateValues()
+    const res = await getLatestIntraday(fundCode.value)
+    const data = res.data || res
+    console.log('盘中估算数据:', data)
+    
+    if (data) {
+      estimateData.fundCode = fundCode.value
+      estimateData.fundName = data.fund_name || `基金 ${fundCode.value}`
+      estimateData.estimatedNav = data.estimated_nav ? data.estimated_nav.toFixed(4) : '-'
+      
+      const change = data.estimated_change || 0
+      estimateData.estimatedChange = change >= 0 ? `+${change.toFixed(4)}` : change.toFixed(4)
+      estimateData.changePercent = `${(data.change_percent || 0).toFixed(2)}%`
+      estimateData.changeClass = (data.change_percent || 0) >= 0 ? 'positive' : 'negative'
+      estimateData.confidence = Math.round((data.confidence || 0) * 100)
+      
+      // 持仓贡献（如果有）
+      if (data.holdings && Array.isArray(data.holdings)) {
+        estimateData.topHoldings = data.holdings.slice(0, 5).map(h => ({
+          name: h.name,
+          code: h.code,
+          weight: h.weight || 0,
+          change: h.change || 0,
+          contribution: h.contribution || 0
+        }))
+      }
+      
+      // 贡献分解（如果有）
+      if (data.contributions) {
+        estimateData.contributions = data.contributions
+      }
+    }
 
     hasResult.value = true
     lastUpdateTime.value = formatTime(new Date())
@@ -413,6 +433,7 @@ const startEstimate = async () => {
     }
   } catch (error) {
     console.error('估算失败:', error)
+    hasResult.value = false
   } finally {
     loading.value = false
   }
@@ -427,32 +448,28 @@ const toggleAutoRefresh = () => {
       autoRefreshTimer = null
     }
   } else {
-    // 开始刷新
+    // 开始刷新 - 重新调用API获取最新数据
     estimating.value = true
-    autoRefreshTimer = setInterval(() => {
-      updateEstimateValues()
-      lastUpdateTime.value = formatTime(new Date())
+    autoRefreshTimer = setInterval(async () => {
+      try {
+        const res = await getLatestIntraday(fundCode.value)
+        const data = res.data || res
+        
+        if (data && data.estimated_nav !== undefined) {
+          const change = data.estimated_change || 0
+          estimateData.estimatedNav = data.estimated_nav.toFixed(4)
+          estimateData.estimatedChange = change >= 0 ? `+${change.toFixed(4)}` : change.toFixed(4)
+          estimateData.changePercent = `${(data.change_percent || 0).toFixed(2)}%`
+          estimateData.changeClass = (data.change_percent || 0) >= 0 ? 'positive' : 'negative'
+          estimateData.confidence = Math.round((data.confidence || 0) * 100)
+        }
+        
+        lastUpdateTime.value = formatTime(new Date())
+      } catch (error) {
+        console.error('刷新估算失败:', error)
+      }
     }, 5000) // 每5秒更新一次
   }
-}
-
-const updateEstimateValues = () => {
-  // 随机更新模拟数据
-  const baseNav = 1.2334
-  const change = (Math.random() * 0.03 - 0.01)
-  const nav = baseNav + change
-
-  estimateData.estimatedNav = nav.toFixed(4)
-  estimateData.estimatedChange = (change >= 0 ? '+' : '') + change.toFixed(4)
-  estimateData.changePercent = ((change / baseNav) * 100).toFixed(2) + '%'
-  estimateData.changeClass = change >= 0 ? 'positive' : 'negative'
-  estimateData.confidence = Math.floor(Math.random() * 10 + 80)
-
-  // 更新持仓数据
-  estimateData.topHoldings.forEach(holding => {
-    holding.change = parseFloat((Math.random() * 6 - 3).toFixed(2))
-    holding.contribution = parseFloat((holding.weight * holding.change / 100).toFixed(1))
-  })
 }
 
 const confidenceColor = (value) => {

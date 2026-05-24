@@ -2,6 +2,9 @@
 // SCSS 变量定义 - 设计系统核心
 // ============================================
 
+@use "sass:color";
+@use "sass:math";
+
 // 深色主题变量
 $dark-bg-primary: #0b1220;
 $dark-bg-secondary: #0f172a;
@@ -70,3 +73,12 @@ $radius-md: 12px;
 $radius-lg: 16px;
 $radius-xl: 20px;
 $radius-full: 9999px;
+
+// 兼容性包装函数（Dart Sass 需要）
+@function lighten-color($color, $percent) {
+  @return color.adjust($color, $lightness: $percent);
+}
+
+@function darken-color($color, $percent) {
+  @return color.adjust($color, $lightness: -$percent);
+}

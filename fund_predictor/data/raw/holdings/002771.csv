@@ -1,0 +1,11 @@
+fund_code,report_date,stock_code,stock_name,shares,market_value,weight_nav,rank,source,holding_scope,created_at
+002771,2026-03-31,300502,新易盛,8.8,3896.99,0.0992,1,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16
+002771,2026-03-31,300308,中际旭创,6.8,3871.99,0.0986,2,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16
+002771,2026-03-31,002384,东山精密,30.0,3099.0,0.0789,3,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16
+002771,2026-03-31,002463,沪电股份,35.0,2658.95,0.0677,4,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16
+002771,2026-03-31,688630,芯碁微装,12.8,2475.52,0.063,5,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16
+002771,2026-03-31,300757,罗博特科,6.2,2359.78,0.0601,6,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16
+002771,2026-03-31,300476,胜宏科技,8.8,2208.8,0.0562,7,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16
+002771,2026-03-31,002222,福晶科技,28.0,1904.56,0.048499999999999995,8,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16
+002771,2026-03-31,300604,长川科技,12.0,1452.6,0.037000000000000005,9,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16
+002771,2026-03-31,688799,华纳药厂,25.0,1374.75,0.035,10,akshare_fund_portfolio_hold_em,top10,2026-05-24T20:14:16

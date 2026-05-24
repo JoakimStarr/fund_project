@@ -1,0 +1,1113 @@
+2026-05-24 20:28:45,644 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=feature_build_success | model_feature_columns_selected count=191 cols=['daily_growth_pct', 'fund_ret', 'fund_ret_lag1', 'fund_ret_lag2', 'fund_ret_lag3', 'fund_ret_lag5', 'fund_ret_lag10', 'fund_ret_mean_5', 'fund_ret_std_5', 'fund_mom_5', 'fund_ret_mean_10', 'fund_ret_std_10', 'fund_mom_10', 'fund_ret_mean_20', 'fund_ret_std_20', 'fund_mom_20', 'fund_ret_mean_60', 'fund_ret_std_60', 'fund_mom_60', 'fund_drawdown_20', 'fund_drawdown_60', 'recent_max_gain_20', 'recent_max_loss_20', 'up_days_5', 'down_days_5', 'consecutive_up_days', 'consecutive_down_days', 'zz1000_ret', 'zz1000_ret_lag1', 'zz1000_ret_mean_5']
+2026-05-24 20:28:45,644 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=feature_build_success | leakage_check_passed fund_code=022771
+2026-05-24 20:28:45,644 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=point_model_train_start | point_model_train_start mode=fast
+2026-05-24 21:58:19,464 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=baseline_eval_start | baseline_eval_start
+2026-05-24 21:58:19,473 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=baseline_eval_success | baseline_eval_success
+2026-05-24 21:58:21,083 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=point_model_train_success | point_model_train_success model=gbr selector=mi_top40
+2026-05-24 21:58:21,087 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_start
+2026-05-24 21:58:21,420 | ERROR | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 353, in _proxy_gain_eval
+    before = _regression_metrics(test["target_next"].to_numpy(), before_pred, baseline_mean=baselines["rolling_mean"].to_numpy())
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 184, in _regression_metrics
+    mean_rmse = float(np.sqrt(mean_squared_error(y_true, mean_pred)))
+                              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/_param_validation.py", line 216, in wrapper
+    return func(*args, **kwargs)
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 565, in mean_squared_error
+    _check_reg_targets_with_floating_dtype(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, sample_weight, multioutput, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 198, in _check_reg_targets_with_floating_dtype
+    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+                                          ~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, multioutput, dtype=dtype_name, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 104, in _check_reg_targets
+    check_consistent_length(y_true, y_pred)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 475, in check_consistent_length
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Found input variables with inconsistent numbers of samples: [32, 40]
+2026-05-24 21:58:21,422 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_train_start | direction_model_train_start
+2026-05-24 21:58:21,449 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:21,466 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:21,544 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:21,560 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:21,577 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:21,594 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:21,623 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:21,639 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:21,656 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:21,672 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:21,701 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:21,718 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:21,735 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:21,751 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:21,781 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:21,797 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:22,028 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:22,045 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:22,285 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:22,301 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:22,536 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:22,553 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:22,795 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:22,811 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:23,052 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:23,068 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:23,351 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:23,368 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:23,533 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:23,661 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:23,841 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:23,959 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:24,127 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:24,256 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:24,416 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:24,546 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:24,697 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:24,804 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:24,988 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:25,085 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:25,241 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:25,358 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:25,515 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:25,643 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:25,989 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:26,107 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:26,492 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:26,612 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:26,965 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:27,077 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:27,470 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:27,604 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:27,971 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:28,089 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:28,481 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:28,605 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:28,787 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:28,863 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:29,039 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:29,115 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:29,267 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:29,343 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:29,533 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:29,609 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:29,773 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:29,848 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:30,016 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:30,099 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:30,266 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:30,341 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:30,517 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:30,595 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:31,144 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:31,354 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:33,385 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=feature_build_success | model_feature_columns_selected count=191 cols=['daily_growth_pct', 'fund_ret', 'fund_ret_lag1', 'fund_ret_lag2', 'fund_ret_lag3', 'fund_ret_lag5', 'fund_ret_lag10', 'fund_ret_mean_5', 'fund_ret_std_5', 'fund_mom_5', 'fund_ret_mean_10', 'fund_ret_std_10', 'fund_mom_10', 'fund_ret_mean_20', 'fund_ret_std_20', 'fund_mom_20', 'fund_ret_mean_60', 'fund_ret_std_60', 'fund_mom_60', 'fund_drawdown_20', 'fund_drawdown_60', 'recent_max_gain_20', 'recent_max_loss_20', 'up_days_5', 'down_days_5', 'consecutive_up_days', 'consecutive_down_days', 'zz1000_ret', 'zz1000_ret_lag1', 'zz1000_ret_mean_5']
+2026-05-24 21:58:33,385 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=feature_build_success | leakage_check_passed fund_code=022771
+2026-05-24 21:58:33,385 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=point_model_train_start | point_model_train_start mode=fast
+2026-05-24 21:58:33,577 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:33,717 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:34,212 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:34,409 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:34,944 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:35,102 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:35,612 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:35,752 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:36,264 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:36,410 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:36,674 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:36,706 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:37,326 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:37,360 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:37,533 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:37,561 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:37,734 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:37,760 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:37,934 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:37,975 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:38,180 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:38,205 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:38,377 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:38,405 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:38,626 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:38,655 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:39,173 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:39,207 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:39,673 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:39,697 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:40,153 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:40,185 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:40,667 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:40,696 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:41,205 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:41,239 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:41,738 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:41,768 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:42,422 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:42,461 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:43,552 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:43,597 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:43,727 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:43,782 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:43,945 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:44,037 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:44,205 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:44,246 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:44,499 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:44,544 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:44,871 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:44,961 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:45,191 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:45,251 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:45,793 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:45,844 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:46,475 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:46,512 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:47,360 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:47,502 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:48,519 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:48,604 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:49,319 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:49,387 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:50,238 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:50,317 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:50,413 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:50,433 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:51,051 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:51,081 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:51,135 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:51,170 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:51,393 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:51,543 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:51,759 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 21:58:51,870 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 21:58:51,903 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=direction_model_train_success | direction_model_train_success model=logistic selector=f_top40
+2026-05-24 21:58:51,905 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=regime_interval_start | regime_interval_start
+2026-05-24 21:58:51,911 | INFO  | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=regime_interval_success | regime_interval_success
+2026-05-24 21:58:51,913 | ERROR | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=regime_interval_success | model_selection_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+2026-05-24 21:58:51,929 | ERROR | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=model_selection | training_failed app_error code=MODEL_SELECTION_FAILED
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/task_service.py", line 102, in run_training_task
+    bundle, metrics, backtest, direction_backtest = select_and_train(data_train, fund_code=fund_code, progress_cb=progress_cb)
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 716, in select_and_train
+    raise ModelSelectionError("Model selection failed", details={"reason": str(exc)}) from exc
+app.core.errors.ModelSelectionError: Model selection failed
+2026-05-24 22:00:21,643 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=baseline_eval_start | baseline_eval_start
+2026-05-24 22:00:21,664 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=baseline_eval_success | baseline_eval_success
+2026-05-24 22:00:22,539 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=point_model_train_success | point_model_train_success model=xgboost selector=f_top40
+2026-05-24 22:00:22,543 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_start
+2026-05-24 22:00:22,595 | ERROR | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 353, in _proxy_gain_eval
+    before = _regression_metrics(test["target_next"].to_numpy(), before_pred, baseline_mean=baselines["rolling_mean"].to_numpy())
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 184, in _regression_metrics
+    mean_rmse = float(np.sqrt(mean_squared_error(y_true, mean_pred)))
+                              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/_param_validation.py", line 216, in wrapper
+    return func(*args, **kwargs)
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 565, in mean_squared_error
+    _check_reg_targets_with_floating_dtype(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, sample_weight, multioutput, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 198, in _check_reg_targets_with_floating_dtype
+    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+                                          ~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, multioutput, dtype=dtype_name, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 104, in _check_reg_targets
+    check_consistent_length(y_true, y_pred)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 475, in check_consistent_length
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Found input variables with inconsistent numbers of samples: [32, 40]
+2026-05-24 22:00:22,596 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_train_start | direction_model_train_start
+2026-05-24 22:00:22,610 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:22,623 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:22,693 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:22,713 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:22,730 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:22,747 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:22,778 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:22,796 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:22,814 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:22,831 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:22,860 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:22,877 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:22,894 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:22,911 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:22,942 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:22,959 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:23,201 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:23,218 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:23,468 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:23,484 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:23,717 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:23,734 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:23,979 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:23,995 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:24,231 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:24,247 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:24,493 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:24,510 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:24,665 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:24,796 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:24,975 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:25,107 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:25,285 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:25,415 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:25,588 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:25,707 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:25,879 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:26,008 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:26,175 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:26,293 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:26,453 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:26,581 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:26,755 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:26,888 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:27,281 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:27,410 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:27,776 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:27,874 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:28,229 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:28,358 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:28,724 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:28,854 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:29,237 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:29,368 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:29,734 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:29,863 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:30,032 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:30,108 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:30,302 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:30,389 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:30,540 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:30,627 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:30,825 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:30,902 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:31,067 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:31,144 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:31,322 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:31,398 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:31,547 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:31,635 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:31,809 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:31,885 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:32,249 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:32,324 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:32,708 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:32,787 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:33,182 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:33,259 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:33,702 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:33,777 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:34,150 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:34,225 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:34,599 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:34,674 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:34,803 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:34,825 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:34,973 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:34,990 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:35,092 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:35,114 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:35,206 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:35,227 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:35,294 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:35,313 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:35,392 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:35,418 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:35,494 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:35,515 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:35,632 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:35,652 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:35,926 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:35,942 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:36,218 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:36,235 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:36,504 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:36,522 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:36,824 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:36,843 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:37,127 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:37,147 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:37,447 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:37,463 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:37,619 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:37,634 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:37,791 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:37,805 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:37,909 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:37,924 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:38,034 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:38,049 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:38,158 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:38,174 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:38,281 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:38,297 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:38,407 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:38,421 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:38,534 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:38,548 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:38,805 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:38,823 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:39,098 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:39,114 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:39,374 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:39,389 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:39,644 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:39,658 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:39,937 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:39,953 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:40,210 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:40,224 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:40,256 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:40,273 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:40,448 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:40,524 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:40,711 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:40,790 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:40,831 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:40,848 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:41,155 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:00:41,173 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:00:41,180 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=direction_model_train_success | direction_model_train_success model=logistic selector=f_top40
+2026-05-24 22:00:41,181 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=regime_interval_start | regime_interval_start
+2026-05-24 22:00:41,186 | INFO  | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=regime_interval_success | regime_interval_success
+2026-05-24 22:00:41,186 | ERROR | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=regime_interval_success | model_selection_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+2026-05-24 22:00:41,187 | ERROR | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=model_selection | training_failed app_error code=MODEL_SELECTION_FAILED
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/task_service.py", line 102, in run_training_task
+    bundle, metrics, backtest, direction_backtest = select_and_train(data_train, fund_code=fund_code, progress_cb=progress_cb)
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 716, in select_and_train
+    raise ModelSelectionError("Model selection failed", details={"reason": str(exc)}) from exc
+app.core.errors.ModelSelectionError: Model selection failed
+2026-05-24 22:08:23,643 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=feature_build_success | model_feature_columns_selected count=191 cols=['daily_growth_pct', 'fund_ret', 'fund_ret_lag1', 'fund_ret_lag2', 'fund_ret_lag3', 'fund_ret_lag5', 'fund_ret_lag10', 'fund_ret_mean_5', 'fund_ret_std_5', 'fund_mom_5', 'fund_ret_mean_10', 'fund_ret_std_10', 'fund_mom_10', 'fund_ret_mean_20', 'fund_ret_std_20', 'fund_mom_20', 'fund_ret_mean_60', 'fund_ret_std_60', 'fund_mom_60', 'fund_drawdown_20', 'fund_drawdown_60', 'recent_max_gain_20', 'recent_max_loss_20', 'up_days_5', 'down_days_5', 'consecutive_up_days', 'consecutive_down_days', 'zz1000_ret', 'zz1000_ret_lag1', 'zz1000_ret_mean_5']
+2026-05-24 22:08:23,644 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=feature_build_success | leakage_check_passed fund_code=022771
+2026-05-24 22:08:23,644 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=point_model_train_start | point_model_train_start mode=fast
+2026-05-24 22:10:15,120 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=baseline_eval_start | baseline_eval_start
+2026-05-24 22:10:15,128 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=baseline_eval_success | baseline_eval_success
+2026-05-24 22:10:16,066 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=point_model_train_success | point_model_train_success model=xgboost selector=f_top40
+2026-05-24 22:10:16,073 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_start
+2026-05-24 22:10:16,165 | ERROR | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 353, in _proxy_gain_eval
+    before = _regression_metrics(test["target_next"].to_numpy(), before_pred, baseline_mean=baselines["rolling_mean"].to_numpy())
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 184, in _regression_metrics
+    mean_rmse = float(np.sqrt(mean_squared_error(y_true, mean_pred)))
+                              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/_param_validation.py", line 216, in wrapper
+    return func(*args, **kwargs)
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 565, in mean_squared_error
+    _check_reg_targets_with_floating_dtype(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, sample_weight, multioutput, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 198, in _check_reg_targets_with_floating_dtype
+    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+                                          ~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, multioutput, dtype=dtype_name, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 104, in _check_reg_targets
+    check_consistent_length(y_true, y_pred)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 475, in check_consistent_length
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Found input variables with inconsistent numbers of samples: [32, 40]
+2026-05-24 22:10:16,169 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_train_start | direction_model_train_start
+2026-05-24 22:10:16,190 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:16,209 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:16,301 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:16,318 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:16,338 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:16,356 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:16,386 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:16,403 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:16,428 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:16,446 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:16,476 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:16,493 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:16,511 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:16,528 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:16,559 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:16,577 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:16,811 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:16,827 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:17,069 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:17,085 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:17,320 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:17,335 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:17,610 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:17,625 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:17,886 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:17,901 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:18,157 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:18,171 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:18,330 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:18,460 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:18,615 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:18,746 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:18,915 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:19,044 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:19,222 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:19,352 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:19,516 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:19,645 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:19,830 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:19,961 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:20,142 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:20,279 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:20,456 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:20,587 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:20,953 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:21,082 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:21,450 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:21,557 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:21,951 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:22,097 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:22,501 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:22,632 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:23,003 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:23,136 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:23,529 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:23,662 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:23,873 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:23,995 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:24,207 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:24,332 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:24,522 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:24,620 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:24,808 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:24,884 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:25,042 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:25,117 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:25,280 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:25,356 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:25,528 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:25,604 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:25,775 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:25,864 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:26,245 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:26,322 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:26,700 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:26,787 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:27,164 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:27,241 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:27,620 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:27,695 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:28,071 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:28,148 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:28,522 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:28,598 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:28,728 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:28,748 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:28,955 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:28,971 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:29,071 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:29,089 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:29,174 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:29,194 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:29,261 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:29,281 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:29,358 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:29,377 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:29,463 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:29,487 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:29,628 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:29,649 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:29,948 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:29,969 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:30,257 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:30,277 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:30,546 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:30,566 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:30,868 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:30,887 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:31,174 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:31,193 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:31,493 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:31,513 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:32,040 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:32,216 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:35,654 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:35,683 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:35,818 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:35,853 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:36,097 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:36,145 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:37,706 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:37,754 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:38,269 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:38,292 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:38,414 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:38,434 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:40,610 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:40,630 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:40,889 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:40,913 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:41,193 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:41,222 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:41,514 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:41,540 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:41,966 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:42,064 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:42,544 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:42,583 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:42,909 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:42,949 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:43,028 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:43,045 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:43,063 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:43,081 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:43,263 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:43,345 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:43,545 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:43,635 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:43,677 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:10:43,696 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:10:43,702 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=direction_model_train_success | direction_model_train_success model=logistic selector=f_top40
+2026-05-24 22:10:43,703 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=regime_interval_start | regime_interval_start
+2026-05-24 22:10:43,708 | INFO  | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=regime_interval_success | regime_interval_success
+2026-05-24 22:10:43,709 | ERROR | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=regime_interval_success | model_selection_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+2026-05-24 22:10:43,723 | ERROR | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=model_selection | training_failed app_error code=MODEL_SELECTION_FAILED
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/task_service.py", line 102, in run_training_task
+    bundle, metrics, backtest, direction_backtest = select_and_train(data_train, fund_code=fund_code, progress_cb=progress_cb)
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 716, in select_and_train
+    raise ModelSelectionError("Model selection failed", details={"reason": str(exc)}) from exc
+app.core.errors.ModelSelectionError: Model selection failed
+2026-05-24 22:17:30,742 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=feature_build_success | model_feature_columns_selected count=191 cols=['daily_growth_pct', 'fund_ret', 'fund_ret_lag1', 'fund_ret_lag2', 'fund_ret_lag3', 'fund_ret_lag5', 'fund_ret_lag10', 'fund_ret_mean_5', 'fund_ret_std_5', 'fund_mom_5', 'fund_ret_mean_10', 'fund_ret_std_10', 'fund_mom_10', 'fund_ret_mean_20', 'fund_ret_std_20', 'fund_mom_20', 'fund_ret_mean_60', 'fund_ret_std_60', 'fund_mom_60', 'fund_drawdown_20', 'fund_drawdown_60', 'recent_max_gain_20', 'recent_max_loss_20', 'up_days_5', 'down_days_5', 'consecutive_up_days', 'consecutive_down_days', 'zz1000_ret', 'zz1000_ret_lag1', 'zz1000_ret_mean_5']
+2026-05-24 22:17:30,742 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=feature_build_success | leakage_check_passed fund_code=022771
+2026-05-24 22:17:30,742 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=point_model_train_start | point_model_train_start mode=fast
+2026-05-24 22:19:20,103 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=baseline_eval_start | baseline_eval_start
+2026-05-24 22:19:20,113 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=baseline_eval_success | baseline_eval_success
+2026-05-24 22:19:20,113 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=baseline_eval_start | baseline_eval_start
+2026-05-24 22:19:20,119 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=baseline_eval_success | baseline_eval_success
+2026-05-24 22:19:21,307 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=point_model_train_success | point_model_train_success model=bayesian_ridge selector=mi_top40
+2026-05-24 22:19:21,311 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_start
+2026-05-24 22:19:21,455 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=proxy_feature_gain_eval_success | proxy_feature_gain_eval_success helpful=False gain={'rmse_improvement': -0.0009586982317195663, 'mae_improvement': -0.0006336804731340833, 'corr_improvement': 0.01743831236698984, 'std_ratio_improvement': 0.02542324362338047, 'mean_baseline_improvement_delta': 0.006015252537769654}
+2026-05-24 22:19:21,456 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_train_start | direction_model_train_start
+2026-05-24 22:19:21,478 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:21,495 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:21,641 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:21,658 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:21,678 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:21,697 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:21,737 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:21,757 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:21,783 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:21,810 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:21,855 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:21,876 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:21,894 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:21,909 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:21,940 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:21,958 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:22,213 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:22,229 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:22,505 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:22,531 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:22,797 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:22,816 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:23,108 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:23,126 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:23,381 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:23,398 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:23,662 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:23,680 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:23,851 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:23,983 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:24,195 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:24,331 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:24,504 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:24,626 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:24,822 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:24,957 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:25,119 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:25,256 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:25,452 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:25,598 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:25,759 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:25,892 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:26,088 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:26,221 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:26,597 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:26,721 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:27,139 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:27,273 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:27,679 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:27,808 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:28,196 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:28,330 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:28,715 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:28,849 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:29,274 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:29,405 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:29,602 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:29,734 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:29,921 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:30,042 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:30,213 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:30,302 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:30,505 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:30,604 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:30,774 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:30,873 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:31,068 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:31,157 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:31,365 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:31,492 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:31,668 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:31,755 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:32,144 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:32,232 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:32,626 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:32,735 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:33,134 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:33,235 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:33,687 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:33,787 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:34,178 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:34,256 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:34,660 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:34,780 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:34,934 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:34,955 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:35,123 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:35,153 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:35,284 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:35,315 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:35,464 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:35,493 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:35,576 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:35,599 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:35,702 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:35,728 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:35,808 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:35,835 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:35,986 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:36,010 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:36,352 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:36,369 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:36,681 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:36,702 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:37,010 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:37,028 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:37,327 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:37,347 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:37,643 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:37,664 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:37,968 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:37,985 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:38,435 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:38,498 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:39,802 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:39,861 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:40,298 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:40,329 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:40,577 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:40,617 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:40,967 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:41,024 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:41,250 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:41,279 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:41,493 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:41,521 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:41,745 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:41,768 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:42,047 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:42,071 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:42,420 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:42,488 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:43,427 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:43,508 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:43,889 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:43,935 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:44,352 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:44,381 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:44,873 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:44,907 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:44,980 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:44,998 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:45,308 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:45,326 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:45,346 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:45,363 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:45,537 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:45,624 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:45,817 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:19:45,905 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:19:45,935 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=direction_model_train_success | direction_model_train_success model=hist_gbc selector=mi_top10
+2026-05-24 22:19:45,936 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=regime_interval_start | regime_interval_start
+2026-05-24 22:19:45,941 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=regime_interval_success | regime_interval_success
+2026-05-24 22:19:45,943 | INFO  | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=strong_signal_eval_start | strong_signal_eval_start
+2026-05-24 22:19:45,943 | ERROR | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=strong_signal_eval_start | model_selection_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 605, in select_and_train
+    direction_backtest["p_up"] = p_test
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+2026-05-24 22:19:45,945 | ERROR | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=model_selection | training_failed app_error code=MODEL_SELECTION_FAILED
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 605, in select_and_train
+    direction_backtest["p_up"] = p_test
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/task_service.py", line 102, in run_training_task
+    bundle, metrics, backtest, direction_backtest = select_and_train(data_train, fund_code=fund_code, progress_cb=progress_cb)
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 717, in select_and_train
+    raise ModelSelectionError("Model selection failed", details={"reason": str(exc)}) from exc
+app.core.errors.ModelSelectionError: Model selection failed
+2026-05-24 22:37:53,510 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=feature_build_success | model_feature_columns_selected count=191 cols=['daily_growth_pct', 'fund_ret', 'fund_ret_lag1', 'fund_ret_lag2', 'fund_ret_lag3', 'fund_ret_lag5', 'fund_ret_lag10', 'fund_ret_mean_5', 'fund_ret_std_5', 'fund_mom_5', 'fund_ret_mean_10', 'fund_ret_std_10', 'fund_mom_10', 'fund_ret_mean_20', 'fund_ret_std_20', 'fund_mom_20', 'fund_ret_mean_60', 'fund_ret_std_60', 'fund_mom_60', 'fund_drawdown_20', 'fund_drawdown_60', 'recent_max_gain_20', 'recent_max_loss_20', 'up_days_5', 'down_days_5', 'consecutive_up_days', 'consecutive_down_days', 'zz1000_ret', 'zz1000_ret_lag1', 'zz1000_ret_mean_5']
+2026-05-24 22:37:53,510 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=feature_build_success | leakage_check_passed fund_code=022771
+2026-05-24 22:37:53,510 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=point_model_train_start | point_model_train_start mode=fast
+2026-05-24 22:39:49,293 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=baseline_eval_start | baseline_eval_start
+2026-05-24 22:39:49,302 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=baseline_eval_success | baseline_eval_success
+2026-05-24 22:39:49,303 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=baseline_eval_start | baseline_eval_start
+2026-05-24 22:39:49,309 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=baseline_eval_success | baseline_eval_success
+2026-05-24 22:39:50,264 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=point_model_train_success | point_model_train_success model=xgboost selector=f_top40
+2026-05-24 22:39:50,269 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_start
+2026-05-24 22:39:50,323 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=proxy_feature_gain_eval_success | proxy_feature_gain_eval_success helpful=False gain={'rmse_improvement': -0.00110481267994046, 'mae_improvement': -0.000592808462412173, 'corr_improvement': 0.18533691359737206, 'std_ratio_improvement': 0.04969015815082406, 'mean_baseline_improvement_delta': -0.0025127598988149216}
+2026-05-24 22:39:50,323 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_train_start | direction_model_train_start
+2026-05-24 22:39:50,351 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:50,368 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:50,454 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:50,470 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:50,487 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:50,503 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:50,533 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:50,550 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:50,567 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:50,584 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:50,615 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:50,632 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:50,649 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:50,665 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:50,694 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:50,712 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:50,946 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:50,962 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:51,198 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:51,214 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:51,442 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:51,458 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:51,705 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:51,719 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:51,970 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:51,988 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:52,241 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:52,254 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:52,377 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:52,495 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:52,669 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:52,775 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:52,924 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:53,031 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:53,203 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:53,321 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:53,473 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:53,602 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:53,777 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:53,896 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:54,073 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:54,196 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:54,362 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:54,479 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:54,836 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:54,932 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:55,292 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:55,389 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:55,758 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:55,889 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:56,265 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:56,374 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:56,724 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:56,843 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:57,208 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:57,326 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:57,506 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:57,581 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:57,751 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:57,838 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:58,004 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:58,081 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:58,279 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:58,356 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:58,525 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:58,602 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:58,767 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:58,855 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:59,035 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:59,146 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:59,332 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:59,408 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:39:59,825 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:39:59,914 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:00,301 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:00,377 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:00,740 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:00,875 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:01,261 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:01,336 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:01,713 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:01,846 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:02,251 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:02,329 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:02,461 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:02,479 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:02,655 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:02,676 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:02,826 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:02,851 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:02,967 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:02,991 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:03,064 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:03,090 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:03,194 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:03,212 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:03,300 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:03,331 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:03,509 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:03,530 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:03,821 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:03,839 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:04,136 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:04,157 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:04,439 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:04,456 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:04,728 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:04,744 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:05,025 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:05,043 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:05,345 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:05,361 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:05,576 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:05,604 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:05,881 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:05,936 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:06,069 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:06,099 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:06,249 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:06,278 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:06,401 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:06,426 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:06,544 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:06,568 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:06,720 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:06,740 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:06,876 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:06,895 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:07,152 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:07,179 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:07,540 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:07,579 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:07,860 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:07,894 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:08,306 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:08,338 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:08,616 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:08,640 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:08,922 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:08,943 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:08,981 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:08,998 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:09,017 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:09,035 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:09,206 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:09,282 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:09,469 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:09,547 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:09,871 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_start | direction_model_calibration_start
+2026-05-24 22:40:09,888 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_calibration_success | direction_model_calibration_success
+2026-05-24 22:40:09,894 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=direction_model_train_success | direction_model_train_success model=logistic selector=f_top40
+2026-05-24 22:40:09,898 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=regime_interval_start | regime_interval_start
+2026-05-24 22:40:09,903 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=regime_interval_success | regime_interval_success
+2026-05-24 22:40:09,905 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=alignment | alignment_success strategy=perfect_match pred_len=32 target_len=32
+2026-05-24 22:40:09,906 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=strong_signal_eval_start | strong_signal_eval_start fund=022771 strategy=perfect_match degraded=False
+2026-05-24 22:40:09,910 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=strong_signal_eval_success | strong_signal_eval_success count=32
+2026-05-24 22:40:09,911 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=excess_model_train_start | excess_model_train_start
+2026-05-24 22:40:09,926 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=excess_model_train_start | excess_model_train_success target=excess_cyb corr=0.652 auc=0.8825910931174089
+2026-05-24 22:40:09,941 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=excess_model_train_start | excess_model_train_success target=excess_kcb50 corr=0.637 auc=0.6280193236714975
+2026-05-24 22:40:09,955 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=excess_model_train_start | excess_model_train_success target=excess_top10 corr=0.677 auc=0.8828125
+2026-05-24 22:40:09,970 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=excess_model_train_start | excess_model_train_success target=excess_theme corr=0.653 auc=0.888888888888889
+2026-05-24 22:40:09,970 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=excess_model_train_success | excess_model_train_success models=['excess_cyb', 'excess_kcb50', 'excess_top10', 'excess_theme']
+2026-05-24 22:40:09,970 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=exposure_stability_check_start | exposure_stability_check_start
+2026-05-24 22:40:09,971 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=exposure_stability_check_success | exposure_stability_check_success shift_flag=False
+2026-05-24 22:40:09,971 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=lead_lag_diagnostics_start | lead_lag_diagnostics_start
+2026-05-24 22:40:09,971 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=lead_lag_diagnostics_success | lead_lag_diagnostics_success best_lag=0 corr=0.874
+2026-05-24 22:40:09,971 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=turning_point_diagnostics_start | turning_point_diagnostics_start
+2026-05-24 22:40:09,971 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=turning_point_diagnostics_success | turning_point_diagnostics_success count=23 same_day_rate=0.957
+2026-05-24 22:40:09,987 | INFO  | train | request_id=97e6341ea999 | fund_code=022771 | task_id=train_022771_e8b6b1847c | stage=model_saved | model_saved fund_code=022771 point_model=xgboost direction_model=logistic

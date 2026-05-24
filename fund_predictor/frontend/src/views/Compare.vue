@@ -188,25 +188,117 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, nextTick } from 'vue'
+import { ref, reactive, computed, nextTick, watch } from 'vue'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import BaseChart from '@/components/common/BaseChart.vue'
+import { predictFund } from '@/api/fund'
 
-// 状态
 const selectedFunds = ref(['018956', '000001'])
 const showAddInput = ref(false)
 const newFundCode = ref('')
 const addInputRef = ref(null)
+const loading = ref(false)
+
+// 预测数据缓存
+const predictionsCache = ref({})
 
 // 推荐基金
 const recommendedFunds = ['110011', '161725', '519778', '000300', '002011']
 
-// 对比数据（模拟）
+// 对比数据（从API加载）
 const comparisonData = computed(() => {
   return selectedFunds.value.map(code => {
-    const baseData = generateRandomPrediction(code)
-    return baseData
+    const cached = predictionsCache.value[code]
+    if (cached) {
+      return cached
+    }
+    // 返回默认值
+    return {
+      fundCode: code,
+      conclusion: '-',
+      directionClass: 'neutral',
+      upProbability: 50,
+      downProbability: 50,
+      interval80: '-',
+      interval90: '-',
+      reliability: '加载中',
+      reliabilityType: 'info',
+      accuracy: 0
+    }
   })
+})
+
+// 加载所有选中基金的预测数据
+const loadPredictions = async () => {
+  loading.value = true
+  
+  try {
+    const results = await Promise.all(
+      selectedFunds.value.map(async (code) => {
+        try {
+          const res = await predictFund({ fund_code: code })
+          const data = res.data || res
+          
+          const pUp = data.p_up !== undefined ? data.p_up : 0.5
+          const predReturn = data.pred_return || data.pred || 0
+          const nav80 = data.nav_interval_80 || {}
+          const nav90 = data.nav_interval_90 || {}
+          const todayNav = data.today_nav || 1
+          
+          return {
+            fundCode: code,
+            conclusion: predReturn >= 0 ? `+${(predReturn * 100).toFixed(2)}%` : `${(predReturn * 100).toFixed(2)}%`,
+            directionClass: data.direction_signal || 'neutral',
+            upProbability: Math.round(pUp * 100),
+            downProbability: Math.round((1 - pUp) * 100),
+            interval80: nav80.lower && nav80.upper 
+              ? `${((nav80.lower / todayNav - 1) * 100).toFixed(2)}% ~ ${((nav80.upper / todayNav - 1) * 100).toFixed(2)}%`
+              : '-',
+            interval90: nav90.lower && nav90.upper 
+              ? `${((nav90.lower / todayNav - 1) * 100).toFixed(2)}% ~ ${((nav90.upper / todayNav - 1) * 100).toFixed(2)}%`
+              : '-',
+            reliability: data.proxy_based_confidence === 'high' ? '高' : data.proxy_based_confidence === 'medium' ? '中' : '低',
+            reliabilityType: data.proxy_based_confidence === 'high' ? 'success' : data.proxy_based_confidence === 'medium' ? 'warning' : 'info',
+            accuracy: data.direction_health?.accuracy ? Math.round(data.direction_health.accuracy * 100) : 0
+          }
+        } catch (error) {
+          console.error(`加载 ${code} 预测失败:`, error)
+          return {
+            fundCode: code,
+            conclusion: '加载失败',
+            directionClass: 'neutral',
+            upProbability: 50,
+            downProbability: 50,
+            interval80: '-',
+            interval90: '-',
+            reliability: '错误',
+            reliabilityType: 'danger',
+            accuracy: 0
+          }
+        }
+      })
+    )
+    
+    // 更新缓存
+    results.forEach(result => {
+      predictionsCache.value[result.fundCode] = result
+    })
+    
+  } catch (error) {
+    console.error('批量加载预测失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听基金列表变化，自动重新加载
+watch(selectedFunds, () => {
+  loadPredictions()
+}, { deep: true })
+
+// 初始加载
+onMounted(() => {
+  loadPredictions()
 })
 
 // 方向概率对比图配置
@@ -374,26 +466,7 @@ const quickAdd = (code) => {
 
 const clearAll = () => {
   selectedFunds.value = []
-}
-
-// 辅助函数：生成随机预测数据
-function generateRandomPrediction(code) {
-  const upProb = Math.floor(Math.random() * 50 + 25)
-  const downProb = Math.floor(Math.random() * 30 + 10)
-  const conclusion = (Math.random() * 2 - 1).toFixed(2)
-
-  return {
-    fundCode: code,
-    conclusion: `${conclusion >= 0 ? '+' : ''}${conclusion}%`,
-    directionClass: conclusion > 0.2 ? 'bullish' : conclusion < -0.2 ? 'bearish' : 'neutral',
-    upProbability: upProb,
-    downProbability: downProb,
-    interval80: `${(Math.random() * -2 - 0.5).toFixed(2)}% ~ ${(Math.random() * 2 + 0.5).toFixed(2)}%`,
-    interval90: `${(Math.random() * -3 - 1).toFixed(2)}% ~ ${(Math.random() * 3 + 1).toFixed(2)}%`,
-    reliability: ['高', '中', '低'][Math.floor(Math.random() * 3)],
-    reliabilityType: ['success', 'warning', 'info'][Math.floor(Math.random() * 3)],
-    accuracy: Math.floor(Math.random() * 20 + 70)
-  }
+  predictionsCache.value = {}
 }
 </script>
 

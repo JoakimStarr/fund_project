@@ -1,0 +1,326 @@
+2026-05-24 21:58:21,420 | ERROR | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 353, in _proxy_gain_eval
+    before = _regression_metrics(test["target_next"].to_numpy(), before_pred, baseline_mean=baselines["rolling_mean"].to_numpy())
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 184, in _regression_metrics
+    mean_rmse = float(np.sqrt(mean_squared_error(y_true, mean_pred)))
+                              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/_param_validation.py", line 216, in wrapper
+    return func(*args, **kwargs)
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 565, in mean_squared_error
+    _check_reg_targets_with_floating_dtype(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, sample_weight, multioutput, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 198, in _check_reg_targets_with_floating_dtype
+    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+                                          ~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, multioutput, dtype=dtype_name, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 104, in _check_reg_targets
+    check_consistent_length(y_true, y_pred)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 475, in check_consistent_length
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Found input variables with inconsistent numbers of samples: [32, 40]
+2026-05-24 21:58:51,913 | ERROR | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=regime_interval_success | model_selection_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+2026-05-24 21:58:51,929 | ERROR | train | request_id=8fb31b7769bc | fund_code=022771 | task_id=train_022771_2c534b6be0 | stage=model_selection | training_failed app_error code=MODEL_SELECTION_FAILED
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/task_service.py", line 102, in run_training_task
+    bundle, metrics, backtest, direction_backtest = select_and_train(data_train, fund_code=fund_code, progress_cb=progress_cb)
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 716, in select_and_train
+    raise ModelSelectionError("Model selection failed", details={"reason": str(exc)}) from exc
+app.core.errors.ModelSelectionError: Model selection failed
+2026-05-24 22:00:22,595 | ERROR | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 353, in _proxy_gain_eval
+    before = _regression_metrics(test["target_next"].to_numpy(), before_pred, baseline_mean=baselines["rolling_mean"].to_numpy())
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 184, in _regression_metrics
+    mean_rmse = float(np.sqrt(mean_squared_error(y_true, mean_pred)))
+                              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/_param_validation.py", line 216, in wrapper
+    return func(*args, **kwargs)
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 565, in mean_squared_error
+    _check_reg_targets_with_floating_dtype(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, sample_weight, multioutput, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 198, in _check_reg_targets_with_floating_dtype
+    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+                                          ~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, multioutput, dtype=dtype_name, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 104, in _check_reg_targets
+    check_consistent_length(y_true, y_pred)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 475, in check_consistent_length
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Found input variables with inconsistent numbers of samples: [32, 40]
+2026-05-24 22:00:41,186 | ERROR | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=regime_interval_success | model_selection_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+2026-05-24 22:00:41,187 | ERROR | train | request_id=7060f0a9f5c1 | fund_code=022771 | task_id=train_022771_38bd37f8e5 | stage=model_selection | training_failed app_error code=MODEL_SELECTION_FAILED
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/task_service.py", line 102, in run_training_task
+    bundle, metrics, backtest, direction_backtest = select_and_train(data_train, fund_code=fund_code, progress_cb=progress_cb)
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 716, in select_and_train
+    raise ModelSelectionError("Model selection failed", details={"reason": str(exc)}) from exc
+app.core.errors.ModelSelectionError: Model selection failed
+2026-05-24 22:10:16,165 | ERROR | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=proxy_feature_gain_eval_start | proxy_feature_gain_eval_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 353, in _proxy_gain_eval
+    before = _regression_metrics(test["target_next"].to_numpy(), before_pred, baseline_mean=baselines["rolling_mean"].to_numpy())
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 184, in _regression_metrics
+    mean_rmse = float(np.sqrt(mean_squared_error(y_true, mean_pred)))
+                              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/_param_validation.py", line 216, in wrapper
+    return func(*args, **kwargs)
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 565, in mean_squared_error
+    _check_reg_targets_with_floating_dtype(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, sample_weight, multioutput, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 198, in _check_reg_targets_with_floating_dtype
+    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+                                          ~~~~~~~~~~~~~~~~~~^
+        y_true, y_pred, multioutput, dtype=dtype_name, xp=xp
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/metrics/_regression.py", line 104, in _check_reg_targets
+    check_consistent_length(y_true, y_pred)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/sklearn/utils/validation.py", line 475, in check_consistent_length
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Found input variables with inconsistent numbers of samples: [32, 40]
+2026-05-24 22:10:43,709 | ERROR | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=regime_interval_success | model_selection_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+2026-05-24 22:10:43,723 | ERROR | train | request_id=8e31cabe3919 | fund_code=022771 | task_id=train_022771_0868617b25 | stage=model_selection | training_failed app_error code=MODEL_SELECTION_FAILED
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 589, in select_and_train
+    backtest["rolling_mean_baseline"] = baselines["rolling_mean"].to_numpy()
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/task_service.py", line 102, in run_training_task
+    bundle, metrics, backtest, direction_backtest = select_and_train(data_train, fund_code=fund_code, progress_cb=progress_cb)
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 716, in select_and_train
+    raise ModelSelectionError("Model selection failed", details={"reason": str(exc)}) from exc
+app.core.errors.ModelSelectionError: Model selection failed
+2026-05-24 22:14:20,848 | ERROR | api.access | request_id=7e1cdaeef358 | fund_code=- | task_id=- | stage=request_in | api_request
+2026-05-24 22:14:23,885 | ERROR | api.access | request_id=2dc45119e098 | fund_code=- | task_id=- | stage=request_in | api_request
+2026-05-24 22:14:59,400 | ERROR | app.main | request_id=6946f5a0fb2c | fund_code=- | task_id=- | stage=request_in | app_error code=MODEL_TRAINING_FAILED
+Traceback (most recent call last):
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/starlette/routing.py", line 73, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/fastapi/routing.py", line 214, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/starlette/concurrency.py", line 39, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/anyio/to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/api/fund.py", line 45, in predict
+    raise ModelTrainingFailedError(
+    ...<8 lines>...
+    )
+app.core.errors.ModelTrainingFailedError: 上一次训练失败，模型未保存，请查看日志。
+2026-05-24 22:14:59,415 | ERROR | api.access | request_id=6946f5a0fb2c | fund_code=- | task_id=- | stage=request_in | api_request
+2026-05-24 22:19:45,943 | ERROR | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=strong_signal_eval_start | model_selection_failed
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 605, in select_and_train
+    direction_backtest["p_up"] = p_test
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+2026-05-24 22:19:45,945 | ERROR | train | request_id=f838a1340a56 | fund_code=022771 | task_id=train_022771_4c1b517dd8 | stage=model_selection | training_failed app_error code=MODEL_SELECTION_FAILED
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 605, in select_and_train
+    direction_backtest["p_up"] = p_test
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4311, in __setitem__
+    self._set_item(key, value)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 4524, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 5266, in _sanitize_column
+    com.require_length_match(value, self.index)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/miniconda3/lib/python3.13/site-packages/pandas/core/common.py", line 573, in require_length_match
+    raise ValueError(
+    ...<4 lines>...
+    )
+ValueError: Length of values (40) does not match length of index (32)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/task_service.py", line 102, in run_training_task
+    bundle, metrics, backtest, direction_backtest = select_and_train(data_train, fund_code=fund_code, progress_cb=progress_cb)
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/joakim/Project/fund_project/fund_predictor/backend/app/services/model_selection_service.py", line 717, in select_and_train
+    raise ModelSelectionError("Model selection failed", details={"reason": str(exc)}) from exc
+app.core.errors.ModelSelectionError: Model selection failed
+2026-05-24 23:23:29,557 | ERROR | api.access | request_id=948e5b609848 | fund_code=- | task_id=- | stage=request_in | api_request
+2026-05-24 23:23:34,365 | ERROR | api.access | request_id=5930cb8990f0 | fund_code=- | task_id=- | stage=request_in | api_request

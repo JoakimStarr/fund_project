@@ -221,30 +221,18 @@ const dateShortcuts = [
   }
 ]
 
-// 回测指标（模拟数据）
+// 回测指标（从API加载）
 const backtestMetrics = ref([
-  { label: '区间覆盖率(80%)', value: '82.5%', tooltip: '实际值落在80%预测区间的比例', status: 'good', trend: 2.3 },
-  { label: '区间覆盖率(90%)', value: '91.2%', tooltip: '实际值落在90%预测区间的比例', status: 'good', trend: 1.8 },
-  { label: '方向准确率', value: '76.8%', tooltip: '预测方向正确的比例', status: 'good', trend: 3.5 },
-  { label: '平均绝对误差(MAE)', value: '0.45%', tooltip: '预测值与实际值的平均偏差', status: 'neutral', trend: -5.2 },
-  { label: '均方根误差(RMSE)', value: '0.62%', tooltip: '预测误差的标准差', status: 'neutral', trend: -3.1 },
-  { label: '皮尔逊相关系数', value: '0.847', tooltip: '预测值与实际值的相关性', status: 'good', trend: 4.2 }
+  { label: '区间覆盖率(80%)', value: '-', tooltip: '实际值落在80%预测区间的比例', status: '', trend: 0 },
+  { label: '区间覆盖率(90%)', value: '-', tooltip: '实际值落在90%预测区间的比例', status: '', trend: 0 },
+  { label: '方向准确率', value: '-', tooltip: '预测方向正确的比例', status: '', trend: 0 },
+  { label: '平均绝对误差(MAE)', value: '-', tooltip: '预测值与实际值的平均偏差', status: '', trend: 0 },
+  { label: '均方根误差(RMSE)', value: '-', tooltip: '预测误差的标准差', status: '', trend: 0 },
+  { label: '皮尔逊相关系数', value: '-', tooltip: '预测值与实际值的相关性', status: '', trend: 0 }
 ])
 
-// 表格数据（模拟）
-const backtestTableData = ref(
-  Array.from({ length: 20 }, (_, i) => ({
-    date: `2024-${String(Math.floor(i / 30) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
-    actual: parseFloat((Math.random() * 6 - 3).toFixed(2)),
-    predicted: parseFloat((Math.random() * 6 - 3).toFixed(2)),
-    interval80Lower: parseFloat((Math.random() * -3 - 1).toFixed(2)),
-    interval80Upper: parseFloat((Math.random() * 3 + 1).toFixed(2)),
-    interval90Lower: parseFloat((Math.random() * -4 - 1).toFixed(2)),
-    interval90Upper: parseFloat((Math.random() * 4 + 1).toFixed(2)),
-    direction: ['up', 'down', 'neutral'][Math.floor(Math.random() * 3)],
-    inInterval: Math.random() > 0.15
-  }))
-)
+// 表格数据（从API加载）
+const backtestTableData = ref([])
 
 // 主图表配置
 const mainChartOption = computed(() => {
@@ -468,10 +456,53 @@ const loadBacktestData = async () => {
 
   try {
     const res = await getBacktestData(fundCode.value)
-    console.log('回测数据:', res.data)
-    hasData.value = true
+    const data = res.data || res
+    console.log('回测数据:', data)
+    
+    // 更新回测指标
+    if (data.metrics) {
+      const m = data.metrics
+      backtestMetrics.value[0].value = m.interval_coverage_80 ? `${m.interval_coverage_80 * 100:.1f}%` : '-'
+      backtestMetrics.value[1].value = m.interval_coverage_90 ? `${m.interval_coverage_90 * 100:.1f}%` : '-'
+      backtestMetrics.value[2].value = m.direction_accuracy ? `${m.direction_accuracy * 100:.1f}%` : '-'
+      backtestMetrics.value[3].value = m.mae ? `${(m.mae * 100).toFixed(2)}%` : '-'
+      backtestMetrics.value[4].value = m.rmse ? `${(m.rmse * 100).toFixed(2)}%` : '-'
+      backtestMetrics.value[5].value = m.correlation ? m.correlation.toFixed(3) : '-'
+      
+      // 设置状态
+      backtestMetrics.value.forEach((metric, i) => {
+        const val = parseFloat(metric.value)
+        if (!isNaN(val)) {
+          if (i < 3) { // 覆盖率和准确率，越高越好
+            metric.status = val >= 70 ? 'good' : (val >= 50 ? 'neutral' : 'bad')
+          } else if (i === 5) { // 相关系数，越高越好
+            metric.status = val >= 0.7 ? 'good' : (val >= 0.4 ? 'neutral' : 'bad')
+          } else { // MAE/RMSE，越低越好
+            metric.status = val <= 1 ? 'good' : (val <= 2 ? 'neutral' : 'bad')
+          }
+        }
+      })
+    }
+    
+    // 更新表格数据
+    if (data.backtest && Array.isArray(data.backtest)) {
+      backtestTableData.value = data.backtest.map(row => ({
+        date: row.date || row.trade_date || '',
+        actual: row.target_next || row.actual || 0,
+        predicted: row.pred_return || row.predicted || 0,
+        interval80Lower: row.nav_interval_80_lower || row.lower_80 || null,
+        interval80Upper: row.nav_interval_80_upper || row.upper_80 || null,
+        interval90Lower: row.nav_interval_90_lower || row.lower_90 || null,
+        interval90Upper: row.nav_interval_90_upper || row.upper_90 || null,
+        direction: row.direction_signal || row.direction || 'neutral',
+        inInterval: row.in_interval !== undefined ? row.in_interval : true
+      }))
+    } else if (data.table_data) {
+      backtestTableData.value = data.table_data
+    }
+    
+    hasData.value = !!backtestTableData.value.length
 
-    // 处理返回的数据...
   } catch (error) {
     console.error('加载回测数据失败:', error)
     hasData.value = false
@@ -481,8 +512,28 @@ const loadBacktestData = async () => {
 }
 
 const exportData = () => {
-  // 导出数据逻辑
-  console.log('导出数据')
+  if (!backtestTableData.value.length) {
+    alert('暂无数据可导出')
+    return
+  }
+  
+  // 导出CSV
+  const headers = ['日期', '实际值', '预测值', '80%区间下限', '80%区间上限', '90%区间下限', '90%区间上限', '方向', '在区间内']
+  const rows = backtestTableData.value.map(d => [
+    d.date, 
+    typeof d.actual === 'number' ? d.actual.toFixed(2) : d.actual,
+    typeof d.predicted === 'number' ? d.predicted.toFixed(2) : d.predicted,
+    d.interval80Lower, d.interval80Upper,
+    d.interval90Lower, d.interval90Upper,
+    directionText(d.direction), d.inInterval
+  ])
+  
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `backtest_${fundCode.value}_${new Date().toISOString().slice(0,10)}.csv`
+  link.click()
 }
 
 const directionText = (dir) => {
@@ -491,7 +542,10 @@ const directionText = (dir) => {
 }
 
 onMounted(() => {
-  // 可以自动加载默认基金代码的回测数据
+  // 自动加载默认基金代码的回测数据
+  if (fundCode.value) {
+    loadBacktestData()
+  }
 })
 </script>
 
