@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import lru_cache
 from io import StringIO
 from pathlib import Path
@@ -92,6 +92,91 @@ def _normalize_fund_nav(df: pd.DataFrame, source: str) -> pd.DataFrame:
     return out.dropna(subset=["date", "nav"]).sort_values("date").drop_duplicates("date").reset_index(drop=True)
 
 
+def _sync_fund_nav_to_db(fund_code: str, df: pd.DataFrame, source: str):
+    from app.db.database import get_conn
+    try:
+        with get_conn() as conn:
+            last_date_row = conn.execute(
+                "SELECT MAX(trade_date) FROM fund_nav WHERE fund_code=?", [fund_code]
+            ).fetchone()
+            last_date = last_date_row[0] if last_date_row and last_date_row[0] else None
+
+            now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            rows_to_insert = []
+            for _, row in df.iterrows():
+                dt_str = row["date"].strftime("%Y-%m-%d") if hasattr(row["date"], "strftime") else str(row["date"])
+                if last_date and dt_str <= last_date:
+                    continue
+                acc_nav_val = float(row["acc_nav"]) if pd.notna(row.get("acc_nav")) else None
+                daily_growth_val = float(row["daily_growth_pct"]) if pd.notna(row.get("daily_growth_pct")) else None
+                rows_to_insert.append((
+                    fund_code, dt_str,
+                    float(row["nav"]),
+                    acc_nav_val,
+                    daily_growth_val,
+                    source,
+                ))
+
+            if rows_to_insert:
+                conn.executemany(
+                    """INSERT OR IGNORE INTO fund_nav 
+                       (fund_code, trade_date, nav, acc_nav, daily_growth_pct, source) 
+                       VALUES (?, ?, ?, ?, ?, ?)""",
+                    rows_to_insert,
+                )
+                conn.execute(
+                    """INSERT INTO data_fetch_log (entity_type, entity_key, source, success, rows_affected, duration_ms, fetched_at)
+                       VALUES (?, ?, ?, 1, ?, 0, ?)""",
+                    ["fund_nav", fund_code, source, len(rows_to_insert), now_iso],
+                )
+            logger.info("fund_nav_synced_to_db fund_code=%s new_rows=%s total_rows=%s", fund_code, len(rows_to_insert), len(df))
+    except Exception as exc:
+        logger.warning("fund_nav_db_sync_failed fund_code=%s error=%s", fund_code, exc)
+
+
+def _sync_index_to_db(index_name: str, symbol: str, df: pd.DataFrame, source: str):
+    from app.db.database import get_conn
+    try:
+        with get_conn() as conn:
+            last_date_row = conn.execute(
+                "SELECT MAX(trade_date) FROM index_data WHERE index_name=?", [index_name]
+            ).fetchone()
+            last_date = last_date_row[0] if last_date_row and last_date_row[0] else None
+
+            now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            rows_to_insert = []
+            for _, row in df.iterrows():
+                dt_str = row["date"].strftime("%Y-%m-%d") if hasattr(row["date"], "strftime") else str(row["date"])
+                if last_date and dt_str <= last_date:
+                    continue
+                rows_to_insert.append((
+                    index_name, symbol, dt_str,
+                    float(row["open"]) if pd.notna(row.get("open")) else None,
+                    float(row["high"]) if pd.notna(row.get("high")) else None,
+                    float(row["low"]) if pd.notna(row.get("low")) else None,
+                    float(row["close"]),
+                    float(row["volume"]) if pd.notna(row.get("volume")) else None,
+                    float(row["amount"]) if pd.notna(row.get("amount")) else None,
+                    source,
+                ))
+
+            if rows_to_insert:
+                conn.executemany(
+                    """INSERT OR IGNORE INTO index_data 
+                       (index_name, symbol, trade_date, open, high, low, close, volume, amount, source) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    rows_to_insert,
+                )
+                conn.execute(
+                    """INSERT INTO data_fetch_log (entity_type, entity_key, source, success, rows_affected, duration_ms, fetched_at)
+                       VALUES (?, ?, ?, 1, ?, 0, ?)""",
+                    ["index", index_name, source, len(rows_to_insert), now_iso],
+                )
+            logger.info("index_synced_to_db index_name=%s new_rows=%s total_rows=%s", index_name, len(rows_to_insert), len(df))
+    except Exception as exc:
+        logger.warning("index_db_sync_failed index_name=%s error=%s", index_name, exc)
+
+
 def _fetch_fund_nav_akshare(fund_code: str) -> pd.DataFrame:
     try:
         import akshare as ak
@@ -157,6 +242,7 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
             raise DataStaleError("Fund NAV latest date is stale", details={"fund_code": fund_code, "latest": str(out["date"].max().date())})
         path.parent.mkdir(parents=True, exist_ok=True)
         out.to_csv(path, index=False, encoding="utf-8")
+        _sync_fund_nav_to_db(fund_code, out, "akshare_fund_open_fund_info_em")
         meta = _nav_meta(out, "akshare_fund_open_fund_info_em", fallback_used=False)
         set_log_context(stage="data_fetch_success")
         logger.info("data_fetch_success fund nav fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
@@ -174,6 +260,7 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
             raise DataStaleError("Fallback fund NAV latest date is stale", details={"fund_code": fund_code, "latest": str(out["date"].max().date())})
         path.parent.mkdir(parents=True, exist_ok=True)
         out.to_csv(path, index=False, encoding="utf-8")
+        _sync_fund_nav_to_db(fund_code, out, "eastmoney_html")
         meta = _nav_meta(out, "eastmoney_html", fallback_used=True, fallback_reason=str(primary_error))
         set_log_context(stage="data_fetch_success")
         logger.info("data_fetch_success fund nav fallback fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
@@ -272,10 +359,14 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
                 "source": "eastmoney",
             }
         ).dropna(subset=["date", "close"]).sort_values("date").drop_duplicates("date")
+
+        index_name = next((n for n, s in INDEX_SYMBOLS.items() if s == symbol), symbol)
+
         if require_fresh and _is_stale(out):
             raise DataStaleError("Index latest date is stale", details={"symbol": symbol, "latest": str(out["date"].max().date())})
         path.parent.mkdir(parents=True, exist_ok=True)
         out.to_csv(path, index=False, encoding="utf-8")
+        _sync_index_to_db(index_name, symbol, out, "eastmoney")
         return out, {"source_used": "eastmoney", "fallback_used": False, "stale": _is_stale(out)}
     except AppError:
         raise
@@ -283,10 +374,12 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
         logger.exception("data_fetch_failed index")
         try:
             out = _fetch_index_sohu(symbol)
+            index_name = next((n for n, s in INDEX_SYMBOLS.items() if s == symbol), symbol)
             if require_fresh and _is_stale(out):
                 raise DataStaleError("Fallback index latest date is stale", details={"symbol": symbol, "latest": str(out["date"].max().date())})
             path.parent.mkdir(parents=True, exist_ok=True)
             out.to_csv(path, index=False, encoding="utf-8")
+            _sync_index_to_db(index_name, symbol, out, "sohu")
             return out, {"source_used": "sohu", "fallback_used": True, "fallback_reason": str(exc), "stale": _is_stale(out)}
         except AppError:
             raise
@@ -304,7 +397,6 @@ def _fetch_single_index(args: tuple[str, str, bool]) -> tuple[str, tuple[pd.Data
 
 
 def load_market_data(require_fresh: bool = False) -> tuple[dict[str, pd.DataFrame], list[dict]]:
-    """并发获取所有指数数据，使用ThreadPoolExecutor加速"""
     tasks = [(name, sym, require_fresh) for name, sym in INDEX_SYMBOLS.items()]
     
     frames = {}

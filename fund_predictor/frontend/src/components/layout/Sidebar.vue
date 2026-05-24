@@ -64,11 +64,12 @@ const menuItems = [
   { path: '/', title: '决策中心', icon: 'DataAnalysis' },
   { path: '/predict', title: '智能预测', icon: 'TrendCharts' },
   { path: '/train', title: '模型训练', icon: 'Setting' },
-  { path: '/backtest', title: '回测诊断', icon: 'LineChart' },
+  { path: '/backtest', title: '回测诊断', icon: 'DataLine' },
   { path: '/model-monitor', title: '模型监控', icon: 'Monitor' },
   { path: '/compare', title: '多基金对比', icon: 'DataLine' },
   { path: '/profile', title: '基金画像', icon: 'UserFilled' },
-  { path: '/intraday', title: 'T日盘中估算', icon: 'Timer' }
+  { path: '/intraday', title: 'T日盘中估算', icon: 'Timer' },
+  { path: '/admin/data-status', title: '数据管理', icon: 'SetUp' }
 ]
 
 const isActive = (path) => {
@@ -127,7 +128,7 @@ const isActive = (path) => {
 .logo {
   font-size: 22px;
   font-weight: 800;
-  @extend .gradient-text;
+  @extend .gradient-text !optional;
   letter-spacing: -0.5px;
   transition: font-size $transition-normal;
 

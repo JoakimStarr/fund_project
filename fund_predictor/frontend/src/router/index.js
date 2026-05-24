@@ -23,7 +23,7 @@ const routes = [
     path: '/backtest',
     name: 'Backtest',
     component: () => import('@/views/Backtest.vue'),
-    meta: { title: '回测诊断', icon: 'LineChart' }
+    meta: { title: '回测诊断', icon: 'DataLine' }
   },
   {
     path: '/model-monitor',
@@ -48,6 +48,12 @@ const routes = [
     name: 'Intraday',
     component: () => import('@/views/Intraday.vue'),
     meta: { title: 'T日盘中估算', icon: 'Timer' }
+  },
+  {
+    path: '/admin/data-status',
+    name: 'AdminDataStatus',
+    component: () => import('@/views/AdminDataStatus.vue'),
+    meta: { title: '数据管理', icon: 'SetUp' }
   }
 ]
 
