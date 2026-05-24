@@ -241,37 +241,39 @@ const chartLoading = ref(false)
 // 快捷代码
 const quickCodes = ['018956', '000001', '110011', '161725', '519778']
 
-// 预测数据（模拟）
+// 预测数据（从API加载）
 const predictionData = reactive({
-  conclusion: '+0.85%',
-  directionClass: 'bullish',
-  subtitle: '基于模型分析，该基金明日净值预计上涨',
-  reliabilityLevel: 'high',
-  reliabilityText: '高可信度',
-  upProbability: 68,
-  downProbability: 22,
-  neutralRange: '-0.10% ~ +0.10%',
+  conclusion: '',
+  directionClass: 'neutral',
+  subtitle: '',
+  reliabilityLevel: 'low',
+  reliabilityText: '加载中...',
+  upProbability: 50,
+  downProbability: 50,
+  neutralRange: '-',
   interval80: {
-    lower: '-1.20%',
-    upper: '+2.35%',
-    left: 25,
-    width: 45,
-    center: 48
+    lower: '-',
+    upper: '-',
+    left: 50,
+    width: 0,
+    center: 50
   },
   interval90: {
-    lower: '-2.10%',
-    upper: '+3.25%',
-    left: 18,
-    width: 58,
-    center: 47
+    lower: '-',
+    upper: '-',
+    left: 50,
+    width: 0,
+    center: 50
   },
-  pointPrediction: '+0.92%',
+  pointPrediction: '-',
   metrics: {
-    improvement: { name: '模型改进度', value: '+12.5%', status: 'good' },
-    correlation: { name: '预测-真实相关', value: '0.847', status: 'good' },
-    auc: { name: '方向 AUC', value: '0.82', status: 'good' },
-    proxyR2: { name: 'Proxy R²', value: '0.76', status: 'good' }
-  }
+    improvement: { name: '模型改进度', value: '-', status: '' },
+    correlation: { name: '预测-真实相关', value: '-', status: '' },
+    auc: { name: '方向 AUC', value: '-', status: '' },
+    proxyR2: { name: 'Proxy R²', value: '-', status: '' }
+  },
+  // 原始API数据，用于调试
+  rawData: null
 })
 
 // 图表配置
@@ -356,11 +358,114 @@ const handlePredict = async () => {
 
   try {
     const res = await predictFund({ fund_code: fundCode.value })
-    console.log('预测结果:', res.data)
-    // 处理返回数据...
+    const data = res.data || res
+    console.log('预测结果:', data)
+    
+    // 将API数据映射到predictionData
+    predictionData.rawData = data
+    
+    // 点预测
+    const predReturn = data.pred_return || data.pred || 0
+    const predPercent = (predReturn * 100).toFixed(3)
+    predictionData.conclusion = predReturn >= 0 ? `+${predPercent}%` : `${predPercent}%`
+    predictionData.pointPrediction = predictionData.conclusion
+    
+    // 方向信号
+    const directionSignal = data.direction_signal || 'neutral'
+    predictionData.directionClass = directionSignal
+    const directionStrength = data.direction_strength || 'none'
+    
+    // 概率
+    const pUp = data.p_up !== null && data.p_up !== undefined ? data.p_up : 0.5
+    const pDown = data.p_down !== null && data.p_down !== undefined ? data.p_down : (1 - pUp)
+    predictionData.upProbability = Math.round(pUp * 100)
+    predictionData.downProbability = Math.round(pDown * 100)
+    
+    // 中性区间 (p_up 在 0.4-0.6 之间)
+    if (pUp >= 0.4 && pUp <= 0.6) {
+      const neutralLow = ((0.4 - pUp) * 100).toFixed(2)
+      const neutralHigh = ((0.6 - pUp) * 100).toFixed(2)
+      predictionData.neutralRange = `${neutralLow}% ~ +${neutralHigh}%`
+    } else {
+      predictionData.neutralRange = '-'
+    }
+    
+    // 副标题
+    if (directionSignal === 'bullish') {
+      predictionData.subtitle = directionStrength === 'strong' 
+        ? '模型强烈看好该基金明日表现' 
+        : '模型倾向认为该基金明日将上涨'
+    } else if (directionSignal === 'bearish') {
+      predictionData.subtitle = directionStrength === 'strong'
+        ? '模型强烈看空该基金明日表现'
+        : '模型倾向认为该基金明日将下跌'
+    } else {
+      predictionData.subtitle = '模型方向信号不明显，建议观望'
+    }
+    
+    // 可靠度/置信度
+    const proxyConfidence = data.proxy_based_confidence || 'low'
+    predictionData.reliabilityLevel = proxyConfidence
+    const confidenceMap = { high: '高可信度', medium: '中可信度', low: '低可信度' }
+    predictionData.reliabilityText = confidenceMap[proxyConfidence] || '未知'
+    
+    // 区间数据 (基于净值区间转换为百分比)
+    const nav80 = data.nav_interval_80 || {}
+    const nav90 = data.nav_interval_90 || {}
+    const todayNav = data.today_nav || 1
+    
+    if (nav80.lower && nav80.upper) {
+      const lower80Pct = ((nav80.lower / todayNav - 1) * 100).toFixed(2)
+      const upper80Pct = ((nav80.upper / todayNav - 1) * 100).toFixed(2)
+      predictionData.interval80.lower = `${lower80Pct}%`
+      predictionData.interval80.upper = `+${upper80Pct}%`
+      
+      // 计算区间位置（简化处理）
+      const center80 = 50 // 预测值在区间中的相对位置
+      const width80 = Math.min(Math.abs(parseFloat(upper80Pct)) + Math.abs(parseFloat(lower80Pct)), 10) * 5
+      predictionData.interval80.left = Math.max(0, 50 - width80 / 2)
+      predictionData.interval80.width = width80
+      predictionData.interval80.center = center80
+    }
+    
+    if (nav90.lower && nav90.upper) {
+      const lower90Pct = ((nav90.lower / todayNav - 1) * 100).toFixed(2)
+      const upper90Pct = ((nav90.upper / todayNav - 1) * 100).toFixed(2)
+      predictionData.interval90.lower = `${lower90Pct}%`
+      predictionData.interval90.upper = `+${upper90Pct}%`
+      
+      const center90 = 50
+      const width90 = Math.min(Math.abs(parseFloat(upper90Pct)) + Math.abs(parseFloat(lower90Pct)), 15) * 3.5
+      predictionData.interval90.left = Math.max(0, 50 - width90 / 2)
+      predictionData.interval90.width = width90
+      predictionData.interval90.center = center90
+    }
+    
+    // 指标数据
+    const pointMetrics = data.point_prediction_health || {}
+    const dirMetrics = data.direction_health || {}
+    const baseline = data.baseline || {}
+    
+    predictionData.metrics.improvement.value = baseline.model_vs_mean_improvement 
+      ? `${(baseline.model_vs_mean_improvement * 100).toFixed(2)}%` 
+      : '-'
+    predictionData.metrics.improvement.status = parseFloat(baseline.model_vs_mean_improvement) > 0 ? 'good' : 'bad'
+    
+    predictionData.metrics.correlation.value = pointMetrics.pred_real_corr 
+      ? pointMetrics.pred_real_corr.toFixed(3) 
+      : '-'
+    predictionData.metrics.correlation.status = parseFloat(pointMetrics.pred_real_corr) > 0.1 ? 'good' : 'bad'
+    
+    predictionData.metrics.auc.value = dirMetrics.auc ? dirMetrics.auc.toFixed(3) : '-'
+    predictionData.metrics.auc.status = parseFloat(dirMetrics.auc) > 0.55 ? 'good' : 'bad'
+    
+    predictionData.metrics.proxyR2.value = data.proxy_r2_60 ? data.proxy_r2_60.toFixed(3) : '-'
+    predictionData.metrics.proxyR2.status = parseFloat(data.proxy_r2_60) > 0.35 ? 'good' : 'bad'
+    
     hasResult.value = true
   } catch (error) {
     errorMessage.value = error.message || '预测失败，请稍后重试'
+    console.error('预测失败:', error)
   } finally {
     predicting.value = false
   }
