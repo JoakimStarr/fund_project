@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api import backtest, fund, model, task, train
+from app.api import backtest, fund, intraday, model, task, train
 from app.core.config import STATIC_DIR, ensure_dirs
 from app.core.errors import AppError
 from app.core.logging_config import request_id_var, set_log_context, setup_logging
@@ -59,6 +59,7 @@ async def exception_handler(request: Request, exc: Exception):
 
 
 app.include_router(fund.router)
+app.include_router(intraday.router)
 app.include_router(train.router)
 app.include_router(task.router)
 app.include_router(model.router)
