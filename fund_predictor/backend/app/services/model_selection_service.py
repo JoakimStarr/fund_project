@@ -291,7 +291,7 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
             rolling.append({**item, "rolling_metrics": _regression_metrics(np.array(trues), np.array(preds))})
     top_k = sorted(rolling or top20, key=lambda x: x.get("rolling_metrics", x["metrics"])["score"])[:refine_top_k]
 
-    baselines = _rolling_baselines(data_train, test_final)
+    baselines = _rolling_baselines(data_train, test_select)
     final = []
     train_valid = pd.concat([train_base, valid])
     for item in top_k:

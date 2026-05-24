@@ -225,6 +225,8 @@ def fit_rolling_proxy_exposure(df: pd.DataFrame, window: int = 60) -> pd.DataFra
 
     cols = ["top10_proxy_ret", "theme_proxy_ret", "hs300_ret", "cyb_ret", "kcb50_ret", "zz1000_ret", "style_tech_vs_large"]
     names = ["top10", "theme", "hs300", "cyb", "kcb50", "zz1000", "style_tech"]
+    available_cols = [c for c in cols if c in df.columns]
+    available_names = [n for c, n in zip(cols, names) if c in df.columns]
 
     out = pd.DataFrame(index=df.index)
     for name in names:
@@ -235,11 +237,11 @@ def fit_rolling_proxy_exposure(df: pd.DataFrame, window: int = 60) -> pd.DataFra
     out["proxy_residual"] = np.nan
 
     for i in range(window - 1, len(df)):
-        sample = df.iloc[i - window + 1 : i + 1][["fund_ret"] + cols].dropna(subset=["fund_ret"])
+        sample = df.iloc[i - window + 1 : i + 1][["fund_ret"] + available_cols].dropna(subset=["fund_ret"])
         if len(sample) < 40:
             continue
         try:
-            active_pairs = [(col, name) for col, name in zip(cols, names) if sample[col].notna().any()]
+            active_pairs = [(col, name) for col, name in zip(available_cols, available_names) if sample[col].notna().any()]
             if len(active_pairs) < 2:
                 continue
             active_cols = [p[0] for p in active_pairs]
