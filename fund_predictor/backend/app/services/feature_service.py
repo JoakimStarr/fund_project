@@ -118,12 +118,19 @@ def build_features(fund_code: str, require_fresh: bool = False) -> tuple[pd.Data
             keep = ["date"] + [c for c in idx_df.columns if c.startswith(f"{name}_") and not c.endswith("_volume")]
             df = df.merge(idx_df[keep], on="date", how="left")
 
-        df["style_growth_vs_large"] = df["cyb_ret"] - df["hs300_ret"]
-        df["style_small_vs_large"] = df["zz1000_ret"] - df["hs300_ret"]
-        df["style_tech_vs_large"] = df["kcb50_ret"] - df["hs300_ret"]
+        _available_index_rets = [c for c in df.columns if c.endswith("_ret") and not c.startswith("fund_")]
+        logger.info("available_index_returns fund_code=%s indexes=%s", fund_code, _available_index_rets)
+
+        if "cyb_ret" in df.columns and "hs300_ret" in df.columns:
+            df["style_growth_vs_large"] = df["cyb_ret"] - df["hs300_ret"]
+        if "zz1000_ret" in df.columns and "hs300_ret" in df.columns:
+            df["style_small_vs_large"] = df["zz1000_ret"] - df["hs300_ret"]
+        if "kcb50_ret" in df.columns and "hs300_ret" in df.columns:
+            df["style_tech_vs_large"] = df["kcb50_ret"] - df["hs300_ret"]
         for col in ["style_growth_vs_large", "style_small_vs_large", "style_tech_vs_large"]:
-            df[f"{col}_mean_5"] = df[col].rolling(5).mean()
-            df[f"{col}_mean_20"] = df[col].rolling(20).mean()
+            if col in df.columns:
+                df[f"{col}_mean_5"] = df[col].rolling(5).mean()
+                df[f"{col}_mean_20"] = df[col].rolling(20).mean()
         df, proxy_meta = build_proxy_features(fund_code, df)
 
         duplicated_cols = df.columns[df.columns.duplicated()].tolist()

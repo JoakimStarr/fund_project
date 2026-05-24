@@ -244,7 +244,7 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
     walk_forward_step = mode_config["WALK_FORWARD_STEP"]
     max_walk_forward_points = mode_config["MAX_WALK_FORWARD_POINTS"]
     
-    train_base, valid, test = _split_train_valid_test(data_train)
+    train_base, valid, test_select, test_final = _split_train_valid_test(data_train)
     X_train, y_train = train_base[feature_cols], train_base["target_next"]
     X_valid, y_valid = valid[feature_cols], valid["target_next"]
     rough = []
