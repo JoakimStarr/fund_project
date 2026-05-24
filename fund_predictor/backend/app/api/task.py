@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app.core.errors import AppError
 from app.services.task_service import get_task
 
-router = APIRouter(prefix="/api/tasks", tags=["tasks"])
+router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
 
 
 @router.get("/{task_id}")

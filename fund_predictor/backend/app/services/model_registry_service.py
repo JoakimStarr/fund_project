@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,8 @@ import pandas as pd
 from app.core.config import MODEL_DIR
 from app.core.errors import ModelNotFoundError
 from app.services.model_selection_service import PREDICTION_MODE
+
+logger = logging.getLogger(__name__)
 
 
 def fund_model_dir(fund_code: str) -> Path:
@@ -117,10 +120,21 @@ def load_model_archive(fund_code: str) -> tuple[Any, Any | None, dict, dict, dic
     if not (path / "point_model.pkl").exists():
         raise ModelNotFoundError("该基金尚未训练，请点击训练并预测", details={"fund_code": fund_code, "prediction_mode": PREDICTION_MODE})
     point_model = joblib.load(path / "point_model.pkl")
-    direction_model = joblib.load(path / "direction_model.pkl") if (path / "direction_model.pkl").exists() else None
+    direction_model = None
+    direction_model_error = None
+    direction_path = path / "direction_model.pkl"
+    if direction_path.exists():
+        try:
+            direction_model = joblib.load(direction_path)
+        except Exception as exc:
+            direction_model_error = str(exc)
+            logger.warning("direction_model_load_failed fund_code=%s reason=%s", fund_code, direction_model_error)
     config = json.loads((path / "config.json").read_text(encoding="utf-8"))
     metrics = json.loads((path / "metrics.json").read_text(encoding="utf-8"))
     interval_config = json.loads((path / "interval_config.json").read_text(encoding="utf-8"))
+    if direction_model_error:
+        config["direction_model_load_error"] = direction_model_error
+        metrics["direction_model_load_error"] = direction_model_error
     return point_model, direction_model, config, metrics, interval_config
 
 

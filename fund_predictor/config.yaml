@@ -1,0 +1,98 @@
+# 基金预测系统配置文件
+# 集中管理所有可调参数，避免魔法数字散落各处
+
+# === 数据获取 ===
+data:
+  cache_stale_days: 10
+  min_train_rows: 220
+  fetch_timeout_seconds: 20
+  fetch_max_workers: 5
+  fund_nav_fallback_enabled: true
+  index_fallback_enabled: true
+
+# === 特征工程 ===
+feature:
+  lookback_lags: [1, 2, 3, 5, 10]
+  rolling_windows: [5, 10, 20, 60]
+  beta_window: 20
+  volatility_window: 20
+  style_window: 60
+
+# === 因子预筛选 ===
+screening:
+  ic_threshold: 0.02
+  vif_threshold: 10.0
+  icir_threshold: 0.5
+  decay_window: 20
+
+# === 模型训练 ===
+model:
+  train_split_ratio: [0.55, 0.22, 0.13, 0.10]
+  sample_weight_halflife: 60
+  walk_forward_train_months: 24
+  walk_forward_valid_months: 3
+  walk_forward_step_months: 1
+  walk_forward_min_rounds: 12
+  
+  # 回归模型参数
+  ridge_alpha: 1.0
+  elasticnet_alpha: 0.01
+  n_estimators: 120
+  max_depth: 5
+  learning_rate: 0.05
+  min_samples_leaf: 10
+  
+  # 方向模型校准
+  direction_calibration_method: "isotonic"
+  
+  # Stacking集成
+  stacking_alpha: 1.0
+
+# === 区间预测 ===
+interval:
+  default_alpha: 0.10
+  regime_groups: ["low", "medium_low", "medium_high", "high"]
+  quantiles: [0.70, 0.80, 0.90, 0.99]
+
+# === 债券因子（物理先验）===
+bond:
+  duration_estimate:
+    bond_pure: 3.0
+    bond_mixed: 2.5
+    bond_convertible: 1.5
+  daily_fee: 0.000003
+
+# === 净值约束 ===
+nav_constraints:
+  hybrid_equity: 0.20
+  equity_active: 0.20
+  hybrid_balanced: 0.15
+  hybrid_bond: 0.10
+  hybrid_flexible: 0.20
+  bond_pure: 0.05
+  bond_mixed: 0.08
+  bond_convertible: 0.20
+
+# === 冷启动 ===
+cold_start:
+  group_model_days: 90
+  fine_tune_days: 180
+  individual_model_days: 180
+
+# === 监控与退化 ===
+monitoring:
+  mae_alert_sigma: 2.0
+  direction_accuracy_threshold: 0.50
+  consecutive_bad_days: 5
+  bias_detection_window: 10
+
+# === API ===
+api:
+  version: "v1"
+  request_timeout: 30
+  max_concurrent_tasks: 3
+
+# === 日志 ===
+logging:
+  level: "INFO"
+  format: "%(asctime)s %(levelname)s %(name)s %(message)s"

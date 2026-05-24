@@ -12,7 +12,7 @@ from app.services.prediction_service import predict_next
 from app.services.routing_service import route_predict
 from app.services.task_service import get_latest_task
 
-router = APIRouter(prefix="/api/fund", tags=["fund"])
+router = APIRouter(prefix="/api/v1/fund", tags=["fund"])
 logger = logging.getLogger(__name__)
 
 

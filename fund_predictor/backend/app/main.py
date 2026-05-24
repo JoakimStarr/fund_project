@@ -16,7 +16,12 @@ setup_logging()
 init_db()
 
 logger = logging.getLogger(__name__)
-app = FastAPI(title="基金 T+1 净值涨跌幅区间预测系统")
+app = FastAPI(
+    title="基金 T+1 净值涨跌幅区间预测系统",
+    version="2.3.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+)
 
 
 @app.middleware("http")

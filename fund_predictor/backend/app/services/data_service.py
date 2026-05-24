@@ -1,14 +1,23 @@
 import json
 import logging
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from functools import lru_cache
 from io import StringIO
 from pathlib import Path
 
 import pandas as pd
 import requests
 
-from app.core.config import INDEX_SYMBOLS, MIN_TRAIN_ROWS, RAW_DIR, STALE_DAYS
+from app.core.config import (
+    FETCH_MAX_WORKERS,
+    FETCH_TIMEOUT,
+    INDEX_SYMBOLS,
+    MIN_TRAIN_ROWS,
+    RAW_DIR,
+    STALE_DAYS,
+)
 from app.core.errors import AppError, DataFetchError, DataStaleError
 from app.core.logging_config import set_log_context
 
@@ -116,7 +125,7 @@ def _fetch_fund_nav_eastmoney_html(fund_code: str) -> pd.DataFrame:
     pages = 1
     for page in range(1, 400):
         params = {"type": "lsjz", "code": fund_code, "page": page, "per": 20, "sdate": "", "edate": ""}
-        resp = requests.get(url, params=params, headers=headers, timeout=20)
+        resp = requests.get(url, params=params, headers=headers, timeout=FETCH_TIMEOUT)
         resp.raise_for_status()
         text = resp.text
         if page == 1:
@@ -204,7 +213,7 @@ def _fetch_index_sohu(symbol: str) -> pd.DataFrame:
         "callback": "historySearchHandler",
         "rt": "jsonp",
     }
-    resp = requests.get(url, params=params, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
+    resp = requests.get(url, params=params, headers={"User-Agent": "Mozilla/5.0"}, timeout=FETCH_TIMEOUT)
     resp.raise_for_status()
     match = re.search(r"historySearchHandler\((.*)\)$", resp.text)
     if not match:
@@ -244,7 +253,7 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
             "fields1": "f1,f2,f3,f4,f5,f6",
             "fields2": "f51,f52,f53,f54,f55,f56,f57",
         }
-        resp = requests.get(url, params=params, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
+        resp = requests.get(url, params=params, headers={"User-Agent": "Mozilla/5.0"}, timeout=FETCH_TIMEOUT)
         resp.raise_for_status()
         data = resp.json().get("data") or {}
         klines = data.get("klines") or []
@@ -288,11 +297,30 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
             raise DataFetchError("Index fetch failed", details={"reason": str(fallback_exc), "symbol": symbol}) from fallback_exc
 
 
+def _fetch_single_index(args: tuple[str, str, bool]) -> tuple[str, tuple[pd.DataFrame, dict]]:
+    name, symbol, fresh = args
+    result = get_index_daily(symbol, require_fresh=fresh)
+    return name, result
+
+
 def load_market_data(require_fresh: bool = False) -> tuple[dict[str, pd.DataFrame], list[dict]]:
+    """并发获取所有指数数据，使用ThreadPoolExecutor加速"""
+    tasks = [(name, sym, require_fresh) for name, sym in INDEX_SYMBOLS.items()]
+    
     frames = {}
     meta = []
-    for name, symbol in INDEX_SYMBOLS.items():
-        df, info = get_index_daily(symbol, require_fresh=require_fresh)
-        frames[name] = df
-        meta.append({"name": name, "symbol": symbol, **info})
+    
+    with ThreadPoolExecutor(max_workers=FETCH_MAX_WORKERS, thread_name_prefix="idx_fetch") as executor:
+        future_to_name = {executor.submit(_fetch_single_index, task): task[0] for task in tasks}
+        
+        for future in as_completed(future_to_name):
+            name = future_to_name[future]
+            try:
+                idx_name, (df, info) = future.result()
+                frames[idx_name] = df
+                meta.append({"name": idx_name, "symbol": INDEX_SYMBOLS.get(idx_name, ""), **info})
+            except Exception as exc:
+                logger.error("index_fetch_concurrent_failed name=%s error=%s", name, exc)
+                meta.append({"name": name, "error": str(exc)})
+    
     return frames, meta

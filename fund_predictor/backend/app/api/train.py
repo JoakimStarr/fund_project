@@ -4,7 +4,7 @@ from app.core.logging_config import set_log_context
 from app.schemas.fund import TrainRequest
 from app.services.task_service import create_task, run_training_task
 
-router = APIRouter(prefix="/api/train", tags=["train"])
+router = APIRouter(prefix="/api/v1/train", tags=["train"])
 
 
 @router.post("")

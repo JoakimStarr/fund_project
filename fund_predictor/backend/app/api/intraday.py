@@ -6,7 +6,7 @@ from app.core.errors import AppError
 from app.core.logging_config import set_log_context
 from app.services.intraday_service import estimate_intraday_nav, get_latest_intraday_estimate
 
-router = APIRouter(prefix="/api/fund", tags=["intraday"])
+router = APIRouter(prefix="/api/v1/fund", tags=["intraday"])
 logger = logging.getLogger(__name__)
 
 
