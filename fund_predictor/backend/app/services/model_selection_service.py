@@ -449,7 +449,7 @@ def _direction_metrics(y_true: np.ndarray, p_up: np.ndarray, baseline_acc: float
 def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=None):
     set_log_context(stage="direction_model_train_start")
     logger.info("direction_model_train_start")
-    train_base, valid, test_select, _ = _split_train_valid_test(data_train)
+    train_base, valid, test_select, test_final = _split_train_valid_test(data_train)
     if progress_cb:
         progress_cb(65, "direction_model_train_start", "Training calibrated direction model")
     y_train = (train_base["target_next"] > 0).astype(int)
@@ -501,9 +501,9 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
     best = sorted(final, key=lambda x: x["final_metrics"]["score"])[0]
     set_log_context(stage="direction_model_train_success")
     logger.info("direction_model_train_success model=%s selector=%s", best["model"], best["selector"])
-    # Keep the calibrated model fit on train_valid/calib split; do not refit on all data without calibration holdout.
     selected = _selected_features(best["pipeline"].estimator.estimator, feature_cols)
-    return best, best["pipeline"], selected, test_select, best["p_test"]
+    p_test_final = _predict_p_up(best["pipeline"], test_final[feature_cols])
+    return best, best["pipeline"], selected, test_final, p_test_final
 
 
 def _regime_intervals(test: pd.DataFrame, pred: np.ndarray) -> tuple[dict[str, Any], pd.DataFrame]:
