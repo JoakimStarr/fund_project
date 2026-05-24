@@ -86,6 +86,163 @@ class ModelBundle:
     interval_config: dict[str, Any]
 
 
+@dataclass
+class AlignmentResult:
+    aligned_predictions: np.ndarray
+    strategy_used: str
+    is_degraded: bool
+    degradation_reason: str | None = None
+
+
+def _align_predictions(
+    predictions: np.ndarray,
+    target_df: pd.DataFrame,
+    source_df: pd.DataFrame | None = None,
+    fund_code: str = "unknown",
+) -> AlignmentResult:
+    """智能预测值对齐器 - 多级降级策略
+    
+    策略优先级：
+    Level 0 - 完美匹配：长度相同直接使用
+    Level 1 - 日期对齐：通过 date 列索引匹配
+    Level 2 - 智能截断：取最新 N 个预测值
+    Level 3 - 安全填充：NaN 填充 + 降级标记
+    Level 4 - 失败：返回空数组，调用方应禁用该功能
+    
+    Args:
+        predictions: 模型预测的概率值数组
+        target_df: 目标 DataFrame (如 test_final)
+        source_df: 预测来源 DataFrame (如 test_select)，用于日期对齐
+        fund_code: 基金代码，用于日志追踪
+    """
+    pred_len = len(predictions)
+    target_len = len(target_df)
+    
+    set_log_context(fund_code=fund_code, stage="alignment")
+    
+    # Level 0: 完美匹配 ✅
+    if pred_len == target_len:
+        logger.info(
+            "alignment_success strategy=perfect_match "
+            "pred_len=%d target_len=%d",
+            pred_len, target_len
+        )
+        return AlignmentResult(
+            aligned_predictions=predictions,
+            strategy_used="perfect_match",
+            is_degraded=False
+        )
+    
+    # Level 1: 日期索引对齐 🔍
+    if source_df is not None and "date" in source_df.columns and "date" in target_df.columns:
+        try:
+            source_dates = set(source_df["date"].astype(str))
+            target_dates = target_df["date"].astype(str)
+            
+            # 创建日期到预测值的映射
+            date_to_pred = dict(zip(source_df["date"].astype(str), predictions))
+            
+            # 对齐：只保留目标 DF 中存在的日期
+            aligned = []
+            missing_count = 0
+            for date in target_dates:
+                if date in date_to_pred:
+                    aligned.append(date_to_pred[date])
+                else:
+                    aligned.append(np.nan)
+                    missing_count += 1
+            
+            aligned_arr = np.array(aligned)
+            
+            # 如果缺失率 < 20%，认为对齐成功
+            missing_rate = missing_count / target_len
+            if missing_rate < 0.2 and missing_count == 0:
+                logger.info(
+                    "alignment_success strategy=date_index "
+                    "pred_len=%d target_len=%d matched=%d",
+                    pred_len, target_len, target_len - missing_count
+                )
+                return AlignmentResult(
+                    aligned_predictions=aligned_arr,
+                    strategy_used="date_index",
+                    is_degraded=False
+                )
+            elif missing_rate < 0.2:
+                logger.warning(
+                    "alignment_partial strategy=date_index "
+                    "missing_rate=%.2f%% (%d/%d)",
+                    missing_rate * 100, missing_count, target_len
+                )
+                return AlignmentResult(
+                    aligned_predictions=aligned_arr,
+                    strategy_used="date_index_partial",
+                    is_degraded=True,
+                    degradation_reason=f"Missing {missing_count} dates ({missing_rate:.1%})"
+                )
+        except Exception as e:
+            logger.warning("alignment_failed strategy=date_index error=%s", str(e))
+    
+    # Level 2: 智能截断 ✂️
+    if pred_len > target_len:
+        # 取最新的 target_len 个预测值（时间序列数据，最新最相关）
+        truncated = predictions[-target_len:]
+        logger.info(
+            "alignment_success strategy=truncation "
+            "original_len=%d target_len=%d dropped=%d",
+            pred_len, target_len, pred_len - target_len
+        )
+        return AlignmentResult(
+            aligned_predictions=truncated,
+            strategy_used="truncation",
+            is_degraded=True,
+            degradation_reason=f"Truncated {pred_len - target_len} oldest predictions"
+        )
+    
+    # Level 3: 安全填充 📝
+    if pred_len < target_len:
+        min_required = int(target_len * 0.5)  # 至少要有 50% 的数据
+        
+        if pred_len >= min_required:
+            # 用 NaN 填充缺失部分（旧数据用 NaN）
+            padded = np.full(target_len, np.nan)
+            # 将预测值放在最新位置
+            padded[-pred_len:] = predictions
+            
+            logger.warning(
+                "alignment_degraded strategy=padding "
+                "pred_len=%d target_len=%d padding=%d values",
+                pred_len, target_len, target_len - pred_len
+            )
+            return AlignmentResult(
+                aligned_predictions=padded,
+                strategy_used="padding",
+                is_degraded=True,
+                degradation_reason=f"Padded with {target_len - pred_len} NaN values"
+            )
+        
+        # 数据量严重不足，无法安全填充
+        logger.error(
+            "alignment_failed strategy=insufficient_data "
+            "pred_len=%d required_min=%d target_len=%d",
+            pred_len, min_required, target_len
+        )
+        return AlignmentResult(
+            aligned_predictions=np.array([]),
+            strategy_used="failed",
+            is_degraded=True,
+            degradation_reason=f"Insufficient data: have {pred_len}, need at least {min_required}"
+        )
+    
+    # 不应该到达这里，但作为保险
+    logger.error("alignment_failed strategy=unknown pred_len=%d target_len=%d", pred_len, target_len)
+    return AlignmentResult(
+        aligned_predictions=np.array([]),
+        strategy_used="failed",
+        is_degraded=True,
+        degradation_reason="Unknown alignment failure"
+    )
+
+
 def _split_train_valid_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """四段划分：train(55%) / valid(22%) / test_select(13%) / test_final(10%)
     
@@ -456,7 +613,7 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
     y_valid = (valid["target_next"] > 0).astype(int)
     if y_train.nunique() < 2 or y_valid.nunique() < 2:
         logger.warning("direction_model_skipped_single_class train_classes=%s valid_classes=%s", y_train.nunique(), y_valid.nunique())
-        return None, None, [], None, None
+        return None, None, [], None, None, None, None
     baseline_acc = float(max((test_select["target_next"] > 0).mean(), (test_select["target_next"] <= 0).mean()))
     rough = []
     for model_name, selector, scaler, model in _candidates(_classifiers()):
@@ -473,7 +630,7 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
             logger.exception("direction_candidate_failed model=%s selector=%s scaler=%s", model_name, selector, scaler)
     if not rough:
         logger.error("direction_model_failed no candidates")
-        return None, None, [], None, None
+        return None, None, [], None, None, None, None
     top = sorted(rough, key=lambda x: x["metrics"]["score"])[:5]
     train_valid = pd.concat([train_base, valid])
     calib_size = max(60, int(len(train_valid) * 0.2))
@@ -497,13 +654,14 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
             logger.exception("direction_candidate_failed final model=%s", item["model"])
     if not final:
         logger.error("direction_model_failed final")
-        return None, None, [], None, None
+        return None, None, [], None, None, None, None
     best = sorted(final, key=lambda x: x["final_metrics"]["score"])[0]
     set_log_context(stage="direction_model_train_success")
     logger.info("direction_model_train_success model=%s selector=%s", best["model"], best["selector"])
     selected = _selected_features(best["pipeline"].estimator.estimator, feature_cols)
     p_test_final = _predict_p_up(best["pipeline"], test_final[feature_cols])
-    return best, best["pipeline"], selected, test_final, p_test_final
+    p_test_select = best.get("p_test")  # 用于回退对齐
+    return best, best["pipeline"], selected, test_final, p_test_final, test_select, p_test_select
 
 
 def _regime_intervals(test: pd.DataFrame, pred: np.ndarray) -> tuple[dict[str, Any], pd.DataFrame]:
@@ -576,7 +734,7 @@ def select_and_train(data_train: pd.DataFrame, fund_code: str = "", progress_cb=
         test_final_pred = point_pipeline.predict(test_final[feature_cols])
         point_best["pred"] = test_final_pred
         proxy_eval = _proxy_gain_eval(data_train, feature_cols, point_best, test_final, baselines)
-        direction_best, direction_pipeline, selected_direction, direction_test, p_test = _direction_model(data_train, feature_cols, progress_cb)
+        direction_best, direction_pipeline, selected_direction, direction_test, p_test_final, test_select_for_align, p_test_select = _direction_model(data_train, feature_cols, progress_cb)
         interval_config, backtest = _regime_intervals(test_final, point_best["pred"])
         
         # 修复回测日期口径：明确区分特征日期和目标日期
@@ -598,27 +756,80 @@ def select_and_train(data_train: pd.DataFrame, fund_code: str = "", progress_cb=
             "direction_failure_reason": "No calibrated direction model was selected",
         }
         direction_model_name = None
-        if direction_best is not None and p_test is not None:
-            set_log_context(stage="strong_signal_eval_start")
-            logger.info("strong_signal_eval_start")
-            direction_model_name = direction_best["model"]
-            direction_backtest["p_up"] = p_test
-            direction_backtest["p_down"] = 1 - direction_backtest["p_up"]
-            direction_backtest["direction_signal"] = np.select(
-                [p_test >= 0.65, p_test >= 0.60, p_test <= 0.35, p_test <= 0.40],
-                ["bullish", "bullish", "bearish", "bearish"],
-                default="neutral",
+        if direction_best is not None and p_test_final is not None:
+            # 使用智能对齐器处理可能的维度不匹配
+            alignment = _align_predictions(
+                predictions=p_test_final,
+                target_df=test_final,
+                source_df=test_select_for_align if p_test_select is not None else None,
+                fund_code=fund_code
             )
-            direction_backtest["direction_strength"] = np.select(
-                [p_test >= 0.65, p_test >= 0.60, p_test <= 0.35, p_test <= 0.40],
-                ["strong", "weak", "strong", "weak"],
-                default="none",
-            )
-            direction_backtest["strong_signal"] = (p_test >= 0.60) | (p_test <= 0.40)
-            direction_backtest["direction_correct"] = ((p_test >= 0.60) & (direction_backtest["target_next"] > 0)) | ((p_test <= 0.40) & (direction_backtest["target_next"] < 0))
-            direction_metrics = {**direction_best["final_metrics"], "direction_available": True}
-            backtest = backtest.merge(direction_backtest[["date", "p_up", "p_down", "strong_signal"]], on="date", how="left")
-            set_log_context(stage="strong_signal_eval_success")
+            
+            # 检查对齐是否成功
+            if len(alignment.aligned_predictions) == 0:
+                logger.warning(
+                    "direction_model_alignment_failed fund=%s strategy=%s reason=%s",
+                    fund_code, alignment.strategy_used, alignment.degradation_reason
+                )
+                # 降级：尝试使用 test_select 的预测值
+                if p_test_select is not None and len(p_test_select) > 0:
+                    fallback_alignment = _align_predictions(
+                        predictions=p_test_select,
+                        target_df=test_final,
+                        source_df=test_select_for_align,
+                        fund_code=fund_code
+                    )
+                    if len(fallback_alignment.aligned_predictions) > 0:
+                        alignment = fallback_alignment
+                        logger.info("direction_model_fallback_success fund=%s", fund_code)
+                    else:
+                        # 完全失败，禁用方向模型
+                        direction_best = None
+                        set_log_context(stage="strong_signal_eval_disabled")
+                        logger.warning("strong_signal_eval_disabled fund=%s reason=alignment_failed", fund_code)
+            
+            if direction_best is not None and len(alignment.aligned_predictions) > 0:
+                set_log_context(stage="strong_signal_eval_start")
+                logger.info(
+                    "strong_signal_eval_start fund=%s strategy=%s degraded=%s",
+                    fund_code, alignment.strategy_used, alignment.is_degraded
+                )
+                direction_model_name = direction_best["model"]
+                p_test = alignment.aligned_predictions
+                
+                # 记录对齐信息到 metrics
+                direction_metrics_base = {**direction_best["final_metrics"], "direction_available": True}
+                if alignment.is_degraded:
+                    direction_metrics_base["alignment_strategy"] = alignment.strategy_used
+                    direction_metrics_base["alignment_degradation"] = alignment.degradation_reason
+                
+                direction_backtest["p_up"] = p_test
+                direction_backtest["p_down"] = 1 - direction_backtest["p_up"]
+                direction_backtest["direction_signal"] = np.select(
+                    [p_test >= 0.65, p_test >= 0.60, p_test <= 0.35, p_test <= 0.40],
+                    ["bullish", "bullish", "bearish", "bearish"],
+                    default="neutral",
+                )
+                direction_backtest["direction_strength"] = np.select(
+                    [p_test >= 0.65, p_test >= 0.60, p_test <= 0.35, p_test <= 0.40],
+                    ["strong", "weak", "strong", "weak"],
+                    default="none",
+                )
+                direction_backtest["strong_signal"] = (p_test >= 0.60) | (p_test <= 0.40)
+                
+                # 处理 NaN 值（填充模式下）
+                valid_mask = ~np.isnan(p_test)
+                if np.any(valid_mask):
+                    direction_backtest.loc[valid_mask, "direction_correct"] = (
+                        ((p_test[valid_mask] >= 0.60) & (direction_backtest.loc[valid_mask, "target_next"] > 0)) |
+                        ((p_test[valid_mask] <= 0.40) & (direction_backtest.loc[valid_mask, "target_next"] < 0))
+                    )
+                else:
+                    direction_backtest["direction_correct"] = np.nan
+                
+                direction_metrics = direction_metrics_base
+                backtest = backtest.merge(direction_backtest[["date", "p_up", "p_down", "strong_signal"]], on="date", how="left")
+                set_log_context(stage="strong_signal_eval_success")
             logger.info("strong_signal_eval_success count=%s", direction_metrics.get("strong_signal_count"))
         else:
             direction_backtest["p_up"] = np.nan
