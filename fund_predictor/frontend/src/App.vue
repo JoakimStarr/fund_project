@@ -29,10 +29,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onErrorCaptured } from 'vue'
 import { useAppStore } from '@/stores/app'
+import logger from '@/utils/logger'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import Topbar from '@/components/layout/Topbar.vue'
+
+onErrorCaptured((err, instance, info) => {
+  logger.error('vue', `组件渲染错误: ${err.message}`, {
+    component: instance?.$options?.name || instance.type?.name || 'unknown',
+    info,
+    stack: err.stack,
+    message: err.message,
+  })
+  if (import.meta.env.DEV) {
+    console.error('[Vue Error]', err, info)
+  }
+})
 
 const appStore = useAppStore()
 const sidebarCollapsed = ref(false)

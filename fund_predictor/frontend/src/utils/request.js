@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
+import logger, { setRequestId } from './logger'
 
-// 创建 axios 实例
 const request = axios.create({
   baseURL: '/api',
   timeout: 30000,
@@ -12,30 +12,39 @@ const request = axios.create({
   }
 })
 
-// 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    // 可以在这里添加 token 等认证信息
-    // const token = localStorage.getItem('token')
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
-
-    console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, config.data || '')
+    logger.info('api', `→ ${config.method?.toUpperCase()} ${config.url}`, {
+      url: config.url,
+      method: config.method,
+      hasData: !!config.data,
+    })
     return config
   },
   (error) => {
-    console.error('[API Request Error]', error)
+    logger.error('api', `✗ request error`, {
+      url: error.config?.url,
+      code: error.code,
+      message: error.message,
+    })
     return Promise.reject(error)
   }
 )
 
-// 响应拦截器
 request.interceptors.response.use(
   (response) => {
+    const rid = response.headers['x-request-id']
+    if (rid) setRequestId(rid)
+
+    logger.info('api', `← ${response.status} ${response.config.url}`, {
+      status: response.status,
+      url: response.config.url,
+      responseTimeMs: response.headers['x-response-time-ms'] || '-',
+      hasData: !!response.data,
+    })
+
     const res = response.data
 
-    // 后端返回格式：{ ok: true, data: {...} } 或 { ok: false, error: {...} }
     if (res.ok === false) {
       ElMessage.error(res.error?.message || '请求失败')
       return Promise.reject(new Error(res.error?.message || '请求失败'))
@@ -44,7 +53,12 @@ request.interceptors.response.use(
     return res
   },
   (error) => {
-    console.error('[API Response Error]', error)
+    logger.error('api', `✗ ${error.config?.url}`, {
+      url: error.config?.url,
+      status: error.response?.status,
+      code: error.code,
+      message: error.message,
+    })
 
     if (error.response) {
       const status = error.response.status
