@@ -4,7 +4,7 @@ import { useAppStore } from '@/stores/app'
 import logger, { setRequestId } from './logger'
 
 const request = axios.create({
-  baseURL: '/api',
+  baseURL: '/api/v1',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
