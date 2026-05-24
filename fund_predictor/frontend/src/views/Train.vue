@@ -182,7 +182,7 @@
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import { VideoPlay, Refresh } from '@element-plus/icons-vue'
 import { startTraining } from '@/api/train'
-import { getTaskStatus } from '@/api/task'
+import { getTaskStatus, getTasksHistory } from '@/api/task'
 
 // 表单相关
 const formRef = ref(null)
@@ -207,30 +207,9 @@ const logContentRef = ref(null)
 // 轮询定时器
 let pollTimer = null
 
-// 历史任务（模拟数据）
-const historyTasks = ref([
-  {
-    taskId: 'task_abc123',
-    fundCode: '018956',
-    status: 'completed',
-    startTime: new Date(Date.now() - 3600000),
-    duration: '12m 34s'
-  },
-  {
-    taskId: 'task_def456',
-    fundCode: '000001',
-    status: 'completed',
-    startTime: new Date(Date.now() - 7200000),
-    duration: '15m 22s'
-  },
-  {
-    taskId: 'task_ghi789',
-    fundCode: '110011',
-    status: 'failed',
-    startTime: new Date(Date.now() - 10800000),
-    duration: '3m 45s'
-  }
-])
+// 历史任务列表（从API加载）
+const historyTasks = ref([])
+const historyLoading = ref(false)
 
 // 方法
 const handleTrain = async () => {
@@ -436,9 +415,21 @@ const formatDuration = (seconds) => {
   return `${hours}h ${mins}m`
 }
 
-const refreshHistory = () => {
+const refreshHistory = async () => {
   // 刷新历史记录逻辑
   console.log('刷新历史记录')
+  historyLoading.value = true
+  try {
+    const response = await getTasksHistory({ limit: 50 })
+    if (response.ok && response.data) {
+      historyTasks.value = response.data
+      console.log('历史记录加载成功:', response.data.length, '条')
+    }
+  } catch (error) {
+    console.error('加载历史记录失败:', error)
+  } finally {
+    historyLoading.value = false
+  }
 }
 
 const viewTaskDetail = (row) => {
@@ -449,6 +440,7 @@ const viewTaskDetail = (row) => {
 // 生命周期
 onMounted(() => {
   // 页面加载时的初始化逻辑
+  refreshHistory()
 })
 
 onUnmounted(() => {

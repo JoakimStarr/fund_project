@@ -88,6 +88,62 @@ def get_latest_task(fund_code: str) -> dict | None:
     return data
 
 
+def get_tasks_history(limit: int = 50, fund_code: str | None = None) -> list[dict]:
+    """获取历史训练任务列表
+    
+    Args:
+        limit: 返回的最大记录数
+        fund_code: 可选，筛选特定基金的任务
+        
+    Returns:
+        任务列表，按创建时间倒序排列
+    """
+    with get_conn() as conn:
+        if fund_code:
+            rows = conn.execute(
+                "SELECT * FROM tasks WHERE fund_code=? ORDER BY created_at DESC LIMIT ?",
+                (fund_code, limit),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM tasks ORDER BY created_at DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+    
+    result = []
+    for row in rows:
+        data = dict(row)
+        if data.get("error_details"):
+            try:
+                data["details"] = json.loads(data["error_details"])
+            except json.JSONDecodeError:
+                data["details"] = {"raw": data["error_details"]}
+        
+        # 计算耗时（如果有开始和结束时间）
+        if data.get("created_at") and data.get("updated_at"):
+            try:
+                start = datetime.fromisoformat(data["created_at"])
+                end = datetime.fromisoformat(data["updated_at"])
+                duration = end - start
+                total_seconds = int(duration.total_seconds())
+                if total_seconds >= 3600:
+                    data["duration"] = f"{total_seconds // 3600}h {(total_seconds % 3600) // 60}m"
+                elif total_seconds >= 60:
+                    data["duration"] = f"{total_seconds // 60}m {total_seconds % 60}s"
+                else:
+                    data["duration"] = f"{total_seconds}s"
+            except (ValueError, TypeError):
+                data["duration"] = None
+        
+        # 添加可读的开始时间
+        if data.get("created_at"):
+            data["startTime"] = data["created_at"]
+        
+        result.append(data)
+    
+    return result
+
+
 def run_training_task(task_id: str, fund_code: str, force: bool = True) -> None:
     set_log_context(task_id=task_id, fund_code=fund_code, stage="training_start")
     try:
