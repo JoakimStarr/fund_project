@@ -1,808 +1,364 @@
 <template>
-  <div class="profile-page">
-    <!-- 页面标题 -->
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">基金画像</h1>
-        <p class="page-subtitle">了解基金的分类信息、投资策略和风险特征</p>
-      </div>
-    </div>
+  <div class="profile-container">
+    <el-card v-if="loading" v-loading="loading" element-loading-text="加载基金画像中..." style="min-height: 400px;" />
 
-    <!-- 搜索区 -->
-    <div class="search-section glass-card">
-      <div class="search-row">
-        <el-input
-          v-model="fundCode"
-          placeholder="请输入6位基金代码"
-          maxlength="6"
-          size="large"
-          clearable
-          @keyup.enter="loadProfile"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-        <el-button type="primary" size="large" :loading="loading" @click="loadProfile">
-          查询画像
-        </el-button>
-      </div>
-
-      <!-- 快捷选择 -->
-      <div class="quick-codes">
-        <span class="quick-label">热门基金：</span>
-        <el-tag
-          v-for="code in hotFunds"
-          :key="code"
-          effect="plain"
-          @click="selectFund(code)"
-        >
-          {{ code }}
-        </el-tag>
-      </div>
-    </div>
-
-    <!-- 基金画像结果 -->
-    <div v-if="hasProfile" class="profile-content">
-      <!-- 基本信息 -->
-      <div class="info-grid">
-        <div class="info-card glass-card main-info">
-          <div class="fund-header">
-            <div class="fund-code-large">{{ profileData.fundCode }}</div>
-            <el-tag :type="profileData.typeTagType" size="large" effect="dark">
-              {{ profileData.fundType }}
-            </el-tag>
-          </div>
-          <h2 class="fund-name">{{ profileData.fundName }}</h2>
-          <p class="fund-desc">{{ profileData.description }}</p>
-
-          <div class="key-metrics">
-            <div class="metric-item">
-              <span class="metric-label">基金规模</span>
-              <span class="metric-value">{{ profileData.fundSize }}</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">成立日期</span>
-              <span class="metric-value">{{ profileData.establishDate }}</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">基金经理</span>
-              <span class="metric-value">{{ profileData.manager }}</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">管理费率</span>
-              <span class="metric-value">{{ profileData.feeRate }}</span>
-            </div>
-          </div>
+    <template v-else-if="profileData.fund_code">
+      <div class="profile-header">
+        <h2 class="fund-name">{{ profileData.fund_name || fundCode }}</h2>
+        <div class="header-tags">
+          <el-tag :type="typeTagType" size="large" effect="dark">{{ typeLabel }}</el-tag>
+          <el-tag v-if="profileData.cache_info?.stale" type="warning" size="small">数据可能过期</el-tag>
+          <el-tag :type="predictionSuitable ? 'success' : 'danger'" size="small">
+            {{ predictionSuitable ? '适合预测' : '不适合预测' }}
+          </el-tag>
         </div>
+      </div>
 
-        <!-- 风险评级 -->
-        <div class="info-card glass-card risk-card">
-          <h3 class="card-title-custom">风险评估</h3>
-          <div class="risk-gauge">
-            <el-progress
-              type="dashboard"
-              :percentage="profileData.riskScore"
-              :width="140"
-              :stroke-width="12"
-              :color="riskColor(profileData.riskScore)"
-              :format="(val) => val + '分'"
-            />
+      <el-row :gutter="20" class="info-section">
+        <el-col :span="6" v-for="(metric, index) in displayMetrics" :key="index">
+          <div class="metric-item">
+            <span class="metric-label">{{ metric.label }}</span>
+            <span class="metric-value">{{ metric.value }}</span>
           </div>
-          <div class="risk-level">
-            <span class="level-text">{{ profileData.riskLevel }}</span>
-            <span class="level-desc">{{ profileData.riskDescription }}</span>
-          </div>
-          <div class="risk-factors">
-            <div v-for="factor in profileData.riskFactors" :key="factor.name" class="factor-item">
-              <span class="factor-name">{{ factor.name }}</span>
-              <div class="factor-bar-wrapper">
-                <div
-                  class="factor-bar"
-                  :style="{ width: factor.value + '%', background: factor.color }"
-                ></div>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="20" class="charts-section">
+        <el-col :span="12">
+          <el-card shadow="hover">
+            <template #header><span>资产配置</span></template>
+            <div ref="allocationChartRef" style="height: 300px;"></div>
+          </el-card>
+        </el-col>
+
+        <el-col :span="12">
+          <el-card shadow="hover">
+            <template #header><span>行业分布</span></template>
+            <div ref="industryChartRef" style="height: 300px;"></div>
+          </el-card>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="20" class="analysis-section">
+        <el-col :span="24">
+          <el-card shadow="hover">
+            <template #header><span>策略与风险分析</span></template>
+            <div class="strategy-content">
+              <div class="benchmark-info">
+                <span class="label">业绩比较基准：</span>
+                <span class="value">{{ profileData.benchmark || '-' }}</span>
               </div>
-              <span class="factor-value">{{ factor.value }}</span>
+              <div class="risk-score-display">
+                <span class="label">风险等级：</span>
+                <el-tag :type="riskTagType">{{ profileData.risk_level || '未知' }}</el-tag>
+              </div>
+              <div class="keywords-section" v-if="profileData.strategy_keywords && profileData.strategy_keywords.length > 0">
+                <span class="label">投资关键词：</span>
+                <el-tag v-for="(keyword, idx) in profileData.strategy_keywords" :key="idx" class="keyword-tag" effect="plain" type="primary" size="small">
+                  {{ keyword }}
+                </el-tag>
+              </div>
+              <div class="strategy-description" v-if="profileData.strategy_text">
+                <p>{{ profileData.strategy_text }}</p>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </template>
 
-      <!-- 投资策略 -->
-      <div class="strategy-section glass-card">
-        <h3 class="section-title">投资策略分析</h3>
-        <div class="strategy-content">
-          <div class="strategy-tags">
-            <span class="tag-label">策略关键词：</span>
-            <el-tag
-              v-for="keyword in profileData.strategyKeywords"
-              :key="keyword"
-              effect="plain"
-              type="primary"
-              class="strategy-tag"
-            >
-              {{ keyword }}
-            </el-tag>
-          </div>
-
-          <div class="benchmark-info">
-            <span class="label">业绩比较基准</span>
-            <span class="value">{{ profileData.benchmark }}</span>
-          </div>
-
-          <div class="strategy-description">
-            {{ profileData.strategyDesc }}
-          </div>
-        </div>
-      </div>
-
-      <!-- 资产配置 -->
-      <div class="allocation-section glass-card">
-        <h3 class="section-title">资产配置（估算）</h3>
-        <div class="allocation-content">
-          <BaseChart :option="allocationChartOption" height="320px" />
-          <div class="allocation-legend">
-            <div
-              v-for="item in profileData.allocation"
-              :key="item.name"
-              class="legend-item"
-            >
-              <span class="legend-color" :style="{ background: item.color }"></span>
-              <span class="legend-name">{{ item.name }}</span>
-              <span class="legend-value">{{ item.percentage }}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 行业分布 -->
-      <div class="industry-section glass-card">
-        <h3 class="section-title">行业分布</h3>
-        <BaseChart :option="industryChartOption" height="300px" />
-      </div>
-
-      <!-- 预测适用性 -->
-      <div class="prediction-suitability glass-card">
-        <h3 class="section-title">预测模型适用性</h3>
-        <div class="suitability-grid">
-          <div class="suitability-card" :class="profileData.predictionSuitable ? 'suitable' : 'not-suitable'">
-            <el-icon :size="32" :color="profileData.predictionSuitable ? '#22c55e' : '#ef4444'">
-              <component :is="profileData.predictionSuitable ? 'CircleCheckFilled' : 'WarningFilled'" />
-            </el-icon>
-            <div class="suitability-text">
-              <strong>{{ profileData.predictionSuitable ? '适用' : '不适用' }}</strong>
-              <p>{{ profileData.predictionReason }}</p>
-            </div>
-          </div>
-
-          <div class="metrics-mini-grid">
-            <div class="mini-metric">
-              <span class="mini-label">历史波动率</span>
-              <span class="mini-value">{{ profileData.volatility }}</span>
-            </div>
-            <div class="mini-metric">
-              <span class="mini-label">数据充足度</span>
-              <span class="mini-value text-positive">{{ profileData.dataSufficiency }}</span>
-            </div>
-            <div class="mini-metric">
-              <span class="mini-label">特征丰富度</span>
-              <span class="mini-value text-primary">{{ profileData.featureRichness }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 空状态 -->
-    <div v-else class="empty-state glass-card">
-      <el-empty description="请输入基金代码查询画像信息" :image-size="120" />
-    </div>
+    <el-empty v-else description="请输入有效的基金代码查看画像信息" />
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
-import { Search, CircleCheckFilled, WarningFilled } from '@element-plus/icons-vue'
-import { getFundProfile } from '@/api/fund'
-import BaseChart from '@/components/common/BaseChart.vue'
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import * as echarts from 'echarts'
 
-// 状态
-const fundCode = ref('018956')
+const props = defineProps<{
+  fundCode: string
+}>()
+
 const loading = ref(false)
-const hasProfile = ref(false)
+const allocationChartRef = ref<HTMLElement | null>(null)
+const industryChartRef = ref<HTMLElement | null>(null)
 
-// 热门基金
-const hotFunds = ['018956', '000001', '110011', '161725', '519778', '000300']
+interface CacheInfo {
+  cached: boolean
+  fetched_at: string
+  expires_at: string
+  ttl_days: number
+  data_source: string
+  stale: boolean
+}
 
-// 基金画像数据（模拟）
-const profileData = ref({
-  fundCode: '018956',
-  fundName: '财通资管新能源汽车混合A',
-  fundType: '混合型-偏股',
-  typeTagType: '',
-  description: '主要投资于新能源汽车产业链相关的优质上市公司，追求长期资本增值。',
-  fundSize: '52.36亿',
-  establishDate: '2021-09-28',
-  manager: '张三',
-  feeRate: '1.50%',
-  riskScore: 72,
-  riskLevel: '中高风险',
-  riskDescription: '适合风险承受能力较强的投资者',
-  riskFactors: [
-    { name: '市场风险', value: 75, color: '#ef4444' },
-    { name: '行业集中', value: 68, color: '#f59e0b' },
-    { name: '流动性', value: 45, color: '#22c55e' }
-  ],
-  strategyKeywords: ['新能源汽车', '新能源', '智能制造', '绿色低碳'],
-  benchmark: '沪深300指数收益率*70%+中债综合财富(总值)指数收益率*30%',
-  strategyDesc: '本基金采用自上而下与自下而上相结合的投资策略，重点关注新能源汽车产业链中的优质企业，通过深入研究行业发展趋势和公司基本面，精选具有核心竞争力和成长潜力的个股进行投资。',
-  allocation: [
-    { name: '股票', percentage: 85, color: '#3b82f6' },
-    { name: '债券', percentage: 8, color: '#22c55e' },
-    { name: '现金', percentage: 5, color: '#94a3b8' },
-    { name: '其他', percentage: 2, color: '#a855f7' }
-  ],
-  industryDistribution: [
-    { name: '电力设备', value: 35 },
-    { name: '汽车', value: 25 },
-    { name: '有色金属', value: 15 },
-    { name: '化工', value: 10 },
-    { name: '电子', value: 8 },
-    { name: '其他', value: 7 }
-  ],
-  predictionSuitable: true,
-  predictionReason: '该基金为偏股混合型，净值变动具有较好的可预测性，且历史数据充足。',
-  volatility: '24.5%',
-  dataSufficiency: '优秀',
-  featureRichness: '良好'
+interface ProfileData {
+  fund_code: string
+  fund_name: string
+  fund_type: string
+  fund_type_raw: string
+  establish_date: string
+  fund_size: number | null
+  manager: string
+  fee_rate: number | null
+  benchmark: string
+  strategy_text: string
+  strategy_keywords: string[]
+  skip_prediction: boolean
+  risk_level: string
+  cache_info: CacheInfo | null
+}
+
+const profileData = ref<ProfileData>({
+  fund_code: '',
+  fund_name: '',
+  fund_type: '',
+  fund_type_raw: '',
+  establish_date: '',
+  fund_size: null,
+  manager: '',
+  fee_rate: null,
+  benchmark: '',
+  strategy_text: '',
+  strategy_keywords: [],
+  skip_prediction: false,
+  risk_level: '',
+  cache_info: null,
 })
 
-// 图表配置
-const allocationChartOption = computed(() => ({
-  tooltip: {
-    trigger: 'item',
-    backgroundColor: 'rgba(15, 23, 42, 0.95)',
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-    textStyle: { color: '#f8fafc' },
-    formatter: '{b}: {c}% ({d}%)'
-  },
-  legend: {
-    orient: 'vertical',
-    right: '5%',
-    top: 'center',
-    textStyle: { color: '#94a3b8' }
-  },
-  series: [{
-    type: 'pie',
-    radius: ['40%', '70%'],
-    center: ['40%', '50%'],
-    avoidLabelOverlap: false,
-    itemStyle: {
-      borderRadius: 8,
-      borderColor: '#0b1220',
-      borderWidth: 2
-    },
-    label: { show: false },
-    emphasis: {
-      label: { show: true, fontSize: 14, fontWeight: 'bold' }
-    },
-    data: profileData.value.allocation.map(item => ({
-      value: item.percentage,
-      name: item.name,
-      itemStyle: { color: item.color }
-    }))
-  }]
-}))
+let allocationInstance: echarts.ECharts | null = null
+let industryInstance: echarts.ECharts | null = null
 
-const industryChartOption = computed(() => ({
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: { type: 'shadow' },
-    backgroundColor: 'rgba(15, 23, 42, 0.95)',
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-    textStyle: { color: '#f8fafc' }
-  },
-  grid: {
-    left: '3%',
-    right: '4%',
-    bottom: '3%',
-    containLabel: true
-  },
-  xAxis: {
-    type: 'value',
-    axisLabel: {
-      formatter: '{value}%',
-      color: '#64748b'
-    },
-    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } }
-  },
-  yAxis: {
-    type: 'category',
-    data: profileData.value.industryDistribution.map(d => d.name),
-    axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
-    axisLabel: { color: '#64748b' }
-  },
-  series: [{
-    type: 'bar',
-    data: profileData.value.industryDistribution.map((d, i) => ({
-      value: d.value,
-      itemStyle: {
-        borderRadius: [0, 4, 4, 0],
-        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-          { offset: 0, color: '#3b82f6' },
-          { offset: 1, color: `hsl(${220 + i * 20}, 80%, 60%)` }
-        ])
-      }
-    })),
-    barWidth: '60%'
-  }]
-}))
+const typeTagType = computed(() => {
+  const map: Record<string, string> = {
+    hybrid_equity: 'danger',
+    equity_active: 'danger',
+    index_equity: 'warning',
+    hybrid_flexible: '',
+    hybrid_balanced: '',
+    bond_mixed: 'success',
+    bond_pure: 'success',
+    money_market: 'info',
+    fof: '',
+    unknown: 'info',
+  }
+  return map[profileData.value.fund_type] || 'info'
+})
 
-// 方法
-const loadProfile = async () => {
-  if (!fundCode.value.trim()) return
+const typeLabel = computed(() => {
+  const map: Record<string, string> = {
+    hybrid_equity: '混合-偏股',
+    equity_active: '股票型',
+    index_equity: '指数型',
+    hybrid_flexible: '混合-灵活',
+    hybrid_balanced: '混合-平衡',
+    bond_mixed: '债券型',
+    bond_pure: '纯债基金',
+    money_market: '货币基金',
+    fof: 'FOF基金',
+    unknown: '未知类型',
+  }
+  return map[profileData.value.fund_type] || profileData.value.fund_type_raw || '未知'
+})
+
+const predictionSuitable = computed(() => !profileData.value.skip_prediction)
+
+const riskTagType = computed(() => {
+  const level = profileData.value.risk_level || ''
+  if (level.includes('低')) return 'success'
+  if (level.includes('中低')) return ''
+  if (level.includes('中')) return 'warning'
+  if (level.includes('高')) return 'danger'
+  return 'info'
+})
+
+const displayMetrics = computed(() => {
+  const data = profileData.value
+  return [
+    { label: '基金代码', value: data.fund_code || '-' },
+    { label: '成立日期', value: data.establish_date || '-' },
+    { label: '规模(亿)', value: data.fund_size != null ? `${data.fund_size.toFixed(2)}亿` : '-' },
+    { label: '基金经理', value: data.manager || '-' },
+    { label: '管理费率', value: data.fee_rate != null ? `${data.fee_rate}%` : '-' },
+    { label: '原始类型', value: data.fund_type_raw || '-' },
+  ]
+})
+
+const defaultAllocation = [
+  { name: '股票', value: 60, color: '#5470c6' },
+  { name: '债券', value: 25, color: '#91cc75' },
+  { name: '现金', value: 10, color: '#fac858' },
+  { name: '其他', value: 5, color: '#ee6666' },
+]
+
+const defaultIndustry = [
+  { name: '待获取持仓数据', value: 1, color: '#ccc' },
+]
+
+function loadProfile() {
+  if (!props.fundCode) return
 
   loading.value = true
 
-  try {
-    const res = await getFundProfile(fundCode.value)
-    console.log('基金画像:', res.data)
-
-    // 更新数据...
-    hasProfile.value = true
-
-    // 根据类型设置标签颜色
-    const typeMap = {
-      '股票型': 'danger',
-      '混合型': 'warning',
-      '债券型': 'success',
-      '货币型': 'info',
-      '指数型': ''
-    }
-
-    // 简单匹配类型
-    for (const [type, tagType] of Object.entries(typeMap)) {
-      if (res.data?.fund_type?.includes(type)) {
-        profileData.value.typeTagType = tagType
-        break
+  fetch(`/api/v1/fund/${props.fundCode}/profile`)
+    .then(res => res.json())
+    .then(res => {
+      if (res.ok) {
+        profileData.value = { ...profileData.value, ...res.data }
+      } else {
+        console.error('Failed to load profile:', res.error)
       }
+
+      nextTick(() => {
+        renderCharts()
+      })
+    })
+    .catch(err => console.error('Error fetching profile:', err))
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+function renderCharts() {
+  if (allocationChartRef.value) {
+    if (!allocationInstance) {
+      allocationInstance = echarts.init(allocationChartRef.value)
     }
-  } catch (error) {
-    console.error('加载画像失败:', error)
-    hasProfile.value = false
-  } finally {
-    loading.value = false
+    allocationInstance.setOption({
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      legend: { bottom: 0, type: 'scroll' },
+      series: [{
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '45%'],
+        avoidLabelOverlap: false,
+        itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+        label: { show: true, formatter: '{b}\n{d}%' },
+        data: defaultAllocation,
+      }],
+    }, true)
+  }
+
+  if (industryChartRef.value) {
+    if (!industryInstance) {
+      industryInstance = echarts.init(industryChartRef.value)
+    }
+    industryInstance.setOption({
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
+      xAxis: { type: 'category', data: defaultIndustry.map(i => i.name), axisLabel: { rotate: 30, fontSize: 11 } },
+      yAxis: { type: 'value', name: '占比(%)' },
+      series: [{
+        type: 'bar',
+        data: defaultIndustry.map(i => ({ value: i.value * 100, itemStyle: { color: i.color } })),
+        barMaxWidth: 40,
+        label: { show: true, position: 'top', fontSize: 11 },
+      }],
+    }, true)
   }
 }
 
-const selectFund = (code) => {
-  fundCode.value = code
+watch(() => props.fundCode, () => {
   loadProfile()
-}
-
-// 辅助函数
-const riskColor = (score) => {
-  if (score >= 80) return '#ef4444'
-  if (score >= 60) return '#f59e0b'
-  return '#22c55e'
-}
+}, { immediate: true })
 
 onMounted(() => {
-  // 自动加载默认基金
-  loadProfile()
+  window.addEventListener('resize', handleResize)
 })
+
+function handleResize() {
+  allocationInstance?.resize()
+  industryInstance?.resize()
+}
 </script>
 
-<style lang="scss" scoped>
-.profile-page {
-  max-width: 1200px;
+<style scoped>
+.profile-container {
+  padding: 16px;
 }
 
-.page-header {
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.page-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.5px;
-  margin: 0;
-}
-
-.page-subtitle {
-  color: var(--text-muted);
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-/* 搜索区域 */
-.search-section {
-  padding: 24px;
+.profile-header {
   margin-bottom: 24px;
-}
-
-.search-row {
-  display: flex;
-  gap: 12px;
-
-  .el-input {
-    width: 280px;
-  }
-}
-
-.quick-codes {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-
-.quick-label {
-  font-size: 13px;
-  color: var(--text-muted);
-
-  .el-tag {
-    cursor: pointer;
-    transition: all $transition-fast;
-
-    &:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-  }
-}
-
-/* 内容区域 */
-.profile-content {
-  animation: fadeIn 0.5s ease;
-}
-
-/* 信息网格 */
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 20px;
-  margin-bottom: 24px;
-
-  @media (max-width: $breakpoint-lg) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.info-card {
-  animation: fadeIn 0.5s ease forwards;
-  opacity: 0;
-}
-
-/* 主信息卡片 */
-.main-info {
-  padding: 28px;
-  animation-delay: 0s;
-}
-
-.fund-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.fund-code-large {
-  font-size: 24px;
-  font-weight: 800;
-  font-family: 'SF Mono', monospace;
-  color: var(--primary);
+  text-align: center;
 }
 
 .fund-name {
   font-size: 22px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 8px;
+  font-weight: bold;
+  color: #303133;
+  margin-bottom: 12px;
 }
 
-.fund-desc {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 24px;
+.header-tags {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.key-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 16px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
+.info-section {
+  margin-bottom: 20px;
 }
 
 .metric-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  background: var(--el-fill-color-light);
+  border-radius: 8px;
+  padding: 18px 14px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.metric-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .metric-label {
-  font-size: 12px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  display: block;
+  color: #909399;
+  font-size: 13px;
+  margin-bottom: 8px;
 }
 
 .metric-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
+  display: block;
+  color: #303133;
+  font-weight: bold;
+  font-size: 17px;
 }
 
-/* 风险卡片 */
-.risk-card {
-  padding: 28px;
-  animation-delay: 0.1s;
+.charts-section,
+.analysis-section {
+  margin-top: 20px;
 }
 
-.card-title-custom {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 20px;
+.strategy-content > div {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--el-border-color-extra-light);
 }
 
-.risk-gauge {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
+.strategy-content > div:last-child {
+  border-bottom: none;
 }
 
-.risk-level {
-  text-align: center;
-  margin-bottom: 24px;
-
-  .level-text {
-    display: block;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  .level-desc {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
+.label {
+  font-weight: bold;
+  color: #606266;
+  margin-right: 8px;
 }
 
-.risk-factors {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.value {
+  color: #303133;
 }
 
-.factor-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.keyword-tag {
+  margin-right: 8px;
+  margin-top: 4px;
 }
 
-.factor-name {
-  font-size: 13px;
-  color: var(--text-secondary);
-  width: 70px;
-  flex-shrink: 0;
-}
-
-.factor-bar-wrapper {
-  flex: 1;
-  height: 6px;
-  background: var(--bg-tertiary);
-  border-radius: $radius-full;
-  overflow: hidden;
-}
-
-.factor-bar {
-  height: 100%;
-  border-radius: $radius-full;
-  transition: width $transition-slow;
-}
-
-.factor-value {
-  font-size: 12px;
-  color: var(--text-muted);
-  width: 30px;
-  text-align: right;
-}
-
-/* 策略区域 */
-.strategy-section,
-.allocation-section,
-.industry-section,
-.prediction-suitability {
-  margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  &::before {
-    content: '';
-    width: 3px;
-    height: 16px;
-    background: var(--primary);
-    border-radius: 2px;
-  }
-}
-
-.strategy-content {
-  .strategy-tags {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-  }
-
-  .tag-label {
-    font-size: 13px;
-    color: var(--text-muted);
-  }
-
-  .strategy-tag {
-    cursor: default;
-  }
-
-  .benchmark-info {
-    display: flex;
-    gap: 12px;
-    padding: 14px 18px;
-    background: var(--bg-tertiary);
-    border-radius: $radius-md;
-    margin-bottom: 16px;
-
-    .label {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .value {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-  }
-
-  .strategy-description {
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.8;
-  }
-}
-
-/* 资产配置 */
-.allocation-content {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 32px;
-  align-items: center;
-
-  @media (max-width: $breakpoint-sm) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.allocation-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-.legend-name {
-  font-size: 13px;
-  color: var(--text-secondary);
-  width: 60px;
-}
-
-.legend-value {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-/* 适用性 */
-.suitability-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-
-  @media (max-width: $breakpoint-sm) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.suitability-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: var(--bg-tertiary);
-  border-radius: $radius-md;
-  border-left: 4px solid transparent;
-
-  &.suitable {
-    border-left-color: #22c55e;
-  }
-
-  &.not-suitable {
-    border-left-color: #ef4444;
-  }
-}
-
-.suitability-text {
-  strong {
-    display: block;
-    font-size: 16px;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-  }
-
-  p {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin: 0;
-  }
-}
-
-.metrics-mini-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: var(--bg-tertiary);
-  border-radius: $radius-md;
-}
-
-.mini-metric {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.mini-label {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.mini-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-/* 空状态 */
-.empty-state {
-  padding: 60px 20px;
-  text-align: center;
+.strategy-description p {
+  line-height: 1.7;
+  color: #606266;
+  margin: 8px 0 0 0;
 }
 </style>

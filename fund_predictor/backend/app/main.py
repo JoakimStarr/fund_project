@@ -116,6 +116,7 @@ async def exception_handler(request: Request, exc: Exception):
 
 
 app.include_router(fund.router)
+app.include_router(fund.admin_router)
 app.include_router(intraday.router)
 app.include_router(train.router)
 app.include_router(task.router)
