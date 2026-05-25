@@ -413,6 +413,61 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
     cached = _read_cache(path)
     if cached is not None and not require_fresh and not _is_stale(cached):
         return cached, {"source_used": "cache", "fallback_used": False, "stale": False}
+
+    index_name = next((n for n, s in INDEX_SYMBOLS.items() if s == symbol), symbol)
+
+    try:
+        from app.services.xueqiu_data_service import get_xueqiu_service
+
+        logger.info("index_fetch_try symbol=%s source=xueqiu_kline", symbol)
+        xueqiu_service = get_xueqiu_service()
+        kline_data = xueqiu_service.fetch_kline_data(
+            symbol=symbol.upper(),
+            period="day",
+            type="before",
+            count=-284,
+            indicator="kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance",
+        )
+
+        if not kline_data:
+            raise DataFetchError("Xueqiu index source returned empty data", details={"symbol": symbol})
+
+        records = []
+        for item in kline_data:
+            record = {
+                "date": item.get("date"),
+                "open": item.get("open"),
+                "high": item.get("high"),
+                "low": item.get("low"),
+                "close": item.get("close"),
+                "volume": item.get("volume"),
+            }
+            records.append(record)
+
+        out = pd.DataFrame(records).dropna(subset=["date", "close"]).sort_values("date").drop_duplicates("date")
+        out["source"] = "xueqiu"
+
+        if require_fresh and _is_stale(out):
+            raise DataStaleError("Index latest date is stale", details={"symbol": symbol, "latest": str(out["date"].max().date())})
+
+        path.parent.mkdir(parents=True, exist_ok=True)
+        out.to_csv(path, index=False, encoding="utf-8")
+        _sync_index_to_db(index_name, symbol, out, "xueqiu")
+
+        logger.info(
+            "index_fetch_success symbol=%s source=xueqiu rows=%s start=%s end=%s",
+            symbol, len(out), out["date"].min(), out["date"].max(),
+        )
+        return out, {"source_used": "xueqiu", "fallback_used": False, "stale": _is_stale(out)}
+
+    except ImportError:
+        logger.warning("xueqiu_service_not_available symbol=%s", symbol)
+    except Exception as xq_exc:
+        logger.warning(
+            "index_fetch_failed symbol=%s source=xueqiu error=%s fallback_to_eastmoney",
+            symbol, xq_exc,
+        )
+
     try:
         url = "https://push2his.eastmoney.com/api/qt/stock/kline/get"
         params = {
@@ -444,8 +499,6 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
             }
         ).dropna(subset=["date", "close"]).sort_values("date").drop_duplicates("date")
 
-        index_name = next((n for n, s in INDEX_SYMBOLS.items() if s == symbol), symbol)
-
         if require_fresh and _is_stale(out):
             raise DataStaleError("Index latest date is stale", details={"symbol": symbol, "latest": str(out["date"].max().date())})
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -458,7 +511,6 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
         logger.exception("data_fetch_failed index")
         try:
             out = _fetch_index_sohu(symbol)
-            index_name = next((n for n, s in INDEX_SYMBOLS.items() if s == symbol), symbol)
             if require_fresh and _is_stale(out):
                 raise DataStaleError("Fallback index latest date is stale", details={"symbol": symbol, "latest": str(out["date"].max().date())})
             path.parent.mkdir(parents=True, exist_ok=True)
