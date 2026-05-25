@@ -1,12 +1,16 @@
 """
-基金画像解析服务：根据 akshare 基金基本信息进行三级分类判定。
+基金画像解析服务：使用 DanjuanFundsService 组合多个API获取完整基金画像。
 支持 SQLite 缓存层：优先读 DB，未命中或过期时从 API 获取并入库。
+修改日期：2026-05-25
+版本号：v2.3.0 + 集成DanjuanFundsService获取基金画像
 """
 import json
 import logging
 from datetime import datetime, timezone
 from dataclasses import dataclass, field, asdict
 from typing import Optional
+
+from app.services.danjuanfunds_service import get_danjuan_service
 
 logger = logging.getLogger(__name__)
 
@@ -70,49 +74,131 @@ def _parse_benchmark_weight(benchmark: str | None) -> float | None:
     return max(weights)
 
 
+def _map_type(type_desc: str) -> str:
+    """将蛋卷基金类型映射到系统标准类型"""
+    type_mapping = {
+        '股票型': 'equity',
+        '混合型': 'hybrid_equity',
+        '债券型': 'bond',
+        '指数型': 'index',
+        'QDII': 'qdii',
+        'FOF': 'fof',
+        '货币型': 'money_market',
+        '商品型': 'commodity',
+    }
+    return type_mapping.get(type_desc, 'hybrid_equity')
+
+
+def _determine_risk_level(volatility_rank: float | None) -> str:
+    """根据波动率确定风险等级"""
+    if volatility_rank is None:
+        return "未知"
+    if volatility_rank < 0.15:
+        return "低风险"
+    elif volatility_rank < 0.25:
+        return "中低风险"
+    elif volatility_rank < 0.35:
+        return "中高风险"
+    else:
+        return "高风险"
+
+
 def classify_fund(fund_code: str) -> FundProfile:
+    """使用 DanjuanFundsService 组合多个API获取完整基金画像"""
+    
     try:
-        info = ak.fund_individual_basic_info_xq(symbol=fund_code)
-    except Exception as exc:
-        logger.warning("fund_profile_fetch_failed fund_code=%s reason=%s", fund_code, exc)
-        return FundProfile(fund_code=fund_code, fund_type="hybrid_equity")
+        service = get_danjuan_service()
+        
+        # 1. 获取基础信息
+        info = service.fetch_fund_info(fund_code)
+        
+        # 2. 获取风险收益分析
+        risk_list = service.fetch_risk_analysis(fund_code)
+        
+        # 3. 获取基金经理
+        manager = service.fetch_manager(fund_code)
+        
+        # 4. 获取业绩表现
+        annual_list, stage_list = service.fetch_achievement(fund_code)
+        
+        # 5. 构建 FundProfile 对象
+        profile = FundProfile(
+            fund_code=fund_code,
+            fund_name=info.get('fd_name', ''),
+            fund_type=_map_type(info.get('fd_type_desc', '')),
+            fund_type_raw=info.get('fd_type_desc', ''),
+            manager=manager.get('name', '') if manager else '',
+            raw_info={
+                'basic': info,
+                'risk': risk_list,
+                'manager': manager,
+                'achievement': {
+                    'annual': annual_list,
+                    'stage': stage_list
+                }
+            },
+            data_source='danjuanfunds'
+        )
+        
+        # 6. 从风险分析中提取额外信息
+        if risk_list:
+            latest_risk = risk_list[0]  # 使用最近时间段的数据
+            self_index = latest_risk.get('self_index', {})
+            profile.risk_level = _determine_risk_level(self_index.get('volatility_rank'))
+            
+        return profile
+        
+    except Exception as e:
+        logger.warning("danjuanfunds_profile_failed fund=%s error=%s", fund_code, e)
+        
+        # Fallback: 尝试原有 akshare 方法
+        try:
+            import akshare as ak
+            info = ak.fund_individual_basic_info_xq(symbol=fund_code)
+            
+            raw_type = str(info.get("基金类型", ""))
+            benchmark = str(info.get("业绩比较基准", ""))
+            strategy = str(info.get("投资策略", ""))
+            fund_name = str(info.get("基金简称", ""))
 
-    raw_type = str(info.get("基金类型", ""))
-    benchmark = str(info.get("业绩比较基准", ""))
-    strategy = str(info.get("投资策略", ""))
-    fund_name = str(info.get("基金简称", ""))
+            fund_type = _classify_by_type(raw_type)
+            if fund_type == "unknown":
+                fund_type = _classify_by_benchmark(benchmark)
 
-    fund_type = _classify_by_type(raw_type)
-    if fund_type == "unknown":
-        fund_type = _classify_by_benchmark(benchmark)
+            size = _parse_size(info.get("最新规模"))
+            manager = str(info.get("基金经理", ""))
+            keywords = _extract_strategy_keywords(strategy)
+            skip = (fund_type == "money_market")
 
-    size = _parse_size(info.get("最新规模"))
-    manager = str(info.get("基金经理", ""))
-    keywords = _extract_strategy_keywords(strategy)
-    skip = (fund_type == "money_market")
+            logger.info(
+                "fund_classified_akshare_fallback fund_code=%s type=%s name=%s size=%s",
+                fund_code, fund_type, fund_name, size,
+            )
 
-    logger.info(
-        "fund_classified fund_code=%s type=%s name=%s size=%s",
-        fund_code, fund_type, fund_name, size,
-    )
-
-    if fund_type == "money_market":
-        skip = True
-
-    return FundProfile(
-        fund_code=fund_code,
-        fund_type=fund_type,
-        fund_name=fund_name,
-        fund_size=size,
-        manager=manager,
-        benchmark=benchmark,
-        strategy_keywords=keywords,
-        skip_prediction=skip,
-        raw_info=info,
-        fund_type_raw=raw_type,
-        strategy_text=strategy,
-        risk_level=_risk_level_for_type(fund_type),
-    )
+            return FundProfile(
+                fund_code=fund_code,
+                fund_type=fund_type,
+                fund_name=fund_name,
+                fund_size=size,
+                manager=manager,
+                benchmark=benchmark,
+                strategy_keywords=keywords,
+                skip_prediction=skip,
+                raw_info=info,
+                fund_type_raw=raw_type,
+                strategy_text=strategy,
+                risk_level=_risk_level_for_type(fund_type),
+                data_source='akshare'
+            )
+        except Exception as fallback_error:
+            logger.error("profile_fetch_all_failed fund=%s", fund_code)
+            return FundProfile(
+                fund_code=fund_code,
+                fund_type="hybrid_equity",
+                stale=True,
+                raw_info={'error': str(fallback_error)},
+                data_source='error'
+            )
 
 
 def get_profile(fund_code: str, force_refresh: bool = False) -> FundProfile:
@@ -135,6 +221,9 @@ def get_profile(fund_code: str, force_refresh: bool = False) -> FundProfile:
         profile = classify_fund(fund_code)
         profile.stale = False
         profile.cached_at = datetime.now(timezone.utc).isoformat()
+        
+        # 动态获取数据源
+        data_source = getattr(profile, 'data_source', 'unknown')
 
         with get_conn() as conn:
             now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -146,7 +235,7 @@ def get_profile(fund_code: str, force_refresh: bool = False) -> FundProfile:
                     benchmark, strategy_text, strategy_keywords,
                     skip_prediction, risk_level,
                     data_source, fetched_at, updated_at, cache_ttl_days, raw_info_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'akshare', ?, ?, 7, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 7, ?)
                 ON CONFLICT(fund_code) DO UPDATE SET
                     fund_name=excluded.fund_name,
                     fund_type=excluded.fund_type,
@@ -160,6 +249,7 @@ def get_profile(fund_code: str, force_refresh: bool = False) -> FundProfile:
                     strategy_keywords=excluded.strategy_keywords,
                     skip_prediction=excluded.skip_prediction,
                     risk_level=excluded.risk_level,
+                    data_source=excluded.data_source,
                     fetched_at=excluded.fetched_at,
                     updated_at=excluded.updated_at,
                     raw_info_json=excluded.raw_info_json
@@ -170,14 +260,14 @@ def get_profile(fund_code: str, force_refresh: bool = False) -> FundProfile:
                     profile.benchmark, profile.strategy_text,
                     json.dumps(profile.strategy_keywords, ensure_ascii=False),
                     int(profile.skip_prediction), profile.risk_level,
-                    now, now,
+                    data_source, now, now,
                     json.dumps(profile.raw_info, ensure_ascii=False, default=str),
                 ],
             )
             duration_ms = int((datetime.now() - start).total_seconds() * 1000)
             conn.execute(
                 "INSERT INTO data_fetch_log (entity_type, entity_key, source, success, duration_ms, fetched_at) VALUES (?, ?, ?, 1, ?, ?)",
-                ["profile", fund_code, "akshare", duration_ms, now],
+                ["profile", fund_code, data_source, duration_ms, now],
             )
 
         logger.info("profile_fetched_and_cached fund_code=%s duration_ms=%s", fund_code, duration_ms)
