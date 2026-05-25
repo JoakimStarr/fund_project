@@ -21,6 +21,7 @@ from app.core.config import (
 )
 from app.core.errors import AppError, DataFetchError, DataStaleError
 from app.core.logging_config import set_log_context
+from app.services.danjuanfunds_service import get_danjuan_service, DataFetchError as DanjuanDataFetchError
 
 logger = logging.getLogger(__name__)
 
@@ -248,6 +249,10 @@ def _fetch_fund_nav_eastmoney_html(fund_code: str) -> pd.DataFrame:
     return _normalize_fund_nav(pd.concat(rows, ignore_index=True), "eastmoney_html")
 
 
+# 使用 DanjuanFundsService 作为主数据源，akshare/eastmoney 作为备用
+# 修改日期: 2026-05-25
+# 版本号: v2.3.0 + 集成蛋卷基金数据源作为主要数据获取方式
+
 def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFrame, dict]:
     set_log_context(fund_code=fund_code, stage="data_fetch_start")
     logger.info("data_fetch_start fund nav")
@@ -271,6 +276,35 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
             return file_cached, _nav_meta(file_cached, "cache", fallback_used=False)
 
     primary_error: Exception | None = None
+    
+    # 主数据源：使用 DanjuanFundsService 获取基金净值数据
+    try:
+        service = get_danjuan_service()
+        df = service.fetch_fund_nav_history(fund_code)
+        
+        if require_fresh and _is_stale(df):
+            raise DataStaleError("Fund NAV latest date is stale", details={"fund_code": fund_code})
+        
+        path.parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(path, index=False, encoding="utf-8")
+        
+        mtime = datetime.fromtimestamp(path.stat().st_mtime)
+        with _FRESHNESS_LOCK:
+            _DATA_FRESHNESS[fund_code] = mtime
+        
+        with _NAV_CACHE_LOCK:
+            _NAV_CACHE[fund_code] = (df, datetime.now())
+        
+        _sync_fund_nav_to_db(fund_code, df, "danjuanfunds")
+        meta = _nav_meta(df, "danjuanfunds", fallback_used=False)
+        set_log_context(stage="data_fetch_success")
+        logger.info("data_fetch_success fund nav fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
+        return df, meta
+    except (DanjuanDataFetchError, Exception) as e:
+        primary_error = e
+        logger.warning("danjuanfunds_failed fund=%s error=%s", fund_code, e)
+
+    # Fallback 1: 如果 DanjuanFundsService 失败，尝试 akshare
     try:
         out = _fetch_fund_nav_akshare(fund_code)
         if require_fresh and _is_stale(out):
@@ -283,17 +317,16 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
         with _NAV_CACHE_LOCK:
             _NAV_CACHE[fund_code] = (out, datetime.now())
         _sync_fund_nav_to_db(fund_code, out, "akshare_fund_open_fund_info_em")
-        meta = _nav_meta(out, "akshare_fund_open_fund_info_em", fallback_used=False)
+        meta = _nav_meta(out, "akshare_fund_open_fund_info_em", fallback_used=True, fallback_reason=str(primary_error))
         set_log_context(stage="data_fetch_success")
-        logger.info("data_fetch_success fund nav fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
+        logger.info("data_fetch_success fund nav fallback fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
         return out, meta
     except AppError as exc:
-        primary_error = exc
-        logger.exception("data_fetch_failed fund nav primary")
+        logger.exception("data_fetch_failed fund nav fallback1")
     except Exception as exc:
-        primary_error = exc
-        logger.exception("data_fetch_failed fund nav primary")
+        logger.exception("data_fetch_failed fund nav fallback1")
 
+    # Fallback 2: 如果 akshare 也失败，尝试 eastmoney HTML
     try:
         out = _fetch_fund_nav_eastmoney_html(fund_code)
         if require_fresh and _is_stale(out):
@@ -306,23 +339,27 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
         with _NAV_CACHE_LOCK:
             _NAV_CACHE[fund_code] = (out, datetime.now())
         _sync_fund_nav_to_db(fund_code, out, "eastmoney_html")
-        meta = _nav_meta(out, "eastmoney_html", fallback_used=True, fallback_reason=str(primary_error))
+        meta = _nav_meta(out, "eastmoney_html", fallback_used=True, fallback_reason=f"All sources failed: primary={str(primary_error)}")
         set_log_context(stage="data_fetch_success")
-        logger.info("data_fetch_success fund nav fallback fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
+        logger.info("data_fetch_success fund nav fallback2 fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
         return out, meta
     except AppError:
         raise
     except Exception as fallback_exc:
         set_log_context(stage="data_fetch_failed")
-        logger.exception("data_fetch_failed fund nav fallback")
+        logger.exception("data_fetch_failed fund nav fallback2")
         if file_cached is not None and not require_fresh:
             with _NAV_CACHE_LOCK:
                 _NAV_CACHE[fund_code] = (file_cached, datetime.now())
             meta = _nav_meta(file_cached, "cache", fallback_used=True, fallback_reason=str(fallback_exc))
             return file_cached, meta
         raise DataFetchError(
-            "Fund NAV fetch failed",
-            details={"reason": str(fallback_exc), "primary_reason": str(primary_error), "fund_code": fund_code},
+            "All data sources failed",
+            details={
+                "fund_code": fund_code,
+                "primary_error": str(primary_error),
+                "fallback_error": str(fallback_exc),
+            },
         ) from fallback_exc
 
 
