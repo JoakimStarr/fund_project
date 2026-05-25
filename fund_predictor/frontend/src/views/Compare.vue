@@ -188,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, nextTick, watch } from 'vue'
+import { ref, reactive, computed, nextTick, watch, onMounted } from 'vue'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import BaseChart from '@/components/common/BaseChart.vue'
 import { predictFund } from '@/api/fund'

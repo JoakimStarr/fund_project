@@ -60,6 +60,7 @@ const toggleSidebar = () => {
 const toggleTheme = () => {
   isDarkTheme.value = !isDarkTheme.value
   document.documentElement.setAttribute('data-theme', isDarkTheme.value ? 'dark' : 'light')
+  localStorage.setItem('theme', isDarkTheme.value ? 'dark' : 'light')
 }
 
 onMounted(() => {
