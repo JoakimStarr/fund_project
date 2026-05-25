@@ -1,8 +1,9 @@
 import json
 import logging
 import re
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from io import StringIO
 from pathlib import Path
@@ -23,12 +24,32 @@ from app.core.logging_config import set_log_context
 
 logger = logging.getLogger(__name__)
 
+_DATA_FRESHNESS: dict[str, datetime] = {}
+_FRESHNESS_LOCK = threading.Lock()
+
+_NAV_CACHE: dict[str, tuple[pd.DataFrame, datetime]] = {}
+_NAV_CACHE_LOCK = threading.RLock()
+
 
 def _is_stale(df: pd.DataFrame) -> bool:
     if df.empty:
         return True
     latest = pd.to_datetime(df["date"]).max().date()
     return (datetime.now().date() - latest).days > STALE_DAYS
+
+
+def check_data_freshness(fund_code: str, stale_days: int = 3) -> str | None:
+    """检查数据是否过期。返回警告消息或None"""
+    with _FRESHNESS_LOCK:
+        last_update = _DATA_FRESHNESS.get(fund_code)
+    
+    if last_update is None:
+        return f"基金{fund_code}无本地数据"
+    
+    days_stale = (datetime.now() - last_update).days
+    if days_stale > stale_days:
+        return f"数据已滞后{days_stale}天(>{stale_days}天)"
+    return None
 
 
 def _read_cache(path: Path) -> pd.DataFrame | None:
@@ -231,9 +252,23 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
     set_log_context(fund_code=fund_code, stage="data_fetch_start")
     logger.info("data_fetch_start fund nav")
     path = RAW_DIR / "fund_nav" / f"{fund_code}.csv"
-    cached = _read_cache(path)
-    if cached is not None and not require_fresh and not _is_stale(cached) and len(cached) >= MIN_TRAIN_ROWS + 1:
-        return cached, _nav_meta(cached, "cache", fallback_used=False)
+    
+    with _NAV_CACHE_LOCK:
+        cached = _NAV_CACHE.get(fund_code)
+        if cached is not None:
+            df_cache, cache_time = cached
+            if not require_fresh and not _is_stale(df_cache) and len(df_cache) >= MIN_TRAIN_ROWS + 1 and (datetime.now() - cache_time).seconds < 3600:
+                return df_cache, _nav_meta(df_cache, "cache", fallback_used=False)
+    
+    file_cached = _read_cache(path)
+    if file_cached is not None:
+        mtime = datetime.fromtimestamp(path.stat().st_mtime)
+        with _FRESHNESS_LOCK:
+            _DATA_FRESHNESS[fund_code] = mtime
+        if not require_fresh and not _is_stale(file_cached) and len(file_cached) >= MIN_TRAIN_ROWS + 1:
+            with _NAV_CACHE_LOCK:
+                _NAV_CACHE[fund_code] = (file_cached, datetime.now())
+            return file_cached, _nav_meta(file_cached, "cache", fallback_used=False)
 
     primary_error: Exception | None = None
     try:
@@ -242,6 +277,11 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
             raise DataStaleError("Fund NAV latest date is stale", details={"fund_code": fund_code, "latest": str(out["date"].max().date())})
         path.parent.mkdir(parents=True, exist_ok=True)
         out.to_csv(path, index=False, encoding="utf-8")
+        mtime = datetime.fromtimestamp(path.stat().st_mtime)
+        with _FRESHNESS_LOCK:
+            _DATA_FRESHNESS[fund_code] = mtime
+        with _NAV_CACHE_LOCK:
+            _NAV_CACHE[fund_code] = (out, datetime.now())
         _sync_fund_nav_to_db(fund_code, out, "akshare_fund_open_fund_info_em")
         meta = _nav_meta(out, "akshare_fund_open_fund_info_em", fallback_used=False)
         set_log_context(stage="data_fetch_success")
@@ -260,6 +300,11 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
             raise DataStaleError("Fallback fund NAV latest date is stale", details={"fund_code": fund_code, "latest": str(out["date"].max().date())})
         path.parent.mkdir(parents=True, exist_ok=True)
         out.to_csv(path, index=False, encoding="utf-8")
+        mtime = datetime.fromtimestamp(path.stat().st_mtime)
+        with _FRESHNESS_LOCK:
+            _DATA_FRESHNESS[fund_code] = mtime
+        with _NAV_CACHE_LOCK:
+            _NAV_CACHE[fund_code] = (out, datetime.now())
         _sync_fund_nav_to_db(fund_code, out, "eastmoney_html")
         meta = _nav_meta(out, "eastmoney_html", fallback_used=True, fallback_reason=str(primary_error))
         set_log_context(stage="data_fetch_success")
@@ -270,9 +315,11 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
     except Exception as fallback_exc:
         set_log_context(stage="data_fetch_failed")
         logger.exception("data_fetch_failed fund nav fallback")
-        if cached is not None and not require_fresh:
-            meta = _nav_meta(cached, "cache", fallback_used=True, fallback_reason=str(fallback_exc))
-            return cached, meta
+        if file_cached is not None and not require_fresh:
+            with _NAV_CACHE_LOCK:
+                _NAV_CACHE[fund_code] = (file_cached, datetime.now())
+            meta = _nav_meta(file_cached, "cache", fallback_used=True, fallback_reason=str(fallback_exc))
+            return file_cached, meta
         raise DataFetchError(
             "Fund NAV fetch failed",
             details={"reason": str(fallback_exc), "primary_reason": str(primary_error), "fund_code": fund_code},
