@@ -8,6 +8,7 @@ from app.core.config import MODEL_DIR
 from app.core.errors import DirectionModelError
 from app.core.logging_config import set_log_context
 from app.services.feature_service import build_features, model_feature_columns
+from app.services.features.ensemble import residual_adaptive_correction
 from app.services.model_registry_service import append_prediction, load_model_archive
 from app.services.model_selection_service import PREDICTION_MODE
 
@@ -190,6 +191,23 @@ def _direction_classes(model) -> list:
     return []
 
 
+def _get_recent_prediction_errors(fund_code: str, n: int = 10) -> list[float] | None:
+    """从 prediction_history 表获取最近的N条预测误差"""
+    try:
+        from app.db.database import get_conn
+        conn = get_conn()
+        row = conn.execute(
+            "SELECT error FROM prediction_history WHERE fund_code=? AND error IS NOT NULL ORDER BY predicted_at DESC LIMIT ?",
+            (fund_code, n),
+        ).fetchall()
+        if row:
+            return [r[0] for r in row]
+        return None
+    except Exception as e:
+        logger.debug("recent_errors_fetch_failed fund_code=%s error=%s", fund_code, e)
+        return None
+
+
 def predict_next(fund_code: str, request_id: str) -> dict:
     try:
         point_model, direction_model, config, metrics, interval_config = load_model_archive(fund_code)
@@ -207,6 +225,10 @@ def predict_next(fund_code: str, request_id: str) -> dict:
 
         point_x = _align_model_features(point_model, latest, feature_cols)
         pred = float(point_model.predict(point_x)[0])
+        
+        recent_errs = _get_recent_prediction_errors(fund_code, n=10)
+        point_pred = pred
+        pred = residual_adaptive_correction(recent_errs, point_pred)
         p_up = None
         p_down = None
         direction_classes = []

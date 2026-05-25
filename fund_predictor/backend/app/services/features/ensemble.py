@@ -134,15 +134,25 @@ class StackingEnsemble:
 
 
 def residual_adaptive_correction(
-    recent_errors: list[float],
+    recent_errors: list[float] | None,
     current_pred: float,
     n_window: int = 10,
 ) -> float:
     """残差自适应修正（Layer3）
     
     基于最近N个交易日的预测误差，修正系统偏差。
+    recent_errors 为 None 或空列表时跳过修正（bias=0）。
+    
+    Args:
+        recent_errors: 最近N次预测的历史误差序列 (predicted - actual)，
+                       为None时表示无历史数据，跳过修正
+        current_pred: 当前模型预测值
+        n_window: 回看窗口大小
+        
+    Returns:
+        修正后的预测值
     """
-    if len(recent_errors) < 3:
+    if not recent_errors or len(recent_errors) < 3:
         return current_pred
     
     bias = np.mean(recent_errors[-n_window:])
