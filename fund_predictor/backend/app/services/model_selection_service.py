@@ -244,22 +244,39 @@ def _align_predictions(
 
 
 def _split_train_valid_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """四段划分：train(55%) / valid(22%) / test_select(13%) / test_final(10%)
+    """四段划分：train(55%) / valid(22%) / calib(13%) / final(10%)
     
-    - train + valid: 粗筛和 walk-forward 精排
-    - test_select: final_metrics 选最佳模型
-    - test_final: 独立回测报告，不参与任何选模
+    划分策略：
+    ┌──────────┬──────────┬───────────┬─────────┐
+    │ X_train  │ X_valid  │ X_calib   │ X_final │
+    │  (55%)   │  (22%)   │   (13%)   │  (10%)  │
+    └──────────┴──────────┴───────────┴─────────┘
+    
+    各段用途与隔离要求：
+    - X_train: 模型训练集 - 用于基础模型参数学习
+    - X_valid: 模型选择/Stacking元学习 - 用于超参调优和元学习器训练
+    - X_calib: 保形预测校准集(不参与任何训练!) - 仅用于概率校准和区间估计
+    - X_final: 最终泛化评估(严格隔离!) - 独立测试集，模拟真实部署环境
+    
+    ⚠️ 重要：X_calib 和 X_final 必须严格隔离，不得参与任何模型训练或选择过程！
+    
+    Args:
+        df: 完整时序数据
+        
+    Returns:
+        (X_train, X_valid, X_calib, X_final) 四个 DataFrame 元组
     """
     n = len(df)
     train_end = int(n * 0.55)
     valid_end = train_end + int(n * 0.22)
     test_sel_end = valid_end + int(n * 0.13)
-    return (
-        df.iloc[:train_end].copy(),
-        df.iloc[train_end:valid_end].copy(),
-        df.iloc[valid_end:test_sel_end].copy(),
-        df.iloc[test_sel_end:].copy(),
-    )
+    
+    X_train = df.iloc[:train_end].copy()      # 55% - 模型训练
+    X_valid = df.iloc[train_end:valid_end].copy()  # 22% - 模型选择/Stacking元学习
+    X_calib = df.iloc[valid_end:test_sel_end].copy() # 13% - 保形预测校准集(不参与任何训练!)
+    X_final = df.iloc[test_sel_end:].copy()       # 10% - 最终泛化评估(严格隔离!)
+    
+    return X_train, X_valid, X_calib, X_final
 
 
 def _selector(selector: str, n_features: int, task: str):

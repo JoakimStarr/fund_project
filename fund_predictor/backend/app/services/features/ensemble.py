@@ -179,90 +179,175 @@ def walk_forward_cv(
     step_months: int = 21,
     min_rounds: int = 12,
     model_fn=None,
-) -> list[dict[str, Any]]:
-    """Walk-Forward 时序交叉验证
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Walk-Forward 时序交叉验证（增强版：动态参数适配 + 方向准确率）
     
-    策略方案 §8.1 实现：
-    - 训练窗口：24个月（约500交易日）
-    - 验证窗口：3个月（约60交易日）
-    - 滚动步长：1个月
-    - 最少轮次：12轮
+    策略方案 §8.1 实现（V2.7 增强）：
+    - 动态适配：根据实际数据量自动调整训练/验证窗口
+    - Hold-out 回退：当数据量不足以支持 WF-CV 时自动降级
+    - 方向准确率：每轮记录预测方向与真实方向的一致性
     
     Args:
         df: 完整时序数据
         feature_cols: 特征列
         target_col: 目标列
-        train_months: 训练窗口月数
-        valid_months: 验证窗口月数
-        step_months: 滚动步长月数
+        train_months: 训练窗口月数（默认值，会被动态覆盖）
+        valid_months: 验证窗口月数（默认值，会被动态覆盖）
+        step_months: 滚动步长月数（默认值，会被动态覆盖）
         min_rounds: 最少验证轮次
         model_fn: 模型训练函数 (X_train, y_train) → model
     
     Returns:
-        每轮验证结果的列表
+        (results_list, aggregated_metrics)
+        结果包含：actual_wf_rounds, validation_method, total_samples, direction_accuracy 等
     """
     from sklearn.metrics import mean_absolute_error, mean_squared_error
     
+    T = len(df)
     trading_days_per_month = 21
-    train_size = train_months * trading_days_per_month
-    valid_size = valid_months * trading_days_per_month
-    step_size = step_months * trading_days_per_month
+    
+    dyn_train_months = max(6, int(T * 0.55 / trading_days_per_month))
+    dyn_valid_months = max(2, int(T * 0.22 / trading_days_per_month))
+    dyn_step_months = 1
+    
+    train_size = dyn_train_months * trading_days_per_month
+    valid_size = dyn_valid_months * trading_days_per_month
+    step_size = dyn_step_months * trading_days_per_month
+    
+    max_rounds_possible = (T - train_size - valid_size) / step_size if step_size > 0 else 0
+    use_holdout = max_rounds_possible < 3
+    
+    validation_method = "holdout" if use_holdout else "walk_forward"
+    
+    logger.info(
+        "wf_cv_dynamic_params T=%d dyn_train=%dmo dyn_valid=%dmo dyn_step=%dmo "
+        "max_rounds_possible=%.1f validation_method=%s",
+        T, dyn_train_months, dyn_valid_months, dyn_step_months,
+        max_rounds_possible, validation_method,
+    )
     
     results = []
-    n = len(df)
-    start = max(train_size, 120)
     
-    round_num = 0
-    for offset in range(start, n - valid_size, step_size):
-        round_num += 1
-        if round_num > min_rounds + 12:
-            break
+    if use_holdout:
+        logger.warning("wf_cv_fallback_to_holdout reason=insufficient_rounds max_rounds=%.1f", max_rounds_possible)
         
-        train_end = offset
-        valid_start = offset
-        valid_end = min(offset + valid_size, n)
+        train_end = int(T * 0.80)
+        X_train_df = df.iloc[:train_end].copy()
+        X_valid_df = df.iloc[train_end:].copy()
         
-        train_df = df.iloc[train_end - train_size : train_end].copy()
-        valid_df = df.iloc[valid_start:valid_end].copy()
+        if len(X_valid_df) < 10:
+            logger.error("wf_cv_holdout_failed reason=insufficient_valid_data valid_n=%d", len(X_valid_df))
+            return [], {
+                "status": "failed",
+                "validation_method": validation_method,
+                "total_samples": T,
+                "actual_wf_rounds": 0,
+                "error": "Insufficient data for holdout validation",
+            }
         
-        if len(valid_df) < 20:
-            continue
-        
-        X_train = train_df[feature_cols].fillna(0).values
-        y_train = train_df[target_col].values
-        X_valid = valid_df[feature_cols].fillna(0).values
-        y_valid = valid_df[target_col].values
+        X_train = X_train_df[feature_cols].fillna(0).values
+        y_train = X_train_df[target_col].values
+        X_valid = X_valid_df[feature_cols].fillna(0).values
+        y_valid = X_valid_df[target_col].values
         
         sample_weights = build_sample_weights(len(y_train))
         
-        if model_fn is not None:
-            try:
+        try:
+            if model_fn is not None:
                 model = model_fn(X_train, y_train, sample_weights)
                 pred = model.predict(X_valid)
-            except Exception as exc:
-                logger.warning("wf_cv_round_failed round=%d error=%s", round_num, exc)
-                continue
-        else:
-            from sklearn.linear_model import Ridge
-            model = Ridge(alpha=1.0)
-            model.fit(X_train, y_train, sample_weight=sample_weights)
-            pred = model.predict(X_valid)
-        
-        mae = mean_absolute_error(y_valid, pred)
-        rmse = np.sqrt(mean_squared_error(y_valid, pred))
-        corr = float(np.corrcoef(pred, y_valid)[0, 1]) if np.std(pred) > 0 else 0.0
-        
-        results.append({
-            "round": round_num,
-            "train_range": (str(train_df.iloc[0]["date"]), str(train_df.iloc[-1]["date"])),
-            "valid_range": (str(valid_df.iloc[0]["date"]), str(valid_df.iloc[-1]["date"])),
-            "valid_n": len(valid_df),
-            "mae": mae,
-            "rmse": rmse,
-            "corr": corr,
-        })
+            else:
+                from sklearn.linear_model import Ridge
+                model = Ridge(alpha=1.0)
+                model.fit(X_train, y_train, sample_weight=sample_weights)
+                pred = model.predict(X_valid)
+            
+            mae = mean_absolute_error(y_valid, pred)
+            rmse = np.sqrt(mean_squared_error(y_valid, pred))
+            corr = float(np.corrcoef(pred, y_valid)[0, 1]) if np.std(pred) > 0 else 0.0
+            
+            direction_match = np.sign(pred) == np.sign(y_valid)
+            direction_accuracy = float(np.mean(direction_match))
+            
+            results.append({
+                "round": 1,
+                "train_range": (str(X_train_df.iloc[0]["date"]), str(X_train_df.iloc[-1]["date"])),
+                "valid_range": (str(X_valid_df.iloc[0]["date"]), str(X_valid_df.iloc[-1]["date"])),
+                "valid_n": len(X_valid_df),
+                "mae": mae,
+                "rmse": rmse,
+                "corr": corr,
+                "direction_accuracy": direction_accuracy,
+            })
+            
+        except Exception as exc:
+            logger.exception("wf_cv_holdout_failed error=%s", exc)
+            return [], {
+                "status": "failed",
+                "validation_method": validation_method,
+                "total_samples": T,
+                "actual_wf_rounds": 0,
+                "error": str(exc),
+            }
     
-    logger.info("walk_forward_cv_completed rounds=%d", len(results))
+    else:
+        start = max(train_size, 120)
+        round_num = 0
+        
+        for offset in range(start, T - valid_size, step_size):
+            round_num += 1
+            if round_num > min_rounds + 12:
+                break
+            
+            train_end = offset
+            valid_start = offset
+            valid_end = min(offset + valid_size, T)
+            
+            train_df = df.iloc[train_end - train_size : train_end].copy()
+            valid_df = df.iloc[valid_start:valid_end].copy()
+            
+            if len(valid_df) < 20:
+                continue
+            
+            X_train = train_df[feature_cols].fillna(0).values
+            y_train = train_df[target_col].values
+            X_valid = valid_df[feature_cols].fillna(0).values
+            y_valid = valid_df[target_col].values
+            
+            sample_weights = build_sample_weights(len(y_train))
+            
+            if model_fn is not None:
+                try:
+                    model = model_fn(X_train, y_train, sample_weights)
+                    pred = model.predict(X_valid)
+                except Exception as exc:
+                    logger.warning("wf_cv_round_failed round=%d error=%s", round_num, exc)
+                    continue
+            else:
+                from sklearn.linear_model import Ridge
+                model = Ridge(alpha=1.0)
+                model.fit(X_train, y_train, sample_weight=sample_weights)
+                pred = model.predict(X_valid)
+            
+            mae = mean_absolute_error(y_valid, pred)
+            rmse = np.sqrt(mean_squared_error(y_valid, pred))
+            corr = float(np.corrcoef(pred, y_valid)[0, 1]) if np.std(pred) > 0 else 0.0
+            
+            direction_match = np.sign(pred) == np.sign(y_valid)
+            direction_accuracy = float(np.mean(direction_match))
+            
+            results.append({
+                "round": round_num,
+                "train_range": (str(train_df.iloc[0]["date"]), str(train_df.iloc[-1]["date"])),
+                "valid_range": (str(valid_df.iloc[0]["date"]), str(valid_df.iloc[-1]["date"])),
+                "valid_n": len(valid_df),
+                "mae": mae,
+                "rmse": rmse,
+                "corr": corr,
+                "direction_accuracy": direction_accuracy,
+            })
+    
+    logger.info("walk_forward_cv_completed rounds=%d method=%s", len(results), validation_method)
     
     if results:
         agg = {
@@ -270,10 +355,19 @@ def walk_forward_cv(
             "median_mae": round(float(np.median([r["mae"] for r in results])), 6),
             "mean_rmse": round(np.mean([r["rmse"] for r in results]), 6),
             "mean_corr": round(np.mean([r["corr"] for r in results]), 4),
+            "mean_direction_accuracy": round(np.mean([r.get("direction_accuracy", 0.5) for r in results]), 4),
             "worst_mae": round(max(r["mae"] for r in results), 6),
             "best_mae": round(min(r["mae"] for r in results), 6),
             "total_rounds": len(results),
+            "validation_method": validation_method,
+            "total_samples": T,
+            "actual_wf_rounds": len(results),
         }
         return results, agg
     
-    return results, {}
+    return results, {
+        "status": "no_valid_rounds",
+        "validation_method": validation_method,
+        "total_samples": T,
+        "actual_wf_rounds": 0,
+    }
