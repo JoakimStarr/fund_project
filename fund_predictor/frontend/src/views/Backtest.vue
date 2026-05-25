@@ -462,9 +462,9 @@ const loadBacktestData = async () => {
     // 更新回测指标
     if (data.metrics) {
       const m = data.metrics
-      backtestMetrics.value[0].value = m.interval_coverage_80 ? `${m.interval_coverage_80 * 100:.1f}%` : '-'
-      backtestMetrics.value[1].value = m.interval_coverage_90 ? `${m.interval_coverage_90 * 100:.1f}%` : '-'
-      backtestMetrics.value[2].value = m.direction_accuracy ? `${m.direction_accuracy * 100:.1f}%` : '-'
+      backtestMetrics.value[0].value = m.interval_coverage_80 ? `${(m.interval_coverage_80 * 100).toFixed(1)}%` : '-'
+      backtestMetrics.value[1].value = m.interval_coverage_90 ? `${(m.interval_coverage_90 * 100).toFixed(1)}%` : '-'
+      backtestMetrics.value[2].value = m.direction_accuracy ? `${(m.direction_accuracy * 100).toFixed(1)}%` : '-'
       backtestMetrics.value[3].value = m.mae ? `${(m.mae * 100).toFixed(2)}%` : '-'
       backtestMetrics.value[4].value = m.rmse ? `${(m.rmse * 100).toFixed(2)}%` : '-'
       backtestMetrics.value[5].value = m.correlation ? m.correlation.toFixed(3) : '-'
