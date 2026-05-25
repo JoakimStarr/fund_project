@@ -190,6 +190,7 @@
 <script setup>
 import { ref, reactive, computed, nextTick, watch, onMounted } from 'vue'
 import { Plus, Delete } from '@element-plus/icons-vue'
+import * as echarts from 'echarts'
 import BaseChart from '@/components/common/BaseChart.vue'
 import { predictFund } from '@/api/fund'
 
