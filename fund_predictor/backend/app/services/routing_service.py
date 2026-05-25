@@ -35,12 +35,6 @@ def route_predict(fund_code: str, profile: FundProfile, request_id: str) -> dict
         # TODO: 后续阶段替换为规则引擎
         logger.info("routing=index_equity (fallback to ML) fund_code=%s", fund_code)
         result = generic_predict(fund_code, request_id)
-    elif profile.fund_type == "money_market":
-        return {
-            "fund_code": fund_code,
-            "fund_type": "money_market",
-            "message": "货币基金净值恒为1",
-        }
     else:
         # 债券、灵活配置、FOF、QDII 暂走通用流程
         logger.info("routing=%s (generic fallback) fund_code=%s", profile.fund_type, fund_code)

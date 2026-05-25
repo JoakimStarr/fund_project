@@ -31,6 +31,45 @@ class FundProfile:
     cached_at: str = ""
 
 
+def _parse_benchmark_weight(benchmark: str | None) -> float | None:
+    """解析基准字符串中的股票权重。
+
+    支持格式:
+    - "沪深300×80%+中证全债×20%" → 0.80
+    - "沪深300收益率*80%+中债*20%" → 0.80
+    - "50%+50%" → 0.50
+    - 纯文字描述 → None
+
+    Returns:
+        股票权重 (0.0~1.0), 无法解析返回 None
+    """
+    if not benchmark:
+        return None
+
+    import re
+
+    patterns = [
+        r'(\d+(?:\.\d+)?)\s*[%％]',           # "80%" or "80％"
+        r'[\*×]\s*(\d+(?:\.\d+)?)',            # "*80" or "×80"
+    ]
+
+    weights = []
+    for pattern in patterns:
+        matches = re.findall(pattern, benchmark)
+        for m in matches:
+            try:
+                w = float(m) / 100.0
+                if 0.0 <= w <= 1.0:
+                    weights.append(w)
+            except ValueError:
+                continue
+
+    if not weights:
+        return None
+
+    return max(weights)
+
+
 def classify_fund(fund_code: str) -> FundProfile:
     try:
         info = ak.fund_individual_basic_info_xq(symbol=fund_code)
@@ -56,6 +95,9 @@ def classify_fund(fund_code: str) -> FundProfile:
         "fund_classified fund_code=%s type=%s name=%s size=%s",
         fund_code, fund_type, fund_name, size,
     )
+
+    if fund_type == "money_market":
+        skip = True
 
     return FundProfile(
         fund_code=fund_code,
@@ -231,9 +273,23 @@ def _classify_by_type(raw_type: str) -> str:
 
 
 def _classify_by_benchmark(benchmark: str) -> str:
-    if "沪深300" in benchmark or "中证500" in benchmark or "中证800" in benchmark:
+    has_equity = bool("沪深300" in benchmark or "中证500" in benchmark or "中证800" in benchmark)
+    has_bond = bool("中债" in benchmark or "国债" in benchmark or "中证全债" in benchmark)
+
+    if has_equity and has_bond:
+        equity_weight = _parse_benchmark_weight(benchmark)
+        if equity_weight is not None:
+            if equity_weight > 0.65:
+                return "hybrid_equity"
+            elif equity_weight >= 0.40:
+                return "hybrid_balanced"
+            else:
+                return "hybrid_bond"
+        return "hybrid_balanced"
+
+    if has_equity:
         return "hybrid_equity"
-    if "中债" in benchmark or "国债" in benchmark:
+    if has_bond:
         return "bond_pure"
     return "hybrid_equity"
 
