@@ -127,10 +127,10 @@ def build_features(fund_code: str, require_fresh: bool = False) -> tuple[pd.Data
             df["style_small_vs_large"] = df["zz1000_ret"] - df["hs300_ret"]
         if "kcb50_ret" in df.columns and "hs300_ret" in df.columns:
             df["style_tech_vs_large"] = df["kcb50_ret"] - df["hs300_ret"]
-        for col in ["style_growth_vs_large", "style_small_vs_large", "style_tech_vs_large"]:
-            if col in df.columns:
-                df[f"{col}_mean_5"] = df[col].rolling(5).mean()
-                df[f"{col}_mean_20"] = df[col].rolling(20).mean()
+        for _style_col in ["style_growth_vs_large", "style_small_vs_large", "style_tech_vs_large"]:
+            if _style_col in df.columns:
+                df[f"{_style_col}_mean_5"] = df[_style_col].rolling(5).mean()
+                df[f"{_style_col}_mean_20"] = df[_style_col].rolling(20).mean()
         df, proxy_meta = build_proxy_features(fund_code, df)
 
         duplicated_cols = df.columns[df.columns.duplicated()].tolist()
