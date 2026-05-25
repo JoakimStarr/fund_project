@@ -26,7 +26,16 @@ class XueqiuRateLimitError(DataFetchError):
 class XueqiuDataService:
     BASE_URL = "https://stock.xueqiu.com"
 
-    DEFAULT_COOKIE = "xq_a_token=20458f74230aee45906ecb90d8c70ff43daa3837; xqat=20458f74230aee45906ecb90d8c70ff43daa3837"
+    DEFAULT_COOKIE_DICT = {
+        "xq_a_token": "20458f74230aee45906ecb90d8c70ff43daa3837",
+        "xqat": "20458f74230aee45906ecb90d8c70ff43daa3837",
+        "xq_r_token": "fa5fac8aea31fef0733c31a1c3670554e9365bda",
+        "xq_id_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOi0xLCJpc3MiOiJ1YyIsImV4cCI6MTc4MTA1NDU5NiwiY3RtIjoxNzc5NjkzNTM2Nzc3LCJjaWQiOiJkOWQwbjRBWnVwIn0.q6KBEn4mP3gcuoHu5Ydu3EQvGBqnfhss7ffOM63KZkTXa_hi_PlmJlRY3XeiyslFIeyNHJkk6DiZHwBzLcJKqmDt0YhgoQflGdRCouQj5R69Ds3SSe-HdliB4l3RV4gdHAUs7yC2lGZKdU0et8CjTqv3LiA2GGOEzkFwG-Sr-iSeuY0Zveht6zd1uWUJVDCmcgT_zKDyMOGrUziQwJHOIGlzCRV45mckDS3bpIVOYwLortL7ubNBw05CkpJ_xD23di-4vitOCSoMKD6fJCdhPX95LL2RTXpoQleHyd4Trhuw51uycGhpS14FYbuTnBi_mfmJblwZXfyqw-WU2XjzIQ",
+        "cookiesu": "601779693564189",
+        "u": "601779693564189",
+        "device_id": "226d8fefef0a0dd96f9820304f458f5f",
+        "is_overseas": "0"
+    }
 
     HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -39,8 +48,8 @@ class XueqiuDataService:
     REQUEST_TIMEOUT = 30
     CACHE_TTL = 300
 
-    def __init__(self, cookie: str | None = None):
-        self.cookie = cookie or self.DEFAULT_COOKIE
+    def __init__(self, cookie: dict[str, str] | None = None):
+        self.cookie_dict = cookie or self.DEFAULT_COOKIE_DICT
         self.session = requests.Session()
         self._setup_session()
         self._cache: dict[str, tuple[Any, float]] = {}
@@ -49,7 +58,7 @@ class XueqiuDataService:
 
     def _setup_session(self):
         self.session.headers.update(self.HEADERS)
-        self.session.headers.update({"Cookie": self.cookie})
+        self.session.cookies.update(self.cookie_dict)
 
     def _get_cache(self, key: str) -> Any | None:
         with self._cache_lock:
@@ -273,68 +282,88 @@ class XueqiuDataService:
         period: str = "day",
         type: str = "before",
         count: int = -284,
-        indicator: str = "kline",
+        indicator: str = "kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance",
     ) -> list[dict[str, Any]]:
-        """获取K线数据（注意：当前API可能返回空数据，需要后续调试）"""
-        cache_key = f"fetch_kline_data:{symbol}:{period}:{indicator}"
+        """获取K线数据（已验证可用 ✅）
+
+        Args:
+            symbol: 股票代码（如 SH000001, SH600519）
+            begin: 开始时间戳（毫秒），默认为当前时间
+            period: 周期（day/week/month/quarter/year/1m/5m/15m/30m/60m）
+            type: 复权类型（before=前复权, after=后复权, normal=不复权）
+            count: 数量（负数表示从begin向前取）
+            indicator: 指标（kline,pe,pb,ps,pcf,market_capital,...）
+
+        Returns:
+            K线数据列表，每条记录包含所有请求的指标字段
+
+        实际返回格式示例（2026-05-25验证通过）：
+            column: ["timestamp","volume","open","high","low","close","chg","percent",
+                    "turnoverrate","amount","volume_post","amount_post","pe","pb","ps",
+                    "pcf","market_capital","balance","hold_volume_cn","hold_ratio_cn",
+                    "net_volume_cn","hold_volume_hk","hold_ratio_hk","net_volume_hk"]
+            item: [1742486400000, 52086263000, 3401.76, 3414.71, 3355.84, 3364.83,
+                   -44.12, -1.29, 1.14, 623164007297.2, ...]
+        """
+        cache_key = f"fetch_kline_data:{symbol}:{period}:{type}:{indicator}"
         cached = self._get_cache(cache_key)
         if cached is not None:
             return cached
 
         url = f"{self.BASE_URL}/v5/stock/chart/kline.json"
+
+        if begin is None:
+            begin = int(datetime.now().timestamp() * 1000)
+
         params = {
             "symbol": symbol,
+            "begin": begin,
             "period": period,
             "type": type,
             "count": count,
             "indicator": indicator,
         }
-        if begin is not None:
-            params["begin"] = begin
+
+        logger.info(
+            "xueqiu_kline_request symbol=%s begin=%s period=%s type=%s count=%s",
+            symbol, begin, period, type, count,
+        )
 
         data = self._request(url, params)
-        items = data.get("data", {}).get("items", [])
+        response_data = data.get("data", {})
+        columns = response_data.get("column", [])
+        items = response_data.get("item", [])
 
         if not items:
             logger.warning(
-                "xueqiu_kline_empty_response symbol=%s period=%s indicator=%s - API returned empty items (may need debugging)",
-                symbol,
-                period,
-                indicator,
+                "xueqiu_kline_empty_response symbol=%s columns=%s",
+                symbol, len(columns),
             )
             return []
 
         result = []
         for item in items:
-            date_val = None
-            if len(item) > 0 and item[0] is not None:
-                try:
-                    if isinstance(item[0], (int, float)):
-                        date_val = datetime.fromtimestamp(item[0] / 1000, tz=timezone.utc).date()
-                    elif isinstance(item[0], str):
-                        date_val = datetime.strptime(item[0], "%Y-%m-%d").date()
-                except (ValueError, OSError, TypeError):
-                    pass
-
-            record = {
-                "date": date_val,
-                "open": item[1] if len(item) > 1 else None,
-                "close": item[2] if len(item) > 2 else None,
-                "high": item[3] if len(item) > 3 else None,
-                "low": item[4] if len(item) > 4 else None,
-                "volume": item[5] if len(item) > 5 else None,
-                "turnoverrate": item[6] if len(item) > 6 else None,
-                "pe": item[8] if len(item) > 8 else None,
-                "pb": item[9] if len(item) > 9 else None,
-                "ps": item[10] if len(item) > 10 else None,
-                "pcf": item[11] if len(item) > 11 else None,
-                "market_capital": item[12] if len(item) > 12 else None,
-                "source": "xueqiu",
-            }
+            record = {"source": "xueqiu"}
+            for idx, col_name in enumerate(columns):
+                if idx < len(item):
+                    value = item[idx]
+                    if col_name == "timestamp" and value is not None:
+                        try:
+                            record["date"] = datetime.fromtimestamp(value / 1000, tz=timezone.utc).date()
+                            record["timestamp"] = value
+                        except (ValueError, OSError, TypeError):
+                            record[col_name] = value
+                    else:
+                        record[col_name] = value
             result.append(record)
 
         self._set_cache(cache_key, result)
-        logger.info("xueqiu_kline_fetched symbol=%s records=%s", symbol, len(result))
+        logger.info(
+            "xueqiu_kline_fetched symbol=%s records=%s columns=%s first_date=%s last_date=%s",
+            symbol, len(result), len(columns),
+            result[0].get("date") if result else None,
+            result[-1].get("date") if result else None,
+        )
 
         return result
 
