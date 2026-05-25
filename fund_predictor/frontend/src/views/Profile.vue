@@ -1,10 +1,43 @@
 <template>
   <div class="profile-container">
+    <!-- 输入区域 -->
+    <div v-if="!effectiveFundCode" class="input-section glass-card">
+      <div class="input-wrapper">
+        <el-input
+          v-model="inputFundCode"
+          placeholder="请输入6位基金代码"
+          maxlength="6"
+          size="large"
+          clearable
+          @keyup.enter="handleLoadProfile"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <el-button type="primary" size="large" @click="handleLoadProfile">
+          查看画像
+        </el-button>
+      </div>
+      <div class="quick-codes">
+        <span class="quick-label">快捷选择：</span>
+        <el-tag
+          v-for="code in ['018956', '022771', '000001']"
+          :key="code"
+          class="code-tag"
+          effect="plain"
+          @click="selectQuickCode(code)"
+        >
+          {{ code }}
+        </el-tag>
+      </div>
+    </div>
+
     <el-card v-if="loading" v-loading="loading" element-loading-text="加载基金画像中..." style="min-height: 400px;" />
 
     <template v-else-if="profileData.fund_code">
       <div class="profile-header">
-        <h2 class="fund-name">{{ profileData.fund_name || fundCode }}</h2>
+        <h2 class="fund-name">{{ profileData.fund_name || effectiveFundCode }}</h2>
         <div class="header-tags">
           <el-tag :type="typeTagType" size="large" effect="dark">{{ typeLabel }}</el-tag>
           <el-tag v-if="profileData.cache_info?.stale" type="warning" size="small">数据可能过期</el-tag>
@@ -73,11 +106,20 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 
 const props = defineProps<{
-  fundCode: string
+  fundCode?: string
 }>()
+
+const route = useRoute()
+const router = useRouter()
+const inputFundCode = ref('')
+
+const effectiveFundCode = computed(() => {
+  return props.fundCode || inputFundCode.value || route.params.code || ''
+})
 
 const loading = ref(false)
 const allocationChartRef = ref<HTMLElement | null>(null)
@@ -196,11 +238,12 @@ const defaultIndustry = [
 ]
 
 function loadProfile() {
-  if (!props.fundCode) return
+  const code = effectiveFundCode.value
+  if (!code) return
 
   loading.value = true
 
-  fetch(`/api/v1/fund/${props.fundCode}/profile`)
+  fetch(`/api/v1/fund/${code}/profile`)
     .then(res => res.json())
     .then(res => {
       if (res.ok) {
@@ -258,7 +301,7 @@ function renderCharts() {
   }
 }
 
-watch(() => props.fundCode, () => {
+watch(effectiveFundCode, () => {
   loadProfile()
 }, { immediate: true })
 
@@ -270,11 +313,56 @@ function handleResize() {
   allocationInstance?.resize()
   industryInstance?.resize()
 }
+
+function handleLoadProfile() {
+  if (inputFundCode.value && inputFundCode.value.length === 6) {
+    router.push(`/profile/${inputFundCode.value}`)
+  }
+}
+
+function selectQuickCode(code) {
+  inputFundCode.value = code
+  router.push(`/profile/${code}`)
+}
 </script>
 
 <style scoped>
 .profile-container {
-  padding: 16px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.input-section {
+  padding: 40px;
+  text-align: center;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 16px;
+  max-width: 500px;
+  margin: 0 auto 24px;
+}
+
+.quick-codes {
+  margin-top: 16px;
+}
+
+.quick-label {
+  margin-right: 12px;
+  color: var(--text-secondary);
+}
+
+.code-tag {
+  cursor: pointer;
+  margin: 4px;
+  transition: all 0.2s;
+}
+
+.code-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .profile-header {

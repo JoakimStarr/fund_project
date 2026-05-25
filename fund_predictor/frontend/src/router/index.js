@@ -38,10 +38,11 @@ const routes = [
     meta: { title: '多基金对比', icon: 'DataLine' }
   },
   {
-    path: '/profile',
+    path: '/profile/:code?',
     name: 'Profile',
     component: () => import('@/views/Profile.vue'),
-    meta: { title: '基金画像', icon: 'UserFilled' }
+    meta: { title: '基金画像', icon: 'UserFilled' },
+    props: true
   },
   {
     path: '/intraday',

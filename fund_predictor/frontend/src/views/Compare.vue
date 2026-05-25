@@ -193,7 +193,7 @@ import { Plus, Delete } from '@element-plus/icons-vue'
 import BaseChart from '@/components/common/BaseChart.vue'
 import { predictFund } from '@/api/fund'
 
-const selectedFunds = ref(['018956', '000001'])
+const selectedFunds = ref(['018956', '022771'])
 const showAddInput = ref(false)
 const newFundCode = ref('')
 const addInputRef = ref(null)

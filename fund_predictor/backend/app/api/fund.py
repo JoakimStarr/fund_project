@@ -116,6 +116,7 @@ def backtest(fund_code: str):
     if not path.exists():
         raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
     df = pd.read_csv(path)
+    df = df.where(pd.notnull(df), None)
     return {"ok": True, "data": df.to_dict(orient="records")}
 
 
