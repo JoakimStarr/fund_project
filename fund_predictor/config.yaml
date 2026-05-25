@@ -75,7 +75,7 @@ nav_constraints:
 
 # === 冷启动 ===
 cold_start:
-  group_model_days: 90
+  group_model_days: 250
   fine_tune_days: 180
   individual_model_days: 180
 

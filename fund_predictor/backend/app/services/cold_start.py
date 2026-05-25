@@ -9,15 +9,19 @@ from app.core.logging_config import set_log_context
 
 logger = logging.getLogger(__name__)
 
-MIN_DAYS_FOR_COLD_START = 120
+MIN_DAYS_FOR_COLD_START = 220
 GROUP_MODEL_MIN_SAMPLES = 3
+INDIVIDUAL_MODEL_THRESHOLD = 400
 
 
 def should_use_group_model(fund_code: str) -> tuple[bool, int]:
     """
     判断基金是否应使用冷启动群体模型。
 
-    当基金历史不足120天时，使用同类基金的群体模型作为基线预测。
+    三段式判断逻辑：
+    - history_days < 220: 使用群体模型（100%群体预测）
+    - 220 <= history_days < 400: 使用群体模型 + 渐变过渡（blend_weight从0到1）
+    - history_days >= 400: 切换到个体模型
 
     Args:
         fund_code: 基金代码
@@ -36,10 +40,10 @@ def should_use_group_model(fund_code: str) -> tuple[bool, int]:
         df = pd.read_csv(nav_path, parse_dates=["date"])
         history_days = len(df)
 
-        if history_days < MIN_DAYS_FOR_COLD_START:
+        if history_days < INDIVIDUAL_MODEL_THRESHOLD:
             logger.info(
-                "cold_start_insufficient_history fund_code=%s days=%s threshold=%s using_group_model=True",
-                fund_code, history_days, MIN_DAYS_FOR_COLD_START,
+                "cold_start_use_group_model fund_code=%s days=%s threshold=%s using_group_model=True",
+                fund_code, history_days, INDIVIDUAL_MODEL_THRESHOLD,
             )
             return True, history_days
 
@@ -49,7 +53,7 @@ def should_use_group_model(fund_code: str) -> tuple[bool, int]:
             logger.info("cold_start_no_model fund_code=%s days=%s using_group_model=True", fund_code, history_days)
             return True, history_days
 
-        logger.info("cold_start_not_needed fund_code=%s days=%s using_group_model=False", fund_code, history_days)
+        logger.info("cold_start_switch_individual fund_code=%s days=%s using_group_model=False", fund_code, history_days)
         return False, history_days
     except Exception as e:
         logger.exception("cold_start_check_error fund_code=%s error=%s", fund_code, e)
@@ -162,7 +166,13 @@ def _compute_fine_tuning_adjustment(fund_code: str, features: dict, group_baseli
 
         recent_ret = df["daily_growth_pct"].tail(min(30, history_days)).astype(float).mean() / 100.0
 
-        blend_weight = min(1.0, history_days / MIN_DAYS_FOR_COLD_START)
+        if history_days < MIN_DAYS_FOR_COLD_START:
+            blend_weight = 0.0
+        elif history_days < INDIVIDUAL_MODEL_THRESHOLD:
+            blend_weight = (history_days - MIN_DAYS_FOR_COLD_START) / (INDIVIDUAL_MODEL_THRESHOLD - MIN_DAYS_FOR_COLD_START)
+        else:
+            blend_weight = 1.0
+        blend_weight = max(0.0, min(1.0, blend_weight))
         adjustment = recent_ret * (1.0 - blend_weight) * 0.5
 
         logger.info(
@@ -218,7 +228,13 @@ def get_group_model_prediction(fund_code: str, fund_type: str, features: dict) -
 
         fine_tune_adj = _compute_fine_tuning_adjustment(fund_code, features, group_baseline)
 
-        blend_weight = min(1.0, max(0.0, history_days / MIN_DAYS_FOR_COLD_START))
+        if history_days < MIN_DAYS_FOR_COLD_START:
+            blend_weight = 0.0
+        elif history_days < INDIVIDUAL_MODEL_THRESHOLD:
+            blend_weight = (history_days - MIN_DAYS_FOR_COLD_START) / (INDIVIDUAL_MODEL_THRESHOLD - MIN_DAYS_FOR_COLD_START)
+        else:
+            blend_weight = 1.0
+        blend_weight = max(0.0, min(1.0, blend_weight))
         final_pred = group_baseline * (1.0 - blend_weight * 0.5) + fine_tune_adj
 
         logger.info(
