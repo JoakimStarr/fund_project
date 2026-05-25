@@ -32,9 +32,42 @@ def route_predict(fund_code: str, profile: FundProfile, request_id: str) -> dict
         logger.info("routing=%s fund_code=%s", profile.fund_type, fund_code)
         result = generic_predict(fund_code, request_id)
     elif profile.fund_type == "index_equity":
-        # TODO: 后续阶段替换为规则引擎
-        logger.info("routing=index_equity (fallback to ML) fund_code=%s", fund_code)
-        result = generic_predict(fund_code, request_id)
+        from app.rules.index_rule_engine import predict_index_fund, get_index_mapping
+        from app.services.feature_service import build_features
+        
+        try:
+            df, _, _ = build_features(fund_code, require_fresh=False)
+            
+            # 获取最新一期指数收益率作为预测依据
+            index_ret_col = None
+            for col in ["hs300_ret", "zz500_ret", "zz1000_ret"]:
+                if col in df.columns:
+                    index_ret_col = col
+                    break
+            
+            if index_ret_col is not None and len(df) > 0:
+                latest_index_ret = df[index_ret_col].iloc[-1]
+                rule_result = predict_index_fund(
+                    fund_code=fund_code,
+                    index_return=latest_index_ret,
+                )
+                
+                result = {
+                    "fund_code": fund_code,
+                    "fund_type": "index_equity",
+                    "predicted_return": rule_result.predicted_return,
+                    "confidence_interval": [rule_result.lower_bound, rule_result.upper_bound],
+                    "prediction_mode": "rule_based",
+                    "method": rule_result.method,
+                    "index_return": rule_result.index_return,
+                }
+            else:
+                logger.warning("index_equity_no_index_data fund_code=%s", fund_code)
+                result = generic_predict(fund_code, request_id)
+                
+        except Exception as e:
+            logger.exception("index_rule_failed fund_code=%s error=%s", fund_code, e)
+            result = generic_predict(fund_code, request_id)
     else:
         # 债券、灵活配置、FOF、QDII 暂走通用流程
         logger.info("routing=%s (generic fallback) fund_code=%s", profile.fund_type, fund_code)
