@@ -84,57 +84,113 @@ def pre_screen_factors(
         
         y_aligned = y[x.index]
         
-        pearson_r, _ = stats.pearsonr(x.to_numpy(), y_aligned)
         spearman_rho, _ = stats.spearmanr(x.to_numpy(), y_aligned)
-        
+        pearson_r, _ = stats.pearsonr(x.to_numpy(), y_aligned)  # 保留作为参考
+
         ic_results[col] = {
-            "ic_pearson": float(pearson_r),
-            "ic_spearman": float(spearman_rho),
-            "abs_ic_pearson": abs(float(pearson_r)),
+            "ic_pearson": float(pearson_r),          # 参考信息，不参与筛选
+            "ic_spearman": float(spearman_rho),       # 主筛选依据
+            "abs_ic_spearman": abs(float(spearman_rho)), # 用于阈值判断
         }
     
-    # Step 2: VIF 检验（逐步回归式）
+    # Step 2 (新): 相关性聚类去重
     remaining = [c for c in feature_cols if c in clean.columns]
-    vif_removed = []
-    vif_history = {}
-    
-    while remaining:
-        X_vif = clean[remaining].dropna()
-        if len(X_vif) < len(remaining) + 10:
-            break
-        
+    cluster_removed = []
+    cluster_history = {}
+
+    if len(remaining) >= 2:
         try:
-            from sklearn.preprocessing import StandardScaler
-            scaler = StandardScaler()
-            X_scaled = scaler.fit_transform(X_vif)
+            clean_for_cluster = clean[remaining].dropna()
+            if len(clean_for_cluster) >= len(remaining) + 10:
+                corr_matrix = clean_for_cluster.corr(method="spearman").abs()
+                
+                assigned = set()
+                clusters = []
+                
+                for i, col_i in enumerate(remaining):
+                    if col_i in assigned:
+                        continue
+                    cluster = [col_i]
+                    assigned.add(col_i)
+                    
+                    for j, col_j in enumerate(remaining):
+                        if i >= j or col_j in assigned:
+                            continue
+                        if col_j in corr_matrix.columns and col_i in corr_matrix.index:
+                            corr_val = corr_matrix.loc[col_i, col_j]
+                            if not np.isnan(corr_val) and corr_val > 0.80:
+                                cluster.append(col_j)
+                                assigned.add(col_j)
+                    
+                    clusters.append(cluster)
+                
+                for cluster in clusters:
+                    if len(cluster) > 1:
+                        best_in_cluster = max(
+                            cluster,
+                            key=lambda c: abs(ic_results.get(c, {}).get("ic_spearman", 0) or 0)
+                        )
+                        for c in cluster:
+                            if c != best_in_cluster:
+                                cluster_removed.append(c)
+                                remaining.remove(c)
+                                cluster_history[c] = {
+                                    "removed_for": best_in_cluster,
+                                    "corr_with_keeper": round(
+                                        float(corr_matrix.loc[c, best_in_cluster]) if c in corr_matrix.index and best_in_cluster in corr_matrix.columns else 0,
+                                        3
+                                    ),
+                                }
+                        logger.info(
+                            "cluster_dedup kept=%s removed=%s",
+                            best_in_cluster, [c for c in cluster if c != best_in_cluster],
+                        )
+        except Exception as e:
+            logger.warning("cluster_dedup_failed error=%s fallback_to_vif", e)
+            # fallback: 使用原始 VIF 逻辑
+            vif_removed_fb = []
+            vif_history_fb = {}
             
-            n = X_scaled.shape[1]
-            vifs = {}
-            for j in range(n):
-                other_idx = [k for k in range(n) if k != j]
-                if not other_idx:
-                    continue
-                X_others = X_scaled[:, other_idx]
-                X_j = X_scaled[:, j]
-                r2 = np.corrcoef(X_j, X_others @ np.linalg.lstsq(X_others, X_j, rcond=None)[0])[0, 1]**2
-                vif_val = 1 / (1 - max(r2, 0)) if (1 - r2) > 0 else float('inf')
-                vifs[remaining[j]] = round(vif_val, 2)
+            while remaining:
+                X_vif = clean[remaining].dropna()
+                if len(X_vif) < len(remaining) + 10:
+                    break
+                
+                try:
+                    from sklearn.preprocessing import StandardScaler
+                    scaler = StandardScaler()
+                    X_scaled = scaler.fit_transform(X_vif)
+                    
+                    n = X_scaled.shape[1]
+                    vifs = {}
+                    for j in range(n):
+                        other_idx = [k for k in range(n) if k != j]
+                        if not other_idx:
+                            continue
+                        X_others = X_scaled[:, other_idx]
+                        X_j = X_scaled[:, j]
+                        r2 = np.corrcoef(X_j, X_others @ np.linalg.lstsq(X_others, X_j, rcond=None)[0])[0, 1]**2
+                        vif_val = 1 / (1 - max(r2, 0)) if (1 - r2) > 0 else float('inf')
+                        vifs[remaining[j]] = round(vif_val, 2)
+                    
+                    worst_factor = max(vifs, key=vifs.get)
+                    worst_vif = vifs[worst_factor]
+                    vif_history_fb[worst_factor] = worst_vif
+                    
+                    if worst_vif > vif_threshold:
+                        vif_removed_fb.append(worst_factor)
+                        remaining.remove(worst_factor)
+                        logger.info(
+                            "vif_removal factor=%s vif=%.1f threshold=%.1f",
+                            worst_factor, worst_vif, vif_threshold,
+                        )
+                    else:
+                        break
+                except Exception:
+                    break
             
-            worst_factor = max(vifs, key=vifs.get)
-            worst_vif = vifs[worst_factor]
-            vif_history[worst_factor] = worst_vif
-            
-            if worst_vif > vif_threshold:
-                vif_removed.append(worst_factor)
-                remaining.remove(worst_factor)
-                logger.info(
-                    "vif_removal factor=%s vif=%.1f threshold=%.1f",
-                    worst_factor, worst_vif, vif_threshold,
-                )
-            else:
-                break
-        except Exception:
-            break
+            cluster_removed = vif_removed_fb
+            cluster_history = vif_history_fb
     
     # Step 3: ICIR 计算（时间序列）
     icir_results = {}
@@ -150,7 +206,7 @@ def pre_screen_factors(
         for i in range(60, len(x), step):
             window_x = x.iloc[i-60:i].to_numpy()
             window_y = y_aligned[i-60:i]
-            r, _ = stats.pearsonr(window_x, window_y)
+            r, _ = stats.spearmanr(window_x, window_y)
             rolling_ics.append(r)
         
         if len(rolling_ics) >= 5:
@@ -198,7 +254,7 @@ def pre_screen_factors(
         reasons = []
         
         ic_info = ic_results.get(col, {})
-        abs_ic = ic_info.get("abs_ic_pearson", 0) or 0
+        abs_ic = ic_info.get("abs_ic_spearman", 0) or 0
         if abs_ic < ic_threshold and col not in [
             "fund_ret_lag1", "fund_ret_lag2", "hs300_ret", "zz500_ret"
         ]:
@@ -216,11 +272,11 @@ def pre_screen_factors(
     
     result = FactorScreeningResult(
         screened_features=final_features,
-        removed_features=list(removal_reasons.keys()) + vif_removed,
+        removed_features=list(removal_reasons.keys()) + cluster_removed,
         ic_report={
             factor: info for factor, info in ic_results.items()
         },
-        vif_report=vif_history,
+        vif_report=cluster_history,
         decay_report={
             k: v for k, v in decay_results.items() if v is not None
         },
@@ -229,7 +285,7 @@ def pre_screen_factors(
             "screened_count": len(final_features),
             "removed_by_ic": len([r for r in removal_reasons.values() if "low_ic" in r]),
             "removed_by_icir": len([r for r in removal_reasons.values() if "low_icir" in r]),
-            "removed_by_vif": len(vif_removed),
+            "removed_by_cluster_dedup": len(cluster_removed),
             "retention_rate": f"{len(final_features)/max(len(feature_cols),1)*100:.1f}%",
         },
     )
