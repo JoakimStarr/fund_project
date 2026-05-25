@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def conformal_interval(
     model,
-    X_calib: pd.DataFrame,
+    X_calib: pd.DataFrame,  # ⚠️ 必须是 Test_select 段(13%)，不得是 Valid 段!
     y_calib: np.ndarray | pd.Series,
     X_new: pd.DataFrame,
     alpha: float = 0.10,
@@ -32,9 +32,14 @@ def conformal_interval(
     
     方法：基于校准集的非一致性得分分位数法
     
+    ⚠️ 校准集隔离要求:
+        X_calib 必须来自四段划分中的 Test_select(13%)段，
+        该段不得用于模型训练、超参调优或 Stacking 元学习器训练。
+        复用 Valid 集会导致系统性低估残差、区间偏窄。
+    
     Args:
         model: 已训练的回归模型
-        X_calib: 校准集特征
+        X_calib: **校准集特征 (必须为 Test_select 段!)**
         y_calib: 校准集标签
         X_new: 新样本特征
         alpha: 显著水平（0.1 → 90%覆盖率）
@@ -44,7 +49,10 @@ def conformal_interval(
         (lower_bounds, upper_bounds, metadata)
     """
     set_log_context(stage="conformal_prediction_start")
-    logger.info("conformal_prediction_start calib_size=%d new_size=%d alpha=%.2f", len(X_calib), len(X_new), alpha)
+    logger.info(
+        "conformal_prediction_start calib_size=%d new_size=%d alpha=%.2f source=test_select_segment",
+        len(X_calib), len(X_new), alpha,
+    )
     
     if len(X_calib) < 20:
         logger.warning("conformal_prediction_fallback calib_size_too_small=%d", len(X_calib))
