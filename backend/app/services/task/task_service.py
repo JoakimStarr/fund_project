@@ -43,10 +43,17 @@ async def _execute_train(task_id: str, fund_code: str):
             pass
 
     def _sync_train(nav_data_list: list, fund_type_str: str) -> dict:
+        import time as _time
         from app.services.features.feature_service import build_and_screen
         from app.services.model.trainer import _do_sync_training
+
+        t_start = _time.time()
         features, selected_features = build_and_screen(fund_code, nav_data_list, fund_type_str)
+        t_feat = _time.time() - t_start
         metrics = _do_sync_training(nav_data_list, fund_type_str, features, selected_features, fund_code)
+        t_total = _time.time() - t_start
+        metrics["timing_feature_build"] = round(t_feat, 3)
+        metrics["timing_total_train"] = round(t_total, 3)
         return metrics
 
     try:

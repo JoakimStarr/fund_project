@@ -26,7 +26,7 @@ def _get_market_session() -> MarketSession:
 
 
 async def estimate(fund_code: str, session, mode: str = "auto") -> IntradayResponse:
-    profile = await get_fund_profile(fund_code)
+    profile = await get_fund_profile(fund_code, session)
     fund_name = profile.get("fund_name", "")
     fund_type = profile.get("fund_type", "hybrid_equity")
     nav_result = await session.execute(

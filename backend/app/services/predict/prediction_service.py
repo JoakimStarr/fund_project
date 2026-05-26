@@ -17,7 +17,7 @@ from app.services.fund.profile_service import get_profile as get_fund_profile
 
 
 async def predict(fund_code: str, session, force_retrain: bool = False) -> PredictResponse:
-    profile = await get_fund_profile(fund_code)
+    profile = await get_fund_profile(fund_code, session)
     fund_type = profile.get("fund_type", "hybrid_equity")
     fund_name = profile.get("fund_name", "")
     nav_result = await session.execute(
@@ -32,7 +32,7 @@ async def predict(fund_code: str, session, force_retrain: bool = False) -> Predi
     target_date = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
     cold_start_info = should_use_group_model(fund_code, n_days)
     model_data, metrics, features_list = load_model(fund_code)
-    if cold_start_info["use_group"] or model_data is None:
+    if model_data is None:
         predicted_return = 0.0
         lower = -0.02
         upper = 0.02
@@ -59,6 +59,11 @@ async def predict(fund_code: str, session, force_retrain: bool = False) -> Predi
     features_df = build_features(fund_code, nav_df.to_dict("records"), fund_type)
     if features_df.empty:
         raise ValueError("特征构建失败")
+    if features_list:
+        missing = [f for f in features_list if f not in features_df.columns]
+        available = [f for f in features_list if f in features_df.columns]
+        if available:
+            features_df = features_df[available]
     latest_features = features_df.iloc[-1:].fillna(0)
     if scaler is not None:
         X = scaler.transform(latest_features.values)

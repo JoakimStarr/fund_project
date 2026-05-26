@@ -45,7 +45,7 @@ async def get_analysis(fund_code: str, session, context: dict = None, refresh: b
             data = json.loads(cached.analysis_json)
             data["cached"] = True
             return data
-    profile = await get_fund_profile(fund_code)
+    profile = await get_fund_profile(fund_code, session)
     fund_type = profile.get("fund_type", "hybrid_equity")
     fund_name = profile.get("fund_name", "")
     import asyncio
