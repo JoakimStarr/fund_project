@@ -103,7 +103,15 @@ def _get_path_b_return(fund_code: str) -> tuple[float, dict]:
         if latest_idx is None or latest_idx.empty:
             return 0.0, meta
 
-        last_idx_ret = float(latest_idx.iloc[-1]["close"].pct_change().iloc[-1]) if len(latest_idx) > 1 else 0.0
+        # 修复 Bug: 正确计算指数最新收益率（需要至少2条记录）
+        if len(latest_idx) < 2:
+            last_idx_ret = 0.0
+        else:
+            close_series = latest_idx["close"].tail(2)
+            prev_close = float(close_series.iloc[0])
+            curr_close = float(close_series.iloc[1])
+            last_idx_ret = (curr_close - prev_close) / prev_close if prev_close != 0 else 0.0
+
         estimated_ret = best_coef * last_idx_ret
 
         meta["available"] = True
