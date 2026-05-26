@@ -173,6 +173,14 @@
         <BaseChart :option="intradayChartOption" height="350px" />
       </div>
 
+      <!-- AI 分析面板 -->
+      <AiAnalysisPanel
+        v-if="hasResult"
+        :fund-code="fundCode"
+        :estimation-return="estimateData.estimatedChange"
+        source="intraday"
+      />
+
       <!-- 估算说明 -->
       <div class="notice-section glass-card">
         <h3 class="section-title">估算说明</h3>
@@ -227,6 +235,7 @@ import {
   Search, VideoPlay, Timer, WarningFilled
 } from '@element-plus/icons-vue'
 import BaseChart from '@/components/common/BaseChart.vue'
+import AiAnalysisPanel from '@/components/AiAnalysisPanel.vue'
 import { getLatestIntraday } from '@/api/intraday'
 
 // 状态

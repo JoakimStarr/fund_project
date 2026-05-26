@@ -261,6 +261,29 @@
         </div>
       </div>
 
+      <!-- AI 一句话摘要入口 -->
+      <div v-if="hasResult" class="ai-summary-entry glass-card">
+        <div class="ai-summary-content">
+          <el-icon class="ai-icon"><MagicStick /></el-icon>
+          <span v-if="aiSummaryLoading" class="summary-text loading-text">
+            <el-icon class="is-loading"><Loading /></el-icon>
+            AI 正在分析...
+          </span>
+          <template v-else-if="aiSummaryText">
+            <span class="summary-text">{{ aiSummaryText }}</span>
+            <router-link
+              :to="{ path: '/intraday', query: { code: fundCode } }"
+              class="view-full-link"
+            >
+              查看完整 AI 解读 →
+            </router-link>
+          </template>
+          <span v-else class="summary-text summary-unavailable">
+            AI 分析暂时不可用
+          </span>
+        </div>
+      </div>
+
       <!-- 预测历史图表 -->
       <div class="chart-section glass-card">
         <h3 class="section-title">预测趋势图</h3>
@@ -278,9 +301,11 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
-  Search, Aim, Setting, TrendCharts
+  Search, Aim, Setting, TrendCharts,
+  MagicStick, Loading
 } from '@element-plus/icons-vue'
 import { predictFund, getFundProfile } from '@/api/fund'
+import { getAIAnalysis } from '@/api/ai_analysis'
 import BaseChart from '@/components/common/BaseChart.vue'
 
 const route = useRoute()
@@ -308,6 +333,10 @@ let pollingTimer = null
 
 // 快捷代码
 const quickCodes = ['018956', '000001', '110011', '161725', '519778']
+
+// AI 摘要相关状态
+const aiSummaryLoading = ref(false)
+const aiSummaryText = ref('')
 
 // 预测数据（从API加载）
 const predictionData = reactive({
@@ -531,6 +560,9 @@ const handlePredict = async () => {
     predictionData.metrics.proxyR2.status = parseFloat(data.proxy_r2_60) > 0.35 ? 'good' : 'bad'
     
     hasResult.value = true
+
+    // 异步加载 AI 摘要（不阻塞主流程）
+    loadAISummary()
   } catch (error) {
     errorMessage.value = error.message || '预测失败，请稍后重试'
     console.error('预测失败:', error)
@@ -776,6 +808,31 @@ const progressColor = computed(() => {
 const selectQuickCode = (code) => {
   fundCode.value = code
   handlePredict()
+}
+
+// 加载 AI 一句话摘要（轻量级）
+async function loadAISummary() {
+  if (!fundCode.value) return
+
+  aiSummaryLoading.value = true
+  aiSummaryText.value = ''
+
+  try {
+    const res = await getAIAnalysis(fundCode.value, { source: 'predict', summary_only: true })
+    const data = res.data || res
+
+    if (data && data.summary) {
+      // 截取摘要前 100 字作为一句话展示
+      aiSummaryText.value = data.summary.length > 100
+        ? data.summary.substring(0, 100) + '...'
+        : data.summary
+    }
+  } catch (error) {
+    console.error('AI 摘要加载失败:', error)
+    // 静默失败，不显示错误信息
+  } finally {
+    aiSummaryLoading.value = false
+  }
 }
 
 // 辅助函数
@@ -1270,6 +1327,74 @@ onMounted(() => {
   }
 }
 
+/* AI 一句话摘要入口 */
+.ai-summary-entry {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: linear-gradient(
+    135deg,
+    var(--glass-bg) 0%,
+    rgba(59, 130, 246, 0.05) 100%
+  );
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: $radius-lg;
+  transition: all $transition-normal;
+
+  &:hover {
+    border-color: var(--primary-glow);
+    background: linear-gradient(
+      135deg,
+      var(--glass-bg) 0%,
+      rgba(59, 130, 246, 0.1) 100%
+    );
+  }
+
+  .ai-summary-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .ai-icon {
+      color: var(--primary);
+      flex-shrink: 0;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    .summary-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      flex: 1;
+
+      &.loading-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--primary);
+      }
+
+      &.summary-unavailable {
+        color: var(--text-muted);
+        font-style: italic;
+      }
+    }
+
+    .view-full-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: color $transition-fast;
+
+      &:hover {
+        color: #60a5fa;
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
 /* 训练进度区域（新增） */
 .training-progress {
   margin-top: 24px;
@@ -1397,6 +1522,17 @@ onMounted(() => {
   50% {
     opacity: 0.5;
     transform: scale(1.2);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
   }
 }
 </style>
