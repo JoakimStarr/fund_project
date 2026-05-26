@@ -1,7 +1,9 @@
 import json
 import logging
+import random
 import re
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
@@ -12,16 +14,20 @@ import pandas as pd
 import requests
 
 from app.core.config import (
+    DATA_SOURCE_ENABLED,
+    DATA_SOURCE_PRIORITY,
     FETCH_MAX_WORKERS,
     FETCH_TIMEOUT,
     INDEX_SYMBOLS,
+    MAX_RETRY_TIMES,
     MIN_TRAIN_ROWS,
     RAW_DIR,
+    REQUEST_INTERVAL,
+    RETRY_INTERVAL,
     STALE_DAYS,
 )
 from app.core.errors import AppError, DataFetchError, DataStaleError
 from app.core.logging_config import set_log_context
-from app.services.danjuanfunds_service import get_danjuan_service, DataFetchError as DanjuanDataFetchError
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +36,72 @@ _FRESHNESS_LOCK = threading.Lock()
 
 _NAV_CACHE: dict[str, tuple[pd.DataFrame, datetime]] = {}
 _NAV_CACHE_LOCK = threading.RLock()
+
+
+class DataSourceManager:
+    """数据源管理器 - 实现智能切换和速率控制"""
+    
+    def __init__(self):
+        self.last_used_source: dict[str, float] = {}  # source -> timestamp
+        self.use_count: dict[str, int] = {}
+        self.lock = threading.Lock()
+    
+    def select_source(self, data_type: str) -> str | None:
+        """智能选择数据源"""
+        priority_list = DATA_SOURCE_PRIORITY.get(data_type, [])
+        enabled_sources = [
+            src for src in priority_list 
+            if DATA_SOURCE_ENABLED.get(src, True) and src != "cache"
+        ]
+        
+        if not enabled_sources:
+            return "cache"
+        
+        with self.lock:
+            # 过滤掉刚使用过的数据源（避免频繁调用同一源）
+            available_sources = [
+                src for src in enabled_sources 
+                if self._can_use_source(src)
+            ]
+            
+            if not available_sources:
+                # 如果所有源都被限制，随机选择一个
+                available_sources = enabled_sources
+            
+            # 随机选择（增加不确定性）
+            selected = random.choice(available_sources)
+            
+            self._record_usage(selected)
+            self._apply_rate_limit(selected)
+            
+            return selected
+    
+    def _can_use_source(self, source: str) -> bool:
+        """检查是否可以使用该数据源"""
+        last_use = self.last_used_source.get(source, 0)
+        interval = REQUEST_INTERVAL.get(source, 2.0)
+        elapsed = time.time() - last_use
+        return elapsed >= interval
+    
+    def _record_usage(self, source: str):
+        """记录使用情况"""
+        now = time.time()
+        self.last_used_source[source] = now
+        self.use_count[source] = self.use_count.get(source, 0) + 1
+    
+    def _apply_rate_limit(self, source: str):
+        """应用速率限制"""
+        interval = REQUEST_INTERVAL.get(source, 2.0)
+        last_use = self.last_used_source.get(source, 0)
+        wait_time = max(0, interval - (time.time() - last_use))
+        
+        if wait_time > 0:
+            logger.debug("Rate limiting %s: waiting %.2fs", source, wait_time)
+            time.sleep(wait_time)
+
+
+# 全局数据源管理器实例
+data_source_manager = DataSourceManager()
 
 
 def _is_stale(df: pd.DataFrame) -> bool:
@@ -222,6 +294,88 @@ def _fetch_fund_nav_akshare(fund_code: str) -> pd.DataFrame:
     return unit_df
 
 
+def _fetch_fund_nav_xueqiu(fund_code: str) -> pd.DataFrame:
+    """雪球网 - 基金净值数据（推荐）"""
+    try:
+        import akshare as ak
+    except Exception as exc:
+        raise DataFetchError("AkShare未安装", details={"reason": str(exc)}) from exc
+    
+    try:
+        # 获取基金基本信息（包含最新净值）
+        info_df = ak.fund_individual_basic_info_xq(symbol=fund_code)
+        
+        if info_df.empty or len(info_df) == 0:
+            raise DataFetchError("雪球基金信息为空", details={"fund_code": fund_code})
+        
+        # 转换为字典格式便于处理
+        info_dict = dict(zip(info_df['item'], info_df['value']))
+        
+        # 构造基础DataFrame（单条记录）
+        now = datetime.now()
+        df = pd.DataFrame([{
+            "date": now,
+            "nav": float(info_dict.get("单位净值", 0)) if info_dict.get("单位净值") else None,
+            "acc_nav": float(info_dict.get("累计净值", 0)) if info_dict.get("累计净值") else None,
+            "daily_growth_pct": float(info_dict.get("日增长率", 0).replace('%', '')) if info_dict.get("日增长率") else None,
+        }])
+        
+        result = _normalize_fund_nav(df, "xueqiu")
+        logger.info("xueqiu_fund_nav_success fund_code=%s rows=%s", fund_code, len(result))
+        return result
+        
+    except DataFetchError:
+        raise
+    except Exception as exc:
+        logger.exception("xueqiu_fetch_failed fund_code=%s error=%s", fund_code, exc)
+        raise DataFetchError(
+            "雪球基金净值获取失败",
+            details={"fund_code": fund_code, "reason": str(exc)}
+        ) from exc
+
+
+def _fetch_fund_nav_sina(fund_code: str) -> pd.DataFrame:
+    """新浪 - 基金净值数据"""
+    try:
+        import akshare as ak
+    except Exception as exc:
+        raise DataFetchError("AkShare未安装", details={"reason": str(exc)}) from exc
+    
+    try:
+        # 获取所有基金的实时净值数据
+        nav_df = ak.fund_open_fund_daily_em()
+        
+        if nav_df is None or nav_df.empty:
+            raise DataFetchError("新浪基金净值数据为空")
+            
+        # 筛选指定基金
+        fund_data = nav_df[nav_df['基金代码'] == fund_code]
+        
+        if fund_data.empty:
+            raise DataFetchError(f"未找到基金{fund_code}的新浪数据")
+        
+        # 转换为标准格式
+        df = pd.DataFrame([{
+            "date": datetime.now(),
+            "nav": float(fund_data.iloc[0]['单位净值']) if '单位净值' in fund_data.columns else None,
+            "acc_nav": float(fund_data.iloc[0]['累计净值']) if '累计净值' in fund_data.columns else None,
+            "daily_growth_pct": float(str(fund_data.iloc[0].get('日增长率', '0')).replace('%', '')) if '日增长率' in fund_data.columns else None,
+        }])
+        
+        result = _normalize_fund_nav(df, "sina")
+        logger.info("sina_fund_nav_success fund_code=%s rows=%s", fund_code, len(result))
+        return result
+        
+    except DataFetchError:
+        raise
+    except Exception as exc:
+        logger.exception("sina_fetch_failed fund_code=%s error=%s", fund_code, exc)
+        raise DataFetchError(
+            "新浪基金净值获取失败",
+            details={"fund_code": fund_code, "reason": str(exc)}
+        ) from exc
+
+
 def _fetch_fund_nav_eastmoney_html(fund_code: str) -> pd.DataFrame:
     url = "https://fundf10.eastmoney.com/F10DataApi.aspx"
     headers = {
@@ -249,10 +403,6 @@ def _fetch_fund_nav_eastmoney_html(fund_code: str) -> pd.DataFrame:
     return _normalize_fund_nav(pd.concat(rows, ignore_index=True), "eastmoney_html")
 
 
-# 使用 DanjuanFundsService 作为主数据源，akshare/eastmoney 作为备用
-# 修改日期: 2026-05-25
-# 版本号: v2.3.0 + 集成蛋卷基金数据源作为主要数据获取方式
-
 def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFrame, dict]:
     set_log_context(fund_code=fund_code, stage="data_fetch_start")
     logger.info("data_fetch_start fund nav")
@@ -275,62 +425,81 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
                 _NAV_CACHE[fund_code] = (file_cached, datetime.now())
             return file_cached, _nav_meta(file_cached, "cache", fallback_used=False)
 
-    primary_error: Exception | None = None
+    # 多数据源尝试（优先级：雪球 > 新浪 > 东财）
+    sources_tried = []
+    last_error: Exception | None = None
     
-    # 主数据源：使用 DanjuanFundsService 获取基金净值数据
-    try:
-        service = get_danjuan_service()
-        df = service.fetch_fund_nav_history(fund_code)
+    for attempt in range(MAX_RETRY_TIMES):
+        selected_source = data_source_manager.select_source("fund_nav")
         
-        if require_fresh and _is_stale(df):
-            raise DataStaleError("Fund NAV latest date is stale", details={"fund_code": fund_code})
+        if selected_source == "cache" or selected_source is None:
+            break
+            
+        sources_tried.append(selected_source)
         
-        path.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(path, index=False, encoding="utf-8")
-        
-        mtime = datetime.fromtimestamp(path.stat().st_mtime)
-        with _FRESHNESS_LOCK:
-            _DATA_FRESHNESS[fund_code] = mtime
-        
-        with _NAV_CACHE_LOCK:
-            _NAV_CACHE[fund_code] = (df, datetime.now())
-        
-        _sync_fund_nav_to_db(fund_code, df, "danjuanfunds")
-        meta = _nav_meta(df, "danjuanfunds", fallback_used=False)
-        set_log_context(stage="data_fetch_success")
-        logger.info("data_fetch_success fund nav fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
-        return df, meta
-    except (DanjuanDataFetchError, Exception) as e:
-        primary_error = e
-        logger.warning("danjuanfunds_failed fund=%s error=%s", fund_code, e)
+        try:
+            logger.info("trying_data_source fund_code=%s source=%s attempt=%s", 
+                       fund_code, selected_source, attempt + 1)
+            
+            if selected_source == "xueqiu":
+                out = _fetch_fund_nav_xueqiu(fund_code)
+            elif selected_source == "sina":
+                out = _fetch_fund_nav_sina(fund_code)
+            elif selected_source == "eastmoney":
+                out = _fetch_fund_nav_akshare(fund_code)
+            else:
+                continue
+                
+            if require_fresh and _is_stale(out):
+                raise DataStaleError(
+                    f"{selected_source} Fund NAV latest date is stale", 
+                    details={"fund_code": fund_code, "latest": str(out["date"].max().date())}
+                )
+                
+            path.parent.mkdir(parents=True, exist_ok=True)
+            out.to_csv(path, index=False, encoding="utf-8")
+            mtime = datetime.fromtimestamp(path.stat().st_mtime)
+            with _FRESHNESS_LOCK:
+                _DATA_FRESHNESS[fund_code] = mtime
+            with _NAV_CACHE_LOCK:
+                _NAV_CACHE[fund_code] = (out, datetime.now())
+            _sync_fund_nav_to_db(fund_code, out, selected_source)
+            meta = _nav_meta(out, selected_source, 
+                            fallback_used=(attempt > 0), 
+                            fallback_reason=f"Tried {sources_tried}" if attempt > 0 else None)
+            set_log_context(stage="data_fetch_success")
+            logger.info(
+                "data_fetch_success fund nav fund_code=%s rows=%s start=%s end=%s source=%s attempts=%s",
+                fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"],
+                meta["source_used"], attempt + 1
+            )
+            return out, meta
+            
+        except AppError as exc:
+            last_error = exc
+            logger.warning(
+                "data_source_failed fund_code=%s source=%s error=%s", 
+                fund_code, selected_source, exc
+            )
+            if attempt < MAX_RETRY_TIMES - 1:
+                time.sleep(RETRY_INTERVAL)
+            continue
+        except Exception as exc:
+            last_error = exc
+            logger.exception("data_source_exception fund_code=%s source=%s", fund_code, selected_source)
+            if attempt < MAX_RETRY_TIMES - 1:
+                time.sleep(RETRY_INTERVAL)
+            continue
 
-    # Fallback 1: 如果 DanjuanFundsService 失败，尝试 akshare
+    # 所有数据源都失败，尝试备用东财HTML
     try:
-        out = _fetch_fund_nav_akshare(fund_code)
-        if require_fresh and _is_stale(out):
-            raise DataStaleError("Fund NAV latest date is stale", details={"fund_code": fund_code, "latest": str(out["date"].max().date())})
-        path.parent.mkdir(parents=True, exist_ok=True)
-        out.to_csv(path, index=False, encoding="utf-8")
-        mtime = datetime.fromtimestamp(path.stat().st_mtime)
-        with _FRESHNESS_LOCK:
-            _DATA_FRESHNESS[fund_code] = mtime
-        with _NAV_CACHE_LOCK:
-            _NAV_CACHE[fund_code] = (out, datetime.now())
-        _sync_fund_nav_to_db(fund_code, out, "akshare_fund_open_fund_info_em")
-        meta = _nav_meta(out, "akshare_fund_open_fund_info_em", fallback_used=True, fallback_reason=str(primary_error))
-        set_log_context(stage="data_fetch_success")
-        logger.info("data_fetch_success fund nav fallback fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
-        return out, meta
-    except AppError as exc:
-        logger.exception("data_fetch_failed fund nav fallback1")
-    except Exception as exc:
-        logger.exception("data_fetch_failed fund nav fallback1")
-
-    # Fallback 2: 如果 akshare 也失败，尝试 eastmoney HTML
-    try:
+        logger.warning("all_primary_sources_failed trying_eastmoney_html fund_code=%s", fund_code)
         out = _fetch_fund_nav_eastmoney_html(fund_code)
         if require_fresh and _is_stale(out):
-            raise DataStaleError("Fallback fund NAV latest date is stale", details={"fund_code": fund_code, "latest": str(out["date"].max().date())})
+            raise DataStaleError(
+                "Fallback fund NAV latest date is stale", 
+                details={"fund_code": fund_code, "latest": str(out["date"].max().date())}
+            )
         path.parent.mkdir(parents=True, exist_ok=True)
         out.to_csv(path, index=False, encoding="utf-8")
         mtime = datetime.fromtimestamp(path.stat().st_mtime)
@@ -339,27 +508,29 @@ def get_fund_nav(fund_code: str, require_fresh: bool = False) -> tuple[pd.DataFr
         with _NAV_CACHE_LOCK:
             _NAV_CACHE[fund_code] = (out, datetime.now())
         _sync_fund_nav_to_db(fund_code, out, "eastmoney_html")
-        meta = _nav_meta(out, "eastmoney_html", fallback_used=True, fallback_reason=f"All sources failed: primary={str(primary_error)}")
+        meta = _nav_meta(out, "eastmoney_html", fallback_used=True, fallback_reason=str(last_error))
         set_log_context(stage="data_fetch_success")
-        logger.info("data_fetch_success fund nav fallback2 fund_code=%s rows=%s start=%s end=%s source=%s", fund_code, meta["nav_rows"], meta["nav_start_date"], meta["nav_end_date"], meta["source_used"])
+        logger.info("data_fetch_success fund nav fallback fund_code=%s rows=%s source=eastmoney_html", 
+                   fund_code, meta["nav_rows"])
         return out, meta
     except AppError:
         raise
     except Exception as fallback_exc:
         set_log_context(stage="data_fetch_failed")
-        logger.exception("data_fetch_failed fund nav fallback2")
+        logger.exception("data_fetch_failed fund nav all_sources_failed fund_code=%s", fund_code)
         if file_cached is not None and not require_fresh:
             with _NAV_CACHE_LOCK:
                 _NAV_CACHE[fund_code] = (file_cached, datetime.now())
             meta = _nav_meta(file_cached, "cache", fallback_used=True, fallback_reason=str(fallback_exc))
             return file_cached, meta
         raise DataFetchError(
-            "All data sources failed",
+            "Fund NAV fetch failed - all data sources exhausted",
             details={
+                "reason": str(fallback_exc),
+                "primary_reason": str(last_error),
                 "fund_code": fund_code,
-                "primary_error": str(primary_error),
-                "fallback_error": str(fallback_exc),
-            },
+                "sources_tried": sources_tried
+            }
         ) from fallback_exc
 
 
@@ -413,61 +584,6 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
     cached = _read_cache(path)
     if cached is not None and not require_fresh and not _is_stale(cached):
         return cached, {"source_used": "cache", "fallback_used": False, "stale": False}
-
-    index_name = next((n for n, s in INDEX_SYMBOLS.items() if s == symbol), symbol)
-
-    try:
-        from app.services.xueqiu_data_service import get_xueqiu_service
-
-        logger.info("index_fetch_try symbol=%s source=xueqiu_kline", symbol)
-        xueqiu_service = get_xueqiu_service()
-        kline_data = xueqiu_service.fetch_kline_data(
-            symbol=symbol.upper(),
-            period="day",
-            type="before",
-            count=-284,
-            indicator="kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance",
-        )
-
-        if not kline_data:
-            raise DataFetchError("Xueqiu index source returned empty data", details={"symbol": symbol})
-
-        records = []
-        for item in kline_data:
-            record = {
-                "date": item.get("date"),
-                "open": item.get("open"),
-                "high": item.get("high"),
-                "low": item.get("low"),
-                "close": item.get("close"),
-                "volume": item.get("volume"),
-            }
-            records.append(record)
-
-        out = pd.DataFrame(records).dropna(subset=["date", "close"]).sort_values("date").drop_duplicates("date")
-        out["source"] = "xueqiu"
-
-        if require_fresh and _is_stale(out):
-            raise DataStaleError("Index latest date is stale", details={"symbol": symbol, "latest": str(out["date"].max().date())})
-
-        path.parent.mkdir(parents=True, exist_ok=True)
-        out.to_csv(path, index=False, encoding="utf-8")
-        _sync_index_to_db(index_name, symbol, out, "xueqiu")
-
-        logger.info(
-            "index_fetch_success symbol=%s source=xueqiu rows=%s start=%s end=%s",
-            symbol, len(out), out["date"].min(), out["date"].max(),
-        )
-        return out, {"source_used": "xueqiu", "fallback_used": False, "stale": _is_stale(out)}
-
-    except ImportError:
-        logger.warning("xueqiu_service_not_available symbol=%s", symbol)
-    except Exception as xq_exc:
-        logger.warning(
-            "index_fetch_failed symbol=%s source=xueqiu error=%s fallback_to_eastmoney",
-            symbol, xq_exc,
-        )
-
     try:
         url = "https://push2his.eastmoney.com/api/qt/stock/kline/get"
         params = {
@@ -499,6 +615,8 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
             }
         ).dropna(subset=["date", "close"]).sort_values("date").drop_duplicates("date")
 
+        index_name = next((n for n, s in INDEX_SYMBOLS.items() if s == symbol), symbol)
+
         if require_fresh and _is_stale(out):
             raise DataStaleError("Index latest date is stale", details={"symbol": symbol, "latest": str(out["date"].max().date())})
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -511,6 +629,7 @@ def get_index_daily(symbol: str, require_fresh: bool = False) -> tuple[pd.DataFr
         logger.exception("data_fetch_failed index")
         try:
             out = _fetch_index_sohu(symbol)
+            index_name = next((n for n, s in INDEX_SYMBOLS.items() if s == symbol), symbol)
             if require_fresh and _is_stale(out):
                 raise DataStaleError("Fallback index latest date is stale", details={"symbol": symbol, "latest": str(out["date"].max().date())})
             path.parent.mkdir(parents=True, exist_ok=True)

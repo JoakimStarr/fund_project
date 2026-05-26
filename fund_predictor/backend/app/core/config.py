@@ -47,6 +47,29 @@ N_ESTIMATORS = int(_cfg.get("model", {}).get("n_estimators", 120))
 MAX_DEPTH = int(_cfg.get("model", {}).get("max_depth", 5))
 LEARNING_RATE = float(_cfg.get("model", {}).get("learning_rate", 0.05))
 
+# GPU配置
+USE_GPU = bool(_cfg.get("model", {}).get("use_gpu", False))
+GPU_DEVICE = str(_cfg.get("model", {}).get("gpu_device", "cuda:0"))
+GPU_MIN_SAMPLES = int(_cfg.get("model", {}).get("gpu_min_samples", 10000))
+
+
+def get_gpu_params(n_samples: int) -> dict:
+    """根据样本数和配置返回GPU参数
+    
+    Args:
+        n_samples: 训练样本数
+        
+    Returns:
+        GPU参数字典，可用于XGBoost/LightGBM
+    """
+    if not USE_GPU or n_samples < GPU_MIN_SAMPLES:
+        return {"tree_method": "hist", "device": "cpu"}
+    
+    return {
+        "tree_method": "hist",
+        "device": GPU_DEVICE,
+    }
+
 BOND_DURATION_ESTIMATE = _cfg.get("bond", {}).get("duration_estimate", {})
 DAILY_FEE = float(_cfg.get("bond", {}).get("daily_fee", 0.000003))
 
@@ -54,6 +77,34 @@ NAV_LIMITS = {k: v for k, v in _cfg.get("nav_constraints", {}).items() if isinst
 
 IC_THRESHOLD = float(_cfg.get("screening", {}).get("ic_threshold", 0.02))
 VIF_THRESHOLD = float(_cfg.get("screening", {}).get("vif_threshold", 10.0))
+
+# 数据源配置（优先级：雪球 > 新浪 > 东财 > 搜狐 > 缓存）
+DATA_SOURCE_PRIORITY = {
+    "fund_nav": ["xueqiu", "sina", "eastmoney", "cache"],
+    "index_data": ["sina", "tencent", "eastmoney", "sohu", "cache"]
+}
+
+# 数据源启用状态
+DATA_SOURCE_ENABLED = _cfg.get("data_sources", {}).get("enabled", {
+    "xueqiu": True,
+    "sina": True,
+    "tencent": True,
+    "eastmoney": True,
+    "sohu": True
+})
+
+# 请求间隔控制（秒）- 避免被封
+REQUEST_INTERVAL = _cfg.get("data_sources", {}).get("request_interval", {
+    "xueqiu": 2.0,
+    "sina": 1.5,
+    "tencent": 1.5,
+    "eastmoney": 2.0,
+    "sohu": 2.5
+})
+
+# 最大重试次数和间隔
+MAX_RETRY_TIMES = int(_cfg.get("data_sources", {}).get("max_retry_times", 3))
+RETRY_INTERVAL = float(_cfg.get("data_sources", {}).get("retry_interval", 1.0))
 
 
 def ensure_dirs() -> None:

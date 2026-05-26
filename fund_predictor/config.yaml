@@ -33,7 +33,12 @@ model:
   walk_forward_valid_months: 3
   walk_forward_step_months: 1
   walk_forward_min_rounds: 12
-  
+
+  # GPU加速配置
+  use_gpu: false                    # 是否启用GPU加速
+  gpu_device: "cuda:0"              # GPU设备 (cuda:0 / cuda:1 / cpu)
+  gpu_min_samples: 10000            # 最小样本数才启用GPU (小数据集CPU更快)
+
   # 回归模型参数
   ridge_alpha: 1.0
   elasticnet_alpha: 0.01
@@ -41,10 +46,10 @@ model:
   max_depth: 5
   learning_rate: 0.05
   min_samples_leaf: 10
-  
+
   # 方向模型校准
   direction_calibration_method: "isotonic"
-  
+
   # Stacking集成
   stacking_alpha: 1.0
 

@@ -65,6 +65,23 @@
 
     <!-- 对比结果 -->
     <div v-if="selectedFunds.length > 0" class="compare-results">
+      <!-- 加载进度条（新增） -->
+      <div v-if="loading && loadProgress > 0" class="loading-progress glass-card">
+        <div class="progress-content">
+          <el-icon class="is-loading" :size="24"><Loading /></el-icon>
+          <div class="progress-text">
+            <span>正在加载预测数据...</span>
+            <span class="progress-count">{{ loadedCount }}/{{ selectedFunds.length }}</span>
+          </div>
+          <el-progress 
+            :percentage="loadProgress" 
+            :stroke-width="8"
+            :show-text="false"
+            style="width: 200px; margin-left: 16px;"
+          />
+        </div>
+      </div>
+
       <!-- 对比表格 -->
       <div class="table-section glass-card">
         <h3 class="section-title">预测结果对比</h3>
@@ -189,7 +206,7 @@
 
 <script setup>
 import { ref, reactive, computed, nextTick, watch, onMounted } from 'vue'
-import { Plus, Delete } from '@element-plus/icons-vue'
+import { Plus, Delete, Loading } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import BaseChart from '@/components/common/BaseChart.vue'
 import { predictFund } from '@/api/fund'
@@ -199,6 +216,10 @@ const showAddInput = ref(false)
 const newFundCode = ref('')
 const addInputRef = ref(null)
 const loading = ref(false)
+
+// 加载进度相关状态（新增）
+const loadProgress = ref(0)
+const loadedCount = ref(0)
 
 // 预测数据缓存
 const predictionsCache = ref({})
@@ -229,56 +250,83 @@ const comparisonData = computed(() => {
   })
 })
 
-// 加载所有选中基金的预测数据
+// 加载所有选中基金的预测数据（优化版）
 const loadPredictions = async () => {
   loading.value = true
+  loadProgress.value = 0
+  loadedCount.value = 0
+  
+  const totalFunds = selectedFunds.value.length
   
   try {
-    const results = await Promise.all(
-      selectedFunds.value.map(async (code) => {
-        try {
-          const res = await predictFund({ fund_code: code })
-          const data = res.data || res
-          
-          const pUp = data.p_up !== undefined ? data.p_up : 0.5
-          const predReturn = data.pred_return || data.pred || 0
-          const nav80 = data.nav_interval_80 || {}
-          const nav90 = data.nav_interval_90 || {}
-          const todayNav = data.today_nav || 1
-          
-          return {
-            fundCode: code,
-            conclusion: predReturn >= 0 ? `+${(predReturn * 100).toFixed(2)}%` : `${(predReturn * 100).toFixed(2)}%`,
-            directionClass: data.direction_signal || 'neutral',
-            upProbability: Math.round(pUp * 100),
-            downProbability: Math.round((1 - pUp) * 100),
-            interval80: nav80.lower && nav80.upper 
-              ? `${((nav80.lower / todayNav - 1) * 100).toFixed(2)}% ~ ${((nav80.upper / todayNav - 1) * 100).toFixed(2)}%`
-              : '-',
-            interval90: nav90.lower && nav90.upper 
-              ? `${((nav90.lower / todayNav - 1) * 100).toFixed(2)}% ~ ${((nav90.upper / todayNav - 1) * 100).toFixed(2)}%`
-              : '-',
-            reliability: data.proxy_based_confidence === 'high' ? '高' : data.proxy_based_confidence === 'medium' ? '中' : '低',
-            reliabilityType: data.proxy_based_confidence === 'high' ? 'success' : data.proxy_based_confidence === 'medium' ? 'warning' : 'info',
-            accuracy: data.direction_health?.accuracy ? Math.round(data.direction_health.accuracy * 100) : 0
+    // 使用并发控制，同时最多3个请求
+    const MAX_CONCURRENT = 3
+    const results = []
+    
+    // 分批处理
+    for (let i = 0; i < selectedFunds.value.length; i += MAX_CONCURRENT) {
+      const batch = selectedFunds.value.slice(i, i + MAX_CONCURRENT)
+      
+      const batchResults = await Promise.all(
+        batch.map(async (code) => {
+          try {
+            const res = await predictFund({ fund_code: code })
+            const data = res.data || res
+            
+            const pUp = data.p_up !== undefined ? data.p_up : 0.5
+            const predReturn = data.pred_return || data.pred || 0
+            const nav80 = data.nav_interval_80 || {}
+            const nav90 = data.nav_interval_90 || {}
+            const todayNav = data.today_nav || 1
+            
+            loadedCount.value++
+            loadProgress.value = Math.round((loadedCount.value / totalFunds) * 100)
+            
+            return {
+              fundCode: code,
+              conclusion: predReturn >= 0 ? `+${(predReturn * 100).toFixed(2)}%` : `${(predReturn * 100).toFixed(2)}%`,
+              directionClass: data.direction_signal || 'neutral',
+              upProbability: Math.round(pUp * 100),
+              downProbability: Math.round((1 - pUp) * 100),
+              interval80: nav80.lower && nav80.upper 
+                ? `${((nav80.lower / todayNav - 1) * 100).toFixed(2)}% ~ ${((nav80.upper / todayNav - 1) * 100).toFixed(2)}%`
+                : '-',
+              interval90: nav90.lower && nav90.upper 
+                ? `${((nav90.lower / todayNav - 1) * 100).toFixed(2)}% ~ ${((nav90.upper / todayNav - 1) * 100).toFixed(2)}%`
+                : '-',
+              reliability: data.proxy_based_confidence === 'high' ? '高' : data.proxy_based_confidence === 'medium' ? '中' : '低',
+              reliabilityType: data.proxy_based_confidence === 'high' ? 'success' : data.proxy_based_confidence === 'medium' ? 'warning' : 'info',
+              accuracy: data.direction_health?.accuracy ? Math.round(data.direction_health.accuracy * 100) : 0
+            }
+          } catch (error) {
+            console.error(`加载 ${code} 预测失败:`, error)
+            
+            loadedCount.value++
+            loadProgress.value = Math.round((loadedCount.value / totalFunds) * 100)
+            
+            return {
+              fundCode: code,
+              conclusion: '加载失败',
+              directionClass: 'neutral',
+              upProbability: 50,
+              downProbability: 50,
+              interval80: '-',
+              interval90: '-',
+              reliability: '错误',
+              reliabilityType: 'danger',
+              accuracy: 0
+            }
           }
-        } catch (error) {
-          console.error(`加载 ${code} 预测失败:`, error)
-          return {
-            fundCode: code,
-            conclusion: '加载失败',
-            directionClass: 'neutral',
-            upProbability: 50,
-            downProbability: 50,
-            interval80: '-',
-            interval90: '-',
-            reliability: '错误',
-            reliabilityType: 'danger',
-            accuracy: 0
-          }
-        }
-      })
-    )
+        })
+      )
+      
+      results.push(...batchResults)
+      
+      // 批次间稍作延迟，避免请求过于密集
+      if (i + MAX_CONCURRENT < selectedFunds.value.length) {
+        await new Promise(resolve => setTimeout(resolve, 300))
+      }
+    }
     
     // 更新缓存
     results.forEach(result => {
@@ -289,6 +337,11 @@ const loadPredictions = async () => {
     console.error('批量加载预测失败:', error)
   } finally {
     loading.value = false
+    loadProgress.value = 100
+    // 1秒后隐藏进度条
+    setTimeout(() => {
+      loadProgress.value = 0
+    }, 1000)
   }
 }
 
@@ -566,6 +619,47 @@ const clearAll = () => {
 /* 对比结果 */
 .compare-results {
   animation: fadeIn 0.5s ease;
+}
+
+/* 加载进度条（新增） */
+.loading-progress {
+  margin-bottom: 20px;
+  padding: 16px 24px;
+  
+  .progress-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .el-icon {
+      color: #409EFF;
+      animation: rotate 1s linear infinite;
+    }
+    
+    .progress-text {
+      flex: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      
+      span:first-child {
+        font-size: 14px;
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+      
+      .progress-count {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .table-section,

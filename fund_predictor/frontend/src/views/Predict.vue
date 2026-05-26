@@ -58,15 +58,71 @@
       </div>
 
       <!-- 错误提示 -->
-      <el-alert
-        v-if="errorMessage"
-        :title="errorMessage"
-        type="error"
-        show-icon
-        closable
-        class="mt-4"
-        @close="errorMessage = ''"
-      />
+    <el-alert
+      v-if="errorMessage"
+      :title="errorMessage"
+      type="error"
+      show-icon
+      closable
+      class="mt-4"
+      @close="errorMessage = ''"
+    />
+    </div>
+
+    <!-- 训练进度区域（新增） -->
+    <div v-if="showTrainingProgress" class="training-progress glass-card">
+      <div class="progress-header">
+        <span class="progress-title">🔄 模型训练中...</span>
+        <el-button 
+          type="danger" 
+          size="small" 
+          text
+          @click="cancelTraining"
+          :disabled="!currentTaskId"
+        >
+          取消训练
+        </el-button>
+      </div>
+      
+      <!-- 进度条 -->
+      <div class="progress-bar-wrapper">
+        <el-progress 
+          :percentage="trainingProgress.percentage" 
+          :status="trainingStatus"
+          :stroke-width="20"
+          text-inside
+          :color="progressColor"
+        />
+      </div>
+      
+      <!-- 训练信息 -->
+      <div class="training-info-grid">
+        <div class="info-item">
+          <span class="info-label">任务ID</span>
+          <span class="info-value">{{ currentTaskId || '---' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">当前阶段</span>
+          <span class="info-value stage-text">{{ trainingProgress.stage }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">已用时</span>
+          <span class="info-value">{{ formatDuration(trainingProgress.elapsed) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">预计剩余</span>
+          <span class="info-value">{{ formatDuration(trainingProgress.remaining) }}</span>
+        </div>
+      </div>
+      
+      <!-- 训练日志（可折叠） -->
+      <el-collapse v-if="trainingLogs.length > 0" class="log-collapse">
+        <el-collapse-item title="📋 查看训练日志">
+          <div class="log-container">
+            <pre>{{ trainingLogs.join('\n') }}</pre>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
     </div>
 
     <!-- 空状态 -->
@@ -237,6 +293,18 @@ const forceRetrain = ref(false)
 const errorMessage = ref('')
 const hasResult = ref(false)
 const chartLoading = ref(false)
+
+// 训练进度相关状态（新增）
+const showTrainingProgress = ref(false)
+const currentTaskId = ref(null)
+const trainingProgress = reactive({
+  percentage: 0,
+  stage: '初始化',
+  elapsed: 0,
+  remaining: 0
+})
+const trainingLogs = ref([])
+let pollingTimer = null
 
 // 快捷代码
 const quickCodes = ['018956', '000001', '110011', '161725', '519778']
@@ -472,30 +540,238 @@ const handlePredict = async () => {
 }
 
 const handleTrain = async () => {
-  // 跳转到训练页面或直接调用训练API
-  // 这里简化处理，实际应该跳转到训练页面
-  const { startTraining } = await import('@/api/train')
+  if (!fundCode.value.trim()) {
+    errorMessage.value = '请输入基金代码'
+    return
+  }
+  
+  if (!/^\d{6}$/.test(fundCode.value)) {
+    errorMessage.value = '请输入正确的6位数字基金代码'
+    return
+  }
+
+  // 动态导入避免循环依赖
+  const { startTraining, getTaskStatus } = await import('@/api/train')
 
   training.value = true
-
+  showTrainingProgress.value = true
+  
+  // 重置进度
+  Object.assign(trainingProgress, {
+    percentage: 0,
+    stage: '提交训练任务',
+    elapsed: 0,
+    remaining: 0
+  })
+  trainingLogs.value = []
+  
   try {
+    ElMessage.info('正在提交训练任务...')
+    
     const res = await startTraining({
       fund_code: fundCode.value,
       force: forceRetrain.value
     })
 
     if (res.task_id) {
-      // 训练任务已创建，可以轮询状态
-      console.log('训练任务ID:', res.task_id)
-      errorMessage.value = ''
-      // 可以显示训练进度...
+      currentTaskId.value = res.task_id
+      ElMessage.success(`训练任务已启动 (ID: ${res.task_id})`)
+      
+      // 开始轮询进度
+      startPolling()
+    } else {
+      throw new Error('训练任务创建失败：未返回task_id')
     }
   } catch (error) {
-    errorMessage.value = error.message || '训练启动失败'
-  } finally {
-    training.value = false
+    console.error('训练启动失败:', error)
+    errorMessage.value = `训练启动失败: ${error.message || '未知错误'}`
+    resetTrainingState()
   }
 }
+
+// 训练进度轮询（新增）
+function startPolling() {
+  stopPolling() // 清除旧的定时器
+  
+  pollingTimer = setInterval(async () => {
+    try {
+      if (!currentTaskId.value) return
+      
+      const { getTaskStatus } = await import('@/api/train')
+      const statusRes = await getTaskStatus(currentTaskId.value)
+      const status = statusRes.data || statusRes
+      
+      // 更新进度
+      updateProgress(status)
+      
+      // 追加日志
+      if (status.log) {
+        const newLog = typeof status.log === 'string' ? status.log : JSON.stringify(status.log)
+        if (!trainingLogs.value.includes(newLog)) {
+          trainingLogs.value.push(newLog)
+          // 保持日志不超过50条
+          if (trainingLogs.value.length > 50) {
+            trainingLogs.value.shift()
+          }
+        }
+      }
+      
+      // 检查是否完成
+      if (status.status === 'completed' || status.status === 'success') {
+        completeTraining()
+      } else if (status.status === 'failed' || status.status === 'error') {
+        failTraining(status.error || '训练失败')
+      }
+      
+    } catch (error) {
+      console.error('轮询失败:', error)
+      // 轮询失败不中断，继续尝试
+    }
+  }, 2000) // 每2秒轮询一次
+}
+
+function updateProgress(status) {
+  let percentage = 0
+  let stage = ''
+  
+  switch (status.status) {
+    case 'pending':
+    case 'queued':
+      percentage = 5
+      stage = '等待执行'
+      break
+    case 'running':
+    case 'processing':
+      if (status.progress && status.progress.current_step) {
+        const steps = ['data_fetch', 'feature_engineering', 'model_training', 'evaluation']
+        const currentIndex = steps.indexOf(status.progress.current_step)
+        percentage = Math.min(95, 20 + (currentIndex * 25) + (status.progress.step_progress || 0))
+        stage = getStageName(status.progress.current_step)
+      } else if (status.progress_percent !== undefined) {
+        percentage = Math.min(95, status.progress_percent)
+        stage = status.stage || '训练中...'
+      } else {
+        percentage = 50
+        stage = '训练中...'
+      }
+      break
+    case 'completed':
+    case 'success':
+      percentage = 100
+      stage = '已完成'
+      break
+    default:
+      percentage = 10
+      stage = status.status || '处理中...'
+  }
+  
+  Object.assign(trainingProgress, {
+    percentage,
+    stage,
+    elapsed: status.elapsed || trainingProgress.elapsed + 2,
+    remaining: status.remaining || Math.max(0, (100 - percentage) * 2)
+  })
+}
+
+function getStageName(step) {
+  const names = {
+    'data_fetch': '📥 正在获取数据...',
+    'feature_engineering': '⚙️ 正在构建特征...',
+    'model_training': '🎯 正在训练模型...',
+    'evaluation': '✅ 正在评估模型...',
+    'saving': '💾 正在保存模型...'
+  }
+  return names[step] || step
+}
+
+function completeTraining() {
+  stopPolling()
+  
+  ElMessage.success('🎉 训练完成！正在自动预测...')
+  
+  // 延迟一下让用户看到完成状态
+  setTimeout(async () => {
+    try {
+      resetTrainingState()
+      // 自动开始预测
+      await handlePredict()
+    } catch (error) {
+      errorMessage.value = `自动预测失败: ${error.message}`
+    }
+  }, 1500)
+}
+
+function failTraining(errorMsg) {
+  stopPolling()
+  ElMessage.error(`❌ 训练失败: ${errorMsg}`)
+  errorMessage.value = `训练失败: ${errorMsg}`
+  resetTrainingState()
+}
+
+function cancelTraining() {
+  ElMessageBox.confirm(
+    '确定要取消当前训练吗？',
+    '取消确认',
+    {
+      confirmButtonText: '确定取消',
+      cancelButtonText: '继续训练',
+      type: 'warning'
+    }
+  ).then(() => {
+    stopPolling()
+    ElMessage.warning('已取消训练')
+    resetTrainingState()
+  }).catch(() => {
+    // 用户选择继续训练
+  })
+}
+
+function stopPolling() {
+  if (pollingTimer) {
+    clearInterval(pollingTimer)
+    pollingTimer = null
+  }
+}
+
+function resetTrainingState() {
+  training.value = false
+  showTrainingProgress.value = false
+  currentTaskId.value = null
+  Object.assign(trainingProgress, {
+    percentage: 0,
+    stage: '',
+    elapsed: 0,
+    remaining: 0
+  })
+  trainingLogs.value = []
+}
+
+function formatDuration(seconds) {
+  if (!seconds || seconds <= 0) return '--'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.round(seconds % 60)
+  if (mins > 0) {
+    return `${mins}分${secs}秒`
+  }
+  return `${secs}秒`
+}
+
+// 计算属性：训练状态
+const trainingStatus = computed(() => {
+  const progress = trainingProgress.percentage
+  if (progress >= 100) return 'success'
+  if (progress > 80) return '' // 接近完成时不显示特殊状态
+  return undefined
+})
+
+// 计算属性：进度条颜色
+const progressColor = computed(() => {
+  const progress = trainingProgress.percentage
+  if (progress < 30) return '#409EFF' // 蓝色
+  if (progress < 70) return '#E6A23C' // 橙色
+  if (progress < 90) return '#67C23A' // 绿色
+  return '#409EFF' // 完成
+})
 
 const selectQuickCode = (code) => {
   fundCode.value = code
@@ -991,6 +1267,136 @@ onMounted(() => {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 20px;
+  }
+}
+
+/* 训练进度区域（新增） */
+.training-progress {
+  margin-top: 24px;
+  padding: 24px;
+  
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    .progress-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #409EFF;
+        border-radius: 50%;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+    }
+  }
+  
+  .progress-bar-wrapper {
+    margin-bottom: 24px;
+    
+    :deep(.el-progress-bar__outer) {
+      border-radius: 10px;
+    }
+    
+    :deep(.el-progress-bar__inner) {
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+  }
+  
+  .training-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+    
+    .info-item {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      
+      .info-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+        display: block;
+      }
+      
+      .info-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        
+        &.stage-text {
+          color: #409EFF;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+  
+  .log-collapse {
+    margin-top: 16px;
+    
+    :deep(.el-collapse-item__header) {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .log-container {
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      background: rgba(0, 0, 0, 0.03);
+      padding: 16px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        
+        &:hover {
+          background: rgba(0, 0, 0, 0.3);
+        }
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
   }
 }
 </style>

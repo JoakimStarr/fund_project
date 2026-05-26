@@ -12,60 +12,12 @@ logger = logging.getLogger(__name__)
 def _get_exchange_prefix(stock_code: str) -> str:
     code = str(stock_code).zfill(6)
     if code.startswith(("600", "601", "603", "605", "688")):
-        return "SH"
+        return "sh"
     if code.startswith(("000", "001", "002", "003", "300", "301")):
-        return "SZ"
+        return "sz"
     if code.startswith(("8", "4")):
-        return "BJ"
-    return "SZ"
-
-
-def _fetch_xueqiu_kline(stock_code: str) -> tuple[pd.DataFrame | None, str]:
-    """使用雪球网K线API获取股票日线数据"""
-    try:
-        from app.services.xueqiu_data_service import get_xueqiu_service
-
-        prefix = _get_exchange_prefix(stock_code)
-        symbol = f"{prefix}{stock_code}"
-
-        service = get_xueqiu_service()
-        kline_data = service.fetch_kline_data(
-            symbol=symbol,
-            period="day",
-            type="before",
-            count=-284,
-            indicator="kline,pe,pb,ps,pcf,market_capital,agt,ggt,balance",
-        )
-
-        if not kline_data:
-            return None, "empty_data"
-
-        records = []
-        for item in kline_data:
-            record = {
-                "date": item.get("date"),
-                "open": item.get("open"),
-                "high": item.get("high"),
-                "low": item.get("low"),
-                "close": item.get("close"),
-                "volume": item.get("volume"),
-            }
-            records.append(record)
-
-        df = pd.DataFrame(records)
-        df = df.dropna(subset=["date", "close"]).sort_values("date").reset_index(drop=True)
-
-        if df.empty:
-            return None, "empty_data"
-
-        df["ret"] = df["close"].pct_change()
-        df["source"] = "xueqiu_kline"
-
-        logger.info("xueqiu_kline_success symbol=%s rows=%s", symbol, len(df))
-        return df, "xueqiu_kline"
-    except Exception as exc:
-        logger.warning("stock_daily_source_failed stock_code=%s source=xueqiu_kline error=%s", stock_code, exc)
-        return None, f"xueqiu_error: {exc}"
+        return "bj"
+    return "sz"
 
 
 def _fetch_akshare_hist(stock_code: str) -> tuple[pd.DataFrame | None, str]:
@@ -180,7 +132,6 @@ def get_stock_daily_multi_source(stock_code: str, start_date: str | None = None,
             logger.warning("stock_cache_read_failed stock_code=%s error=%s", code, exc)
 
     sources = [
-        ("xueqiu_kline", lambda: _fetch_xueqiu_kline(code)),
         ("akshare_stock_zh_a_hist", lambda: _fetch_akshare_hist(code)),
         ("akshare_stock_zh_a_daily", lambda: _fetch_akshare_daily(code)),
         ("eastmoney_stock_kline", lambda: _fetch_eastmoney_stock(code)),

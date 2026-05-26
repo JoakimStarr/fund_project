@@ -49,7 +49,7 @@ except ImportError:
     LGBM_AVAILABLE = False
     logger.warning("lightgbm_not_available")
 
-from app.core.config import INTERVAL_ALPHA, MODEL_DIR
+from app.core.config import INTERVAL_ALPHA, MODEL_DIR, get_gpu_params
 from app.core.errors import BaselineEvalError, ModelSelectionError, ProbabilityCalibrationError, RegimeIntervalError
 from app.core.logging_config import set_log_context
 from app.services.feature_service import model_feature_columns, validate_no_leakage_columns
@@ -308,7 +308,12 @@ def _selected_features(pipe: Pipeline, feature_cols: list[str]) -> list[str]:
     return [c for c, keep in zip(feature_cols, selector.get_support()) if keep]
 
 
-def _regressors() -> dict[str, Any]:
+def _regressors(n_samples: int = 0) -> dict[str, Any]:
+    """获取回归模型候选
+    
+    Args:
+        n_samples: 训练样本数，用于决定是否启用GPU
+    """
     models = {
         "ridge": Ridge(alpha=1.0),
         "bayesian_ridge": BayesianRidge(),
@@ -318,26 +323,67 @@ def _regressors() -> dict[str, Any]:
         "hist_gbr": HistGradientBoostingRegressor(max_iter=120, max_leaf_nodes=15, random_state=42),
         "gbr": GradientBoostingRegressor(n_estimators=120, max_depth=2, random_state=42),
     }
-    # XGB/LightGBM 候选 (V2.6)
+    # XGB/LightGBM 候选 (V2.6) - 支持GPU加速
+    gpu_params = get_gpu_params(n_samples)
     if XGB_AVAILABLE and xgb is not None:
-        models["xgboost"] = xgb.XGBRegressor(n_estimators=100, max_depth=3, learning_rate=0.05, random_state=42, n_jobs=-1, verbosity=0)
+        xgb_params = {
+            "n_estimators": 100,
+            "max_depth": 3,
+            "learning_rate": 0.05,
+            "random_state": 42,
+            "verbosity": 0,
+        }
+        xgb_params.update(gpu_params)
+        models["xgboost"] = xgb.XGBRegressor(**xgb_params)
+        logger.info("xgboost_initialized device=%s samples=%d", gpu_params.get("device", "cpu"), n_samples)
     if LGBM_AVAILABLE and lgb is not None:
-        models["lightgbm"] = lgb.LGBMRegressor(n_estimators=100, max_depth=4, learning_rate=0.05, random_state=42, n_jobs=-1, verbose=-1)
+        lgb_params = {
+            "n_estimators": 100,
+            "max_depth": 4,
+            "learning_rate": 0.05,
+            "random_state": 42,
+            "verbose": -1,
+        }
+        lgb_params.update(gpu_params)
+        models["lightgbm"] = lgb.LGBMRegressor(**lgb_params)
+        logger.info("lightgbm_initialized device=%s samples=%d", gpu_params.get("device", "cpu"), n_samples)
     return models
 
 
-def _classifiers() -> dict[str, Any]:
+def _classifiers(n_samples: int = 0) -> dict[str, Any]:
+    """获取分类模型候选
+    
+    Args:
+        n_samples: 训练样本数，用于决定是否启用GPU
+    """
     models = {
         "logistic": LogisticRegression(max_iter=2000, class_weight="balanced"),
         "extra_trees_cls": ExtraTreesClassifier(n_estimators=160, max_depth=5, random_state=42, n_jobs=-1, class_weight="balanced"),
         "random_forest_cls": RandomForestClassifier(n_estimators=140, max_depth=5, random_state=42, n_jobs=-1, class_weight="balanced"),
         "hist_gbc": HistGradientBoostingClassifier(max_iter=120, max_leaf_nodes=15, random_state=42),
     }
-    # XGB/LightGBM 候选 (V2.6)
+    # XGB/LightGBM 候选 (V2.6) - 支持GPU加速
+    gpu_params = get_gpu_params(n_samples)
     if XGB_AVAILABLE and xgb is not None:
-        models["xgboost_cls"] = xgb.XGBClassifier(n_estimators=100, max_depth=3, learning_rate=0.05, random_state=42, n_jobs=-1, verbosity=0)
+        xgb_params = {
+            "n_estimators": 100,
+            "max_depth": 3,
+            "learning_rate": 0.05,
+            "random_state": 42,
+            "verbosity": 0,
+        }
+        xgb_params.update(gpu_params)
+        models["xgboost_cls"] = xgb.XGBClassifier(**xgb_params)
     if LGBM_AVAILABLE and lgb is not None:
-        models["lightgbm_cls"] = lgb.LGBMClassifier(n_estimators=100, max_depth=4, learning_rate=0.05, random_state=42, n_jobs=-1, verbose=-1)
+        lgb_params = {
+            "n_estimators": 100,
+            "max_depth": 4,
+            "learning_rate": 0.05,
+            "random_state": 42,
+            "verbose": -1,
+        }
+        lgb_params.update(gpu_params)
+        models["lightgbm_cls"] = lgb.LGBMClassifier(**lgb_params)
     return models
 
 
@@ -421,10 +467,11 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
     train_base, valid, test_select, test_final = _split_train_valid_test(data_train)
     X_train, y_train = train_base[feature_cols], train_base["target_next"]
     X_valid, y_valid = valid[feature_cols], valid["target_next"]
+    n_samples = len(train_base)
     rough = []
     if progress_cb:
         progress_cb(35, "point_model_train_start", "Training point model candidates")
-    for model_name, selector, scaler, model in _candidates(_regressors()):
+    for model_name, selector, scaler, model in _candidates(_regressors(n_samples)):
         try:
             pipe = _make_pipeline(selector, scaler, clone(model), len(feature_cols), "regression")
             pipe.fit(X_train, y_train)
@@ -456,7 +503,7 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
             w = combined.iloc[max(0, i - TRAIN_WINDOW) : i]
             if len(w) < 120:
                 continue
-            pipe = _make_pipeline(item["selector"], item["scaler"], clone(_regressors()[item["model"]]), len(feature_cols), "regression")
+            pipe = _make_pipeline(item["selector"], item["scaler"], clone(_regressors(n_samples)[item["model"]]), len(feature_cols), "regression")
             pipe.fit(w[feature_cols], w["target_next"])
             preds.append(float(pipe.predict(combined.iloc[[i]][feature_cols])[0]))
             trues.append(float(combined.iloc[i]["target_next"]))
@@ -471,7 +518,7 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
     train_valid = pd.concat([train_base, valid])
     for item in top_k:
         try:
-            pipe = _make_pipeline(item["selector"], item["scaler"], clone(_regressors()[item["model"]]), len(feature_cols), "regression")
+            pipe = _make_pipeline(item["selector"], item["scaler"], clone(_regressors(n_samples)[item["model"]]), len(feature_cols), "regression")
             pipe.fit(train_valid[feature_cols], train_valid["target_next"])
             pred = pipe.predict(test_select[feature_cols])
             metrics = _regression_metrics(test_select["target_next"].to_numpy(), pred, baseline_mean=baselines_select["rolling_mean"].to_numpy())
@@ -481,7 +528,7 @@ def _point_model(data_train: pd.DataFrame, feature_cols: list[str], progress_cb=
     if not final:
         raise ModelSelectionError("No point model passed final test")
     best = sorted(final, key=lambda x: x["final_metrics"]["score"])[0]
-    final_pipe = _make_pipeline(best["selector"], best["scaler"], clone(_regressors()[best["model"]]), len(feature_cols), "regression")
+    final_pipe = _make_pipeline(best["selector"], best["scaler"], clone(_regressors(n_samples)[best["model"]]), len(feature_cols), "regression")
     final_pipe.fit(data_train[feature_cols], data_train["target_next"])
     set_log_context(stage="point_model_train_success")
     logger.info("point_model_train_success model=%s selector=%s", best["model"], best["selector"])
@@ -521,8 +568,9 @@ def _proxy_gain_eval(data_train: pd.DataFrame, feature_cols: list[str], point_be
         }
     train_base, valid, _, _ = _split_train_valid_test(data_train)
     train_valid = pd.concat([train_base, valid])
+    n_samples = len(train_base)
     try:
-        before_pipe = _make_pipeline(point_best["selector"], point_best["scaler"], clone(_regressors()[point_best["model"]]), len(no_proxy_cols), "regression")
+        before_pipe = _make_pipeline(point_best["selector"], point_best["scaler"], clone(_regressors(n_samples)[point_best["model"]]), len(no_proxy_cols), "regression")
         before_pipe.fit(train_valid[no_proxy_cols], train_valid["target_next"])
         before_pred = before_pipe.predict(test[no_proxy_cols])
         before = _regression_metrics(test["target_next"].to_numpy(), before_pred, baseline_mean=baselines["rolling_mean"].to_numpy())
@@ -632,8 +680,9 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
         logger.warning("direction_model_skipped_single_class train_classes=%s valid_classes=%s", y_train.nunique(), y_valid.nunique())
         return None, None, [], None, None, None, None
     baseline_acc = float(max((test_select["target_next"] > 0).mean(), (test_select["target_next"] <= 0).mean()))
+    n_samples = len(train_base)
     rough = []
-    for model_name, selector, scaler, model in _candidates(_classifiers()):
+    for model_name, selector, scaler, model in _candidates(_classifiers(n_samples)):
         try:
             base = _make_pipeline(selector, scaler, clone(model), len(feature_cols), "classification")
             base.fit(train_base[feature_cols], y_train)
@@ -661,7 +710,7 @@ def _direction_model(data_train: pd.DataFrame, feature_cols: list[str], progress
             logger.warning("direction_final_skipped_single_class")
             continue
         try:
-            base = _make_pipeline(item["selector"], item["scaler"], clone(_classifiers()[item["model"]]), len(feature_cols), "classification")
+            base = _make_pipeline(item["selector"], item["scaler"], clone(_classifiers(n_samples)[item["model"]]), len(feature_cols), "classification")
             base.fit(fit_part[feature_cols], y_fit)
             calibrated = _calibrated_direction_pipeline(base, calib_part[feature_cols], y_calib)
             p_test = _predict_p_up(calibrated, test_select[feature_cols])
