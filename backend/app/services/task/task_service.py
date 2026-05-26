@@ -16,7 +16,7 @@ async def enqueue_train(fund_code: str, session, force_retrain: bool = False) ->
     task_id = _get_task_id()
     task = TrainTask(id=task_id, fund_code=fund_code, status="pending", force_retrain=1 if force_retrain else 0, progress=0, created_at=datetime.now())
     session.add(task)
-    await session.flush()
+    await session.commit()
     asyncio.create_task(_execute_train(task_id, fund_code))
     return {"task_id": task_id, "fund_code": fund_code, "status": "pending", "progress": 0}
 

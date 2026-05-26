@@ -13,7 +13,7 @@ from app.services.model.conformal import predict_interval
 from app.services.model.constraints import apply_constraints
 from app.services.model.cold_start import should_use_group_model
 from app.services.predict.shap_service import explain
-from app.services.fund.profile_service import get_fund_profile
+from app.services.fund.profile_service import get_profile as get_fund_profile
 
 
 async def predict(fund_code: str, session, force_retrain: bool = False) -> PredictResponse:
@@ -56,7 +56,7 @@ async def predict(fund_code: str, session, force_retrain: bool = False) -> Predi
     calibration = model_data.get("calibration")
     latest_nav = nav_rows[-1]
     prev_nav_val = float(latest_nav.nav)
-    features_df = build_features(nav_df, fund_type)
+    features_df = build_features(fund_code, nav_df.to_dict("records"), fund_type)
     if features_df.empty:
         raise ValueError("特征构建失败")
     latest_features = features_df.iloc[-1:].fillna(0)
