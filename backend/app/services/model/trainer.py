@@ -28,7 +28,8 @@ async def train_model(fund_code: str, session) -> dict:
     )
     profile = profile_result.scalar_one_or_none()
     fund_type = profile.fund_type if profile else "hybrid_equity"
-    features, selected_features = build_and_screen(nav_df, fund_type)
+    nav_data_list = [{"nav_date": r.nav_date, "nav": r.nav, "acc_nav": r.acc_nav, "daily_return": r.daily_return} for r in nav_rows]
+    features, selected_features = build_and_screen(fund_code, nav_data_list, fund_type)
     nav_df["nav_date"] = pd.to_datetime(nav_df["nav_date"])
     nav_df = nav_df.sort_values("nav_date").set_index("nav_date")
     forward_returns = nav_df["nav"].pct_change().shift(-1)

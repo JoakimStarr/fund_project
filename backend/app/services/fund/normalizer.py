@@ -1,6 +1,5 @@
 import re
 import logging
-import akshare as ak
 from app.core.errors import ValidationError
 
 logger = logging.getLogger(__name__)
@@ -34,17 +33,28 @@ def normalize(raw_input: str) -> dict:
     fund_type = None
     skip_prediction = None
     try:
-        df = ak.fund_individual_basic_info_xq(symbol=text)
-        if df is not None and not df.empty:
-            row = df.iloc[0]
-            fund_name = str(row.get("基金简称", ""))
-            fund_type_raw = str(row.get("基金类型", ""))
-            if "货币" in fund_type_raw:
-                skip_prediction = True
-            steps.append("verify_akshare")
+        import asyncio
+        from app.services.data.danjuan_client import get_fund_info as dj_get_info
+        loop = asyncio.get_event_loop()
+        dj_data = loop.run_until_complete(dj_get_info(text))
+        fund_name = dj_data.get("fund_name", "")
+        if fund_name:
+            steps.append("verify_danjuan")
     except Exception as e:
-        logger.warning(f"AKShare 验证失败 {text}: {e}")
-        steps.append("verify_akshare_failed")
+        logger.warning(f"danjuan验证失败 {text}: {e}, 尝试akshare")
+        try:
+            import akshare as ak
+            df = ak.fund_individual_basic_info_xq(symbol=text)
+            if df is not None and not df.empty:
+                row = df.iloc[0]
+                fund_name = str(row.get("基金简称", ""))
+                fund_type_raw = str(row.get("基金类型", ""))
+                if "货币" in fund_type_raw:
+                    skip_prediction = True
+                steps.append("verify_akshare")
+        except Exception as e2:
+            logger.warning(f"AKShare验证也失败 {text}: {e2}")
+            steps.append("verify_all_failed")
     return {
         "raw_input": raw_input,
         "normalized": text,

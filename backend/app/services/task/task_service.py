@@ -29,17 +29,35 @@ async def _execute_train(task_id: str, fund_code: str):
             if task:
                 task.status = "running"
                 task.started_at = datetime.now()
-                task.progress = 10
+                task.progress = 5
+                task.log_text = "开始获取净值数据..."
                 await session.commit()
+
+        async with async_session() as session:
+            from sqlalchemy import select, func
+            from app.models.fund_nav import FundNav
+            result = await session.execute(select(func.count(FundNav.id)).where(FundNav.fund_code == fund_code))
+            nav_count = result.scalar() or 0
+            if nav_count < 220:
+                task = await session.get(TrainTask, task_id)
+                if task:
+                    task.progress = 10
+                    task.log_text = f"正在从蛋卷基金拉取净值数据 (当前{nav_count}行)..."
+                    await session.commit()
+                from app.services.data.nav_service import fetch_and_store_nav
+                await fetch_and_store_nav(fund_code, session)
+
         async with async_session() as session:
             task = await session.get(TrainTask, task_id)
             if task:
                 task.progress = 30
+                task.log_text = "开始训练模型..."
                 await session.commit()
             metrics = await train_model(fund_code, session)
             if task:
                 task.status = "success"
                 task.progress = 100
+                task.log_text = "训练完成"
                 task.metrics_json = json.dumps(metrics, ensure_ascii=False)
                 task.model_version = metrics.get("model_version", "")
                 task.finished_at = datetime.now()

@@ -1,6 +1,6 @@
 import json
 import logging
-import akshare as ak
+import asyncio
 from sqlalchemy import select
 from app.models.fund_profile import FundProfileCache
 from app.services.fund.routing_service import classify
@@ -30,30 +30,51 @@ async def get_profile(fund_code: str, session):
             "rating": cached.rating,
             "skip_prediction": bool(cached.skip_prediction),
         }
-    df = ak.fund_individual_basic_info_xq(symbol=fund_code)
-    if df is None or df.empty:
-        raise ValueError(f"基金 {fund_code} 信息获取失败")
-    row = df.iloc[0]
-    fund_name = str(row.get("基金简称", ""))
-    fund_type_raw = str(row.get("基金类型", ""))
-    benchmark = str(row.get("业绩比较基准", ""))
-    invest_strategy = str(row.get("投资策略", "") or row.get("投资目标", ""))
+
+    try:
+        from app.services.data.danjuan_client import get_fund_info as dj_get_info
+        dj_data = await dj_get_info(fund_code)
+        fund_name = dj_data.get("fund_name", "")
+        fund_type_raw = ""
+        benchmark = ""
+        invest_strategy = ""
+        company = dj_data.get("keeper_name", "")
+        manager = dj_data.get("manager_name", "")
+        established = dj_data.get("found_date", "")
+        full_name = dj_data.get("full_name", "")
+    except Exception as e:
+        logger.warning(f"danjuan获取失败 {fund_code}: {e}, 尝试akshare")
+        import akshare as ak
+        df = ak.fund_individual_basic_info_xq(symbol=fund_code)
+        if df is None or df.empty:
+            raise ValueError(f"基金 {fund_code} 信息获取失败")
+        row = df.iloc[0]
+        fund_name = str(row.get("基金简称", ""))
+        fund_type_raw = str(row.get("基金类型", ""))
+        benchmark = str(row.get("业绩比较基准", ""))
+        invest_strategy = str(row.get("投资策略", "") or row.get("投资目标", ""))
+        company = str(row.get("基金公司", ""))
+        manager = str(row.get("基金经理", ""))
+        established = str(row.get("成立时间", ""))
+        full_name = ""
+
     classification = classify(fund_name, fund_type_raw, benchmark, invest_strategy)
     fund_type = classification["fund_type"]
     skip_prediction = 1 if fund_type == "money_market" else 0
     profile = {
         "fund_code": fund_code,
         "fund_name": fund_name,
+        "full_name": full_name,
         "fund_type_raw": fund_type_raw,
         "fund_type": fund_type,
         "classification_confidence": classification["confidence"],
-        "established": str(row.get("成立时间", "")),
-        "size_text": str(row.get("最新规模", "")),
-        "company": str(row.get("基金公司", "")),
-        "manager": str(row.get("基金经理", "")),
+        "established": established,
+        "size_text": "",
+        "company": company,
+        "manager": manager,
         "benchmark": benchmark,
         "invest_strategy": invest_strategy,
-        "rating": str(row.get("基金评级", "")),
+        "rating": "",
         "skip_prediction": skip_prediction,
     }
     existing = await session.execute(
@@ -69,6 +90,7 @@ async def get_profile(fund_code: str, session):
         session.add(FundProfileCache(
             fund_code=fund_code,
             fund_name=fund_name,
+            full_name=full_name,
             fund_type_raw=fund_type_raw,
             fund_type=fund_type,
             classification_confidence=classification["confidence"],
