@@ -80,13 +80,22 @@ def classify_fund(fund_code: str) -> FundProfile:
 
     logger.debug("AKShare returned info keys: %s", list(info.keys()) if info else "None")
 
-    raw_type = str(info.get("基金类型", "") or "")
-    benchmark = str(info.get("业绩比较基准", "") or "")
-    strategy = str(info.get("投资策略", "") or "")
-    fund_name = str(info.get("基金简称", "") or "").strip()
-    establish_date = str(info.get("成立日期", "") or "").strip()
-    size = _parse_size(info.get("最新规模"))
-    manager = str(info.get("基金经理", "") or "").strip()
+    # 字段提取：支持多种可能的字段名（兼容不同数据源）
+    def _get_field(info_dict, *possible_keys, default=""):
+        """尝试从字典中获取字段值，支持多个候选键名"""
+        for key in possible_keys:
+            val = info_dict.get(key)
+            if val is not None and str(val).strip():
+                return str(val).strip()
+        return default
+
+    raw_type = _get_field(info, "基金类型", "基金类型（新）", "type", "fund_type")
+    benchmark = _get_field(info, "业绩比较基准", "比较基准", "benchmark")
+    strategy = _get_field(info, "投资策略", "投资目标", "strategy")
+    fund_name = _get_field(info, "基金名称", "基金简称", "NAME", "name", "SHORTNAME")  # 优先"基金名称"
+    establish_date = _get_field(info, "成立日期", "成立时间", "SETUPDATE", "setupDate", "establish_date")
+    size = _parse_size(_get_field(info, "最新规模", "基金规模", "资产规模", "SCALE", "scale"))
+    manager = _get_field(info, "基金经理", "经理", "MANAGER", "manager")
     fee_rate = _extract_fee_rate(info)
     keywords = _extract_strategy_keywords(strategy)
 
@@ -340,12 +349,38 @@ def _risk_level_for_type(fund_type: str) -> str:
 
 def _fetch_from_primary_source(fund_code: str) -> Optional[dict]:
     import akshare as ak
+    import pandas as pd
 
     try:
         info = ak.fund_individual_basic_info_xq(symbol=fund_code)
-        if info and isinstance(info, dict) and len(info) > 0:
-            logger.info("Primary source (xueqiu) succeeded for fund %s", fund_code)
-            return dict(info)
+
+        # 转换 DataFrame 为字典（AKShare 返回格式：[['item', 'value'], ...]）
+        if info is not None:
+            if isinstance(info, pd.DataFrame) and not info.empty:
+                # 将 item-value 格式的 DataFrame 转为普通字典
+                if 'item' in info.columns and 'value' in info.columns:
+                    result_dict = {}
+                    for _, row in info.iterrows():
+                        key = str(row['item']).strip()
+                        val = row['value']
+                        # 处理 NaN 值
+                        if pd.isna(val) or (isinstance(val, float) and (val != val)):  # NaN check
+                            result_dict[key] = ''
+                        else:
+                            result_dict[key] = str(val).strip() if val is not None else ''
+                    logger.info(
+                        "Primary source (xueqiu) succeeded for fund %s, got %d fields",
+                        fund_code, len(result_dict)
+                    )
+                    return result_dict
+                # 其他格式的 DataFrame，转为字典记录
+                elif isinstance(info, pd.DataFrame):
+                    logger.warning("Primary source returned unexpected DataFrame format for fund %s", fund_code)
+                    return None
+            elif isinstance(info, dict) and len(info) > 0:
+                logger.info("Primary source (xueqiu) succeeded for fund %s (dict format)", fund_code)
+                return {str(k): str(v) for k, v in info.items()}
+
         logger.warning("Primary source returned empty/invalid data for fund %s", fund_code)
     except Exception as exc:
         logger.warning("Primary source (xueqiu) failed for %s: %s", fund_code, exc)
@@ -353,9 +388,25 @@ def _fetch_from_primary_source(fund_code: str) -> Optional[dict]:
     try:
         logger.info("Trying fallback source (eastmoney) for fund %s", fund_code)
         info = ak.fund_individual_basic_info_em(symbol=fund_code)
-        if info and isinstance(info, dict) and len(info) > 0:
-            logger.info("Fallback source (eastmoney) succeeded for fund %s", fund_code)
-            return _normalize_eastmoney_info(info)
+
+        # 同样处理 eastmoney 可能返回的 DataFrame
+        if info is not None:
+            if isinstance(info, pd.DataFrame) and not info.empty:
+                if 'item' in info.columns and 'value' in info.columns:
+                    result_dict = {}
+                    for _, row in info.iterrows():
+                        key = str(row['item']).strip()
+                        val = row['value']
+                        if pd.isna(val) or (isinstance(val, float) and (val != val)):
+                            result_dict[key] = ''
+                        else:
+                            result_dict[key] = str(val).strip() if val is not None else ''
+                    logger.info("Fallback source (eastmoney) succeeded for fund %s", fund_code)
+                    return _normalize_eastmoney_info(result_dict)
+            elif isinstance(info, dict) and len(info) > 0:
+                logger.info("Fallback source (eastmoney) succeeded for fund %s (dict format)", fund_code)
+                return _normalize_eastmoney_info(info)
+
         logger.warning("Fallback source returned empty data for fund %s", fund_code)
     except Exception as exc:
         logger.warning("Fallback source (eastmoney) failed for %s: %s", fund_code, exc)
