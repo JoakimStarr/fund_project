@@ -1,0 +1,159 @@
+app:
+  name: "FundPredictor"
+  version: "1.0.0"
+  debug: false
+  timezone: "Asia/Shanghai"
+
+data:
+  db_path: "data/fund_predictor.db"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  models_dir: "models"
+  nav_cache_ttl_seconds: 86400
+  nav_cache_maxsize: 500
+  fetch_timeout_seconds: 20
+  fetch_max_workers: 5
+  fetch_retry_times: 2
+  min_train_rows: 220
+  cold_start_threshold: 250
+
+feature:
+  lookback_lags: [1, 2, 3, 5, 10]
+  rolling_windows: [5, 10, 20, 60]
+  beta_window: 20
+  volatility_window: 20
+  style_window: 60
+
+screening:
+  ic_threshold: 0.02
+  use_spearman: true
+  vif_threshold: 10.0
+  icir_threshold: 0.5
+  vif_method: "cluster"
+  cluster_corr_threshold: 0.8
+
+model:
+  train_split_ratio: [0.55, 0.22, 0.13, 0.10]
+  wfcv_dynamic: true
+  wfcv_max_train_months: 24
+  wfcv_min_rounds: 3
+  wfcv_step_months: 1
+  selection_mae_weight: 0.60
+  selection_direction_weight: 0.40
+  direction_accuracy_min: 0.52
+  sample_weight_halflife: 60
+  candidate_models:
+    - name: "ridge"
+      alpha: 1.0
+    - name: "elasticnet"
+      alpha: 0.01
+      l1_ratio: 0.5
+    - name: "lgbm"
+      n_estimators: 120
+      max_depth: 5
+      learning_rate: 0.05
+      min_child_samples: 10
+    - name: "xgboost"
+      n_estimators: 120
+      max_depth: 5
+      learning_rate: 0.05
+  keep_versions: 3
+
+interval:
+  default_alpha: 0.10
+  calibration_split: "test_select"
+
+nav_constraints:
+  hybrid_equity:    0.20
+  equity_active:    0.20
+  hybrid_balanced:  0.15
+  hybrid_bond:      0.10
+  hybrid_flexible:  0.20
+  bond_pure:        0.05
+  bond_mixed:       0.08
+  bond_convertible: 0.20
+  index_equity:     null
+  index_bond:       null
+  fof:              0.15
+  qdii:             0.20
+
+bond:
+  duration_estimate:
+    bond_pure:        3.0
+    bond_mixed:       2.5
+    bond_convertible: 1.5
+  daily_fee: 0.000003
+
+cold_start:
+  threshold_days: 250
+  blend_start_days: 250
+  blend_end_days: 400
+  min_peers: 3
+
+ai_provider:
+  primary:
+    provider: "glm"
+    base_url: "https://open.bigmodel.cn/api/paas/v4"
+    model: "glm-4-flash"
+    timeout_seconds: 8
+    max_tokens: 512
+    temperature: 0.3
+  fallback:
+    provider: "siliconflow"
+    base_url: "https://api.siliconflow.cn/v1"
+    model: "Qwen/Qwen2.5-7B-Instruct"
+    timeout_seconds: 12
+    max_tokens: 512
+    temperature: 0.3
+  concurrent_providers: true
+  total_timeout_seconds: 10
+  retry_times: 1
+  cache_ttl: "day"
+  allowed_actions: ["增持", "持有", "减持", "观望"]
+  force_json_output: true
+
+news_service:
+  sources:
+    cls:
+      enabled: true
+      max_items: 50
+      relevance_min_score: 0.3
+    em:
+      enabled: true
+      max_items: 20
+      relevance_min_score: 0.4
+      use_holdings_codes: true
+      max_holdings_to_query: 5
+  max_news_for_ai: 3
+  max_news_for_display: 5
+  cache_minutes: 10
+  fetch_timeout_seconds: 8
+  news_max_age_hours: 36
+
+task:
+  max_concurrent: 2
+  task_timeout_seconds: 300
+
+api:
+  version: "v1"
+  request_timeout: 30
+  rate_limit:
+    ai_refresh_per_fund_minutes: 30
+    batch_predict_max: 10
+
+scheduler:
+  nav_update_time: "17:30"
+  backfill_time: "21:30"
+  model_health_check_day: "sat"
+  model_health_check_time: "08:00"
+
+logging:
+  level: "INFO"
+  dir: "logs"
+  handlers:
+    app:   { filename: "app.log",    max_bytes: 10485760, backup_count: 30 }
+    api:   { filename: "api.jsonl",  format: "json" }
+    train: { filename: "train.log",  level: "DEBUG" }
+    error: { filename: "error.log",  level: "ERROR" }
+    audit: { filename: "audit.jsonl",format: "json" }
+    perf:  { filename: "perf.jsonl", format: "json" }

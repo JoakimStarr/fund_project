@@ -1,1 +1,0 @@
-import{r as t}from"./request-D3qEZWvj.js";function o(){return t.get("/dashboard/stats")}function a(e={}){const{limit:s=10}=e;return t.get(`/dashboard/recent-predictions?limit=${s}`)}function n(){return t.get("/dashboard/models")}function i(){return t.get("/dashboard/system-resources")}export{n as a,a as b,i as c,o as g};

@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.env
+data/
+models/
+logs/
+dist/
+node_modules/
+.idea/
+.vscode/
+*.db
+*.db-shm
+*.db-wal
+*.egg-info/
+.pytest_cache/
+.venv/
+trash/
