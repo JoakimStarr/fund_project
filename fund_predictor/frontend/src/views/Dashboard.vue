@@ -28,7 +28,7 @@
           </el-icon>
         </div>
         <div class="stat-content">
-          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-value" :class="{ 'animate-number': stat.animating }">{{ displayValue(stat) }}</div>
           <div class="stat-label">{{ stat.label }}</div>
         </div>
         <div class="stat-trend" :class="stat.trend">
@@ -146,7 +146,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   Aim, Top, Bottom, ArrowRight,
@@ -327,6 +327,61 @@ const goToPredict = () => {
   router.push('/predict')
 }
 
+// 数字显示格式化
+const displayValue = (stat) => {
+  if (stat._displayValue !== undefined) {
+    return stat._displayValue
+  }
+  return stat.value
+}
+
+// 数字滚动动画
+const animateNumber = (statIndex, targetValue) => {
+  const stat = statsData.value[statIndex]
+  if (!stat) return
+
+  stat.animating = true
+
+  // 解析目标值
+  const targetStr = String(targetValue)
+  const isPercent = targetStr.includes('%')
+  const isTime = targetStr.includes('<') || targetStr.includes('s') || targetStr.includes('ms')
+  const numMatch = targetStr.match(/[\d.]+/)
+  const targetNum = numMatch ? parseFloat(numMatch[0]) : 0
+  const startNum = 0
+  const duration = 1500 // 动画持续时间（毫秒）
+  const startTime = Date.now()
+
+  const animate = () => {
+    const elapsed = Date.now() - startTime
+    const progress = Math.min(elapsed / duration, 1)
+
+    // 使用缓动函数让动画更自然
+    const easeOutQuart = 1 - Math.pow(1 - progress, 4)
+    const currentNum = startNum + (targetNum - startNum) * easeOutQuart
+
+    // 格式化显示值
+    if (isTime) {
+      stat._displayValue = targetStr
+    } else if (isPercent) {
+      stat._displayValue = `${currentNum.toFixed(1)}%`
+    } else if (targetNum % 1 !== 0 || targetStr.includes('.')) {
+      stat._displayValue = currentNum.toFixed(2)
+    } else {
+      stat._displayValue = Math.floor(currentNum).toString()
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(animate)
+    } else {
+      stat._displayValue = undefined
+      stat.animating = false
+    }
+  }
+
+  requestAnimationFrame(animate)
+}
+
 const viewPrediction = (item) => {
   router.push({
     path: '/predict',
@@ -345,11 +400,24 @@ const loadDashboardData = async () => {
     // 更新统计数据
     if (statsRes.data) {
       const data = statsRes.data
-      
-      statsData.value[0].value = String(data.total_models || 0)
-      statsData.value[1].value = data.avg_accuracy?.label || '-'
-      statsData.value[2].value = String(data.today_predictions || 0)
-      statsData.value[3].value = data.avg_response_time?.label || '< 2s'
+
+      const newValues = [
+        String(data.total_models || 0),
+        data.avg_accuracy?.label || '-',
+        String(data.today_predictions || 0),
+        data.avg_response_time?.label || '< 2s'
+      ]
+
+      // 更新值并触发动画
+      newValues.forEach((value, index) => {
+        if (statsData.value[index] && value !== statsData.value[index].value) {
+          statsData.value[index].value = value
+          // 延迟触发动画，让每个卡片错开显示效果
+          setTimeout(() => {
+            animateNumber(index, value)
+          }, index * 150)
+        }
+      })
       
       // 更新系统状态
       if (data.system_status) {
@@ -457,12 +525,35 @@ onMounted(() => {
     font-weight: 700;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
+    transition: transform 0.3s ease, color 0.3s ease;
+
+    &.animate-number {
+      animation: numberGlow 1.5s ease-out;
+    }
   }
 
   .stat-label {
     font-size: 13px;
     color: var(--text-muted);
     margin-top: 2px;
+  }
+}
+
+@keyframes numberGlow {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+    text-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    text-shadow: none;
   }
 }
 

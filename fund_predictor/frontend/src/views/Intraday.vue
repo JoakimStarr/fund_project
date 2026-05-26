@@ -58,6 +58,11 @@
           <el-icon><Timer /></el-icon>
           {{ estimating ? '停止' : '自动刷新' }}
         </el-button>
+
+        <div v-if="estimating" class="refresh-status">
+          <span class="status-indicator"></span>
+          <span>{{ refreshStatusText }}</span>
+        </div>
       </div>
     </div>
 
@@ -237,6 +242,13 @@ const isMarketOpen = ref(true)
 // 自动刷新定时器
 let autoRefreshTimer = null
 let timeUpdateTimer = null
+let currentRefreshInterval = 5000 // 当前刷新间隔（毫秒）
+
+// 智能刷新间隔配置
+const REFRESH_INTERVALS = {
+  trading: 3000,      // 交易时间：3秒
+  nonTrading: 30000   // 非交易时间：30秒
+}
 
 // 估算数据（从API加载）
 const estimateData = reactive({
@@ -260,6 +272,21 @@ const estimateData = reactive({
 // 市场状态
 const marketStatusType = computed(() => isMarketOpen.value ? 'success' : 'info')
 const marketStatusText = computed(() => isMarketOpen.value ? '交易中' : '已收盘')
+
+// 智能刷新间隔计算
+const getSmartRefreshInterval = () => {
+  return isMarketOpen.value ? REFRESH_INTERVALS.trading : REFRESH_INTERVALS.nonTrading
+}
+
+// 当前刷新状态描述
+const refreshStatusText = computed(() => {
+  if (!estimating.value) return ''
+  const interval = getSmartRefreshInterval()
+  if (interval === REFRESH_INTERVALS.trading) {
+    return `交易中 (${interval / 1000}秒刷新)`
+  }
+  return `非交易时间 (${interval / 1000}秒刷新)`
+})
 
 // 日内走势图配置
 const intradayChartOption = computed(() => ({
@@ -448,27 +475,48 @@ const toggleAutoRefresh = () => {
       autoRefreshTimer = null
     }
   } else {
-    // 开始刷新 - 重新调用API获取最新数据
+    // 开始刷新 - 使用智能刷新间隔
     estimating.value = true
-    autoRefreshTimer = setInterval(async () => {
-      try {
-        const res = await getLatestIntraday(fundCode.value)
-        const data = res.data || res
-        
-        if (data && data.estimated_nav !== undefined) {
-          const change = data.estimated_change || 0
-          estimateData.estimatedNav = data.estimated_nav.toFixed(4)
-          estimateData.estimatedChange = change >= 0 ? `+${change.toFixed(4)}` : change.toFixed(4)
-          estimateData.changePercent = `${(data.change_percent || 0).toFixed(2)}%`
-          estimateData.changeClass = (data.change_percent || 0) >= 0 ? 'positive' : 'negative'
-          estimateData.confidence = Math.round((data.confidence || 0) * 100)
-        }
-        
-        lastUpdateTime.value = formatTime(new Date())
-      } catch (error) {
-        console.error('刷新估算失败:', error)
+
+    const startSmartRefresh = () => {
+      // 清除旧的定时器
+      if (autoRefreshTimer) {
+        clearInterval(autoRefreshTimer)
       }
-    }, 5000) // 每5秒更新一次
+
+      // 获取当前应该使用的刷新间隔
+      currentRefreshInterval = getSmartRefreshInterval()
+
+      autoRefreshTimer = setInterval(async () => {
+        try {
+          const res = await getLatestIntraday(fundCode.value)
+          const data = res.data || res
+
+          if (data && data.estimated_nav !== undefined) {
+            const change = data.estimated_change || 0
+            estimateData.estimatedNav = data.estimated_nav.toFixed(4)
+            estimateData.estimatedChange = change >= 0 ? `+${change.toFixed(4)}` : change.toFixed(4)
+            estimateData.changePercent = `${(data.change_percent || 0).toFixed(2)}%`
+            estimateData.changeClass = (data.change_percent || 0) >= 0 ? 'positive' : 'negative'
+            estimateData.confidence = Math.round((data.confidence || 0) * 100)
+          }
+
+          lastUpdateTime.value = formatTime(new Date())
+
+          // 动态检查是否需要调整刷新间隔（每10次检查一次或当市场状态变化时）
+          const newInterval = getSmartRefreshInterval()
+          if (Math.abs(newInterval - currentRefreshInterval) > 1000) {
+            console.log(`[智能刷新] 刷新间隔调整: ${currentRefreshInterval}ms -> ${newInterval}ms`)
+            startSmartRefresh() // 重启定时器以应用新间隔
+          }
+        } catch (error) {
+          console.error('刷新估算失败:', error)
+        }
+      }, currentRefreshInterval)
+    }
+
+    // 启动智能刷新
+    startSmartRefresh()
   }
 }
 
@@ -631,6 +679,32 @@ onUnmounted(() => {
     .el-select {
       width: 100% !important;
     }
+  }
+
+  .refresh-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: $radius-full;
+    font-size: 12px;
+    color: #3b82f6;
+    font-weight: 500;
+    white-space: nowrap;
+
+    .status-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: statusBlink 2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes statusBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
   }
 }
 

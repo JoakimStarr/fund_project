@@ -97,6 +97,29 @@
           <span>训练日志</span>
           <el-button text size="small" @click="clearLogs">清空</el-button>
         </div>
+
+        <!-- 训练进度可视化指示器 -->
+        <div class="training-progress-visual">
+          <div class="progress-stages">
+            <div
+              v-for="(stage, index) in trainingStages"
+              :key="stage.name"
+              class="stage-item"
+              :class="{
+                'active': stage.status === 'active',
+                'completed': stage.status === 'completed',
+                'pending': stage.status === 'pending'
+              }"
+            >
+              <div class="stage-dot">
+                <span v-if="stage.status === 'completed'" class="check-icon">✓</span>
+                <span v-else-if="stage.status === 'active'" class="pulse-ring"></span>
+              </div>
+              <span class="stage-name">{{ stage.name }}</span>
+            </div>
+          </div>
+        </div>
+
         <div class="log-content" ref="logContentRef">
           <div
             v-for="(log, index) in logs"
@@ -179,7 +202,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { VideoPlay, Refresh } from '@element-plus/icons-vue'
 import { startTraining } from '@/api/train'
 import { getTaskStatus, getTasksHistory } from '@/api/task'
@@ -210,6 +233,70 @@ let pollTimer = null
 // 历史任务列表（从API加载）
 const historyTasks = ref([])
 const historyLoading = ref(false)
+
+// 训练阶段定义
+const stageDefinitions = [
+  { name: '初始化', keywords: ['初始化', '准备'] },
+  { name: '数据加载', keywords: ['数据', '加载', 'fetch'] },
+  { name: '特征工程', keywords: ['特征', 'feature', '预处理'] },
+  { name: '模型训练', keywords: ['训练', 'train', 'epoch', 'batch', 'loss'] },
+  { name: '模型评估', keywords: ['评估', 'evaluate', '验证', 'val'] },
+  { name: '保存模型', keywords: ['保存', 'save', '完成'] }
+]
+
+// 基于日志分析训练阶段进度
+const trainingStages = computed(() => {
+  const stages = stageDefinitions.map(s => ({ ...s, status: 'pending' }))
+
+  if (!currentTask.value || logs.value.length === 0) {
+    return stages
+  }
+
+  // 合并所有日志消息用于分析
+  const allLogsText = logs.value.map(l => l.message).join(' ')
+  const currentStage = currentTask.value.stage || ''
+
+  let foundActive = false
+
+  for (let i = 0; i < stages.length; i++) {
+    const stage = stages[i]
+
+    // 检查是否已完成（后续阶段已开始或任务完成）
+    if (foundActive) {
+      stage.status = 'pending'
+      continue
+    }
+
+    // 检查是否匹配当前阶段
+    const isCurrentStage = stage.keywords.some(kw =>
+      currentStage.toLowerCase().includes(kw.toLowerCase())
+    )
+
+    // 检查日志中是否有该阶段的记录
+    const hasLogEvidence = stage.keywords.some(kw =>
+      allLogsText.toLowerCase().includes(kw.toLowerCase())
+    )
+
+    if (currentTask.value.status === 'completed') {
+      stage.status = 'completed'
+    } else if (isCurrentStage || (hasLogEvidence && !foundActive)) {
+      stage.status = 'active'
+      foundActive = true
+    } else if (hasLogEvidence || i === 0) {
+      stage.status = 'completed'
+    }
+  }
+
+  // 如果没有找到活跃状态且任务还在运行，设置第一个未完成为活跃
+  if (!foundActive && currentTask.value.status === 'running') {
+    const firstPending = stages.find(s => s.status === 'pending')
+    if (firstPending) {
+      firstPending.status = 'active'
+    }
+  }
+
+  return stages
+})
 
 // 方法
 const handleTrain = async () => {
@@ -580,6 +667,102 @@ onUnmounted(() => {
   border: 1px solid var(--border);
   border-radius: $radius-md;
   overflow: hidden;
+}
+
+/* 训练进度可视化 */
+.training-progress-visual {
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+}
+
+.progress-stages {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.stage-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+
+  .stage-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.3s ease;
+
+    .check-icon {
+      color: #22c55e;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .pulse-ring {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #3b82f6;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  .stage-name {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+  }
+
+  &.completed {
+    .stage-dot {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: #22c55e;
+    }
+    .stage-name {
+      color: #22c55e;
+    }
+  }
+
+  &.active {
+    .stage-dot {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    .stage-name {
+      color: #3b82f6;
+      font-weight: 600;
+    }
+  }
+
+  &.pending {
+    .stage-dot {
+      opacity: 0.5;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
 }
 
 .log-header {
