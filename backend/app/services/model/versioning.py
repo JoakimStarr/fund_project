@@ -16,7 +16,7 @@ def _get_model_dir(fund_code: str) -> Path:
 
 def save_model(fund_code: str, model, metrics: dict, features_list: list) -> str:
     model_dir = _get_model_dir(fund_code)
-    version = datetime.now().strftime("%Y%m%d")
+    version = datetime.now().strftime("%Y%m%d%H%M%S")
     model_path = model_dir / f"model_{version}.pkl"
     joblib.dump({"model": model, "metrics": metrics, "features_list": features_list, "saved_at": datetime.now().isoformat()}, model_path)
     versions_path = model_dir / "versions.json"
@@ -30,11 +30,14 @@ def save_model(fund_code: str, model, metrics: dict, features_list: list) -> str
     versions.append(entry)
     keep = 3
     if len(versions) > keep:
-        for v in versions[:-keep]:
-            old_path = model_dir / f"model_{v['version']}.pkl"
-            if old_path.exists():
-                old_path.unlink()
+        removed = versions[:-keep]
         versions = versions[-keep:]
+        seen_pkl = {v["version"] for v in versions}
+        for v in removed:
+            if v["version"] not in seen_pkl:
+                old_path = model_dir / f"model_{v['version']}.pkl"
+                if old_path.exists():
+                    old_path.unlink()
     with open(versions_path, "w") as f:
         json.dump(versions, f, ensure_ascii=False, indent=2)
     latest_path = model_dir / "latest.json"

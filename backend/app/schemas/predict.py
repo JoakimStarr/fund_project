@@ -14,6 +14,7 @@ class ModelInfo(BaseModel):
     mae: Optional[float] = None
     direction_accuracy: Optional[float] = None
     features_used: Optional[int] = None
+    training_days: Optional[int] = None
     trained_date: Optional[str] = None
     model_version: Optional[str] = None
     wfcv_rounds: Optional[int] = None

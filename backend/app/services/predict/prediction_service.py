@@ -80,7 +80,11 @@ async def predict(fund_code: str, session, force_retrain: bool = False) -> Predi
     constraint_info = ConstraintInfo(is_clipped=is_clipped, original_return=predicted_return if is_clipped else None, limit=limit if is_clipped else None)
     shap_factors = explain(model, X, features_df.columns.tolist())
     model_type_str = metrics.get("best_model", "unknown") if metrics else "unknown"
-    model_info = ModelInfo(model_type=model_type_str, mae=metrics.get("valid_mae") if metrics else None, direction_accuracy=metrics.get("valid_direction_accuracy") if metrics else None, features_used=metrics.get("features_used") if metrics else X.shape[1], trained_date=metrics.get("model_version") if metrics else None, model_version=metrics.get("model_version") if metrics else None, wfcv_rounds=metrics.get("wfcv_rounds") if metrics else None)
+    model_version_str = metrics.get("model_version") if metrics else None
+    trained_date_str = metrics.get("trained_date") if metrics else None
+    if trained_date_str and len(trained_date_str) == 8:
+        trained_date_str = f"{trained_date_str[:4]}-{trained_date_str[4:6]}-{trained_date_str[6:8]}"
+    model_info = ModelInfo(model_type=model_type_str, mae=metrics.get("valid_mae") if metrics else None, direction_accuracy=metrics.get("valid_direction_accuracy") if metrics else None, features_used=metrics.get("features_used") if metrics else X.shape[1], training_days=metrics.get("train_rows") if metrics else n_days, trained_date=trained_date_str, model_version=model_version_str, wfcv_rounds=metrics.get("wfcv_rounds") if metrics else None)
     predicted_nav_val = float(prev_nav_val * (1 + clipped_return))
     data_days = n_days
     data_sufficiency = "sufficient"

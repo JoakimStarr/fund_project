@@ -86,6 +86,8 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
     full_X = np.vstack([X_train_s, X_valid_s])
     full_y = np.hstack([y_train, y_valid])
     best_model.fit(full_X, full_y)
+    from datetime import datetime
+    trained_date = datetime.now().strftime("%Y%m%d")
     metrics = {
         "best_model": best_name,
         "valid_mae": results[best_name]["mae"],
@@ -100,9 +102,11 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
         "train_rows": n_total,
         "calibration_q_value": calib_result["q_value"],
         "calibration_size": calib_result["calibration_size"],
+        "trained_date": trained_date,
     }
-    model_version = save_model(fund_code, {"model": best_model, "scaler": scaler, "calibration": calib_result, "fund_type": fund_type}, metrics, selected_features if selected_features else [])
+    model_version = trained_date
     metrics["model_version"] = model_version
+    save_model(fund_code, {"model": best_model, "scaler": scaler, "calibration": calib_result, "fund_type": fund_type}, metrics, selected_features if selected_features else [])
     return metrics
 
 
