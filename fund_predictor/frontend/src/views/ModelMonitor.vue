@@ -186,21 +186,23 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Refresh, Search } from '@element-plus/icons-vue'
 import BaseChart from '@/components/common/BaseChart.vue'
-import { getModelList, getDashboardStats } from '@/api/dashboard'
+import { getModelList, getDashboardStats, getSystemResources } from '@/api/dashboard'
 
 // 状态
 const refreshing = ref(false)
 const searchQuery = ref('')
-const diskUsage = ref(65)
-const diskUsed = ref(128)
-const diskTotal = ref(500)
-const diskAvailable = ref(372)
 
-// 系统健康
+// 系统资源（从API加载）
+const diskUsage = ref(0)
+const diskUsed = ref(0)
+const diskTotal = ref(0)
+const diskAvailable = ref(0)
+
+// 系统健康（从API动态计算）
 const systemHealth = ref({
-  score: 92,
-  status: '优秀',
-  type: 'success'
+  score: 0,
+  status: '检测中...',
+  type: 'info'
 })
 
 // 服务状态（从API加载）
@@ -268,7 +270,7 @@ const filteredModels = computed(() => {
   )
 })
 
-// 图表配置
+// 图表配置（基于真实数据）
 const latencyChartOption = computed(() => ({
   tooltip: {
     trigger: 'axis',
@@ -296,7 +298,7 @@ const latencyChartOption = computed(() => ({
   },
   series: [{
     type: 'bar',
-    data: [78, 15, 5, 1.5, 0.5],
+    data: [0, 0, 0, 0, 0],
     barWidth: '50%',
     itemStyle: {
       borderRadius: [4, 4, 0, 0],
@@ -305,7 +307,13 @@ const latencyChartOption = computed(() => ({
         return colors[params.dataIndex]
       }
     }
-  }]
+  }],
+  title: {
+    text: '暂无监控数据',
+    left: 'center',
+    top: 'center',
+    textStyle: { color: '#64748b', fontSize: 14, fontWeight: 'normal' }
+  }
 }))
 
 const requestChartOption = computed(() => ({
@@ -337,7 +345,7 @@ const requestChartOption = computed(() => ({
   series: [{
     type: 'line',
     smooth: true,
-    data: Array.from({ length: 24 }, () => Math.floor(Math.random() * 150 + 50)),
+    data: Array.from({ length: 25 }, () => 0),
     lineStyle: { width: 3, color: '#3b82f6' },
     areaStyle: {
       color: {
@@ -350,7 +358,13 @@ const requestChartOption = computed(() => ({
       }
     },
     itemStyle: { color: '#3b82f6' }
-  }]
+  }],
+  title: {
+    text: '暂无监控数据',
+    left: 'center',
+    top: 'center',
+    textStyle: { color: '#64748b', fontSize: 14, fontWeight: 'normal' }
+  }
 }))
 
 const cpuChartOption = computed(() => ({
@@ -371,7 +385,7 @@ const cpuChartOption = computed(() => ({
   series: [{
     type: 'line',
     smooth: true,
-    data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 40 + 25)),
+    data: Array.from({ length: 31 }, () => 0),
     lineStyle: { width: 2, color: '#a855f7' },
     areaStyle: {
       color: {
@@ -383,7 +397,13 @@ const cpuChartOption = computed(() => ({
         ]
       }
     }
-  }]
+  }],
+  title: {
+    text: '暂无监控数据',
+    left: 'center',
+    top: 'center',
+    textStyle: { color: '#64748b', fontSize: 14, fontWeight: 'normal' }
+  }
 }))
 
 const memoryChartOption = computed(() => ({
@@ -404,7 +424,7 @@ const memoryChartOption = computed(() => ({
   series: [{
     type: 'line',
     smooth: true,
-    data: Array.from({ length: 30 }, () => Math.floor(Math.random() * 20 + 60)),
+    data: Array.from({ length: 31 }, () => 0),
     lineStyle: { width: 2, color: '#06b6d4' },
     areaStyle: {
       color: {
@@ -416,7 +436,13 @@ const memoryChartOption = computed(() => ({
         ]
       }
     }
-  }]
+  }],
+  title: {
+    text: '暂无监控数据',
+    left: 'center',
+    top: 'center',
+    textStyle: { color: '#64748b', fontSize: 14, fontWeight: 'normal' }
+  }
 }))
 
 // 方法
@@ -424,56 +450,111 @@ const refreshData = async () => {
   refreshing.value = true
 
   try {
-    const [statsRes, modelsRes] = await Promise.all([
+    const [statsRes, modelsRes, resourcesRes] = await Promise.all([
       getDashboardStats(),
-      getModelList()
+      getModelList(),
+      getSystemResources()
     ])
-    
-    // 更新服务状态
+
+    // 更新系统健康状态（基于API返回的真实数据）
     if (statsRes.data?.system_status) {
       const sysStatus = statsRes.data.system_status
+      const healthValues = []
+
       if (sysStatus.model) {
         services.value.modelService.health = sysStatus.model.value || 0
         services.value.modelService.status = sysStatus.model.status || 'unknown'
-        services.value.modelService.statusText = sysStatus.model.status === 'healthy' ? '运行正常' : 
+        services.value.modelService.statusText = sysStatus.model.status === 'healthy' ? '运行正常' :
           sysStatus.model.status === 'warning' ? '轻微异常' : '离线'
         services.value.modelService.lastUpdate = '刚刚'
+        healthValues.push(sysStatus.model.value || 0)
       }
       if (sysStatus.api) {
         services.value.apiService.health = sysStatus.api.value || 0
         services.value.apiService.status = sysStatus.api.status || 'unknown'
         services.value.apiService.statusText = sysStatus.api.status === 'healthy' ? '运行正常' : '轻微异常'
         services.value.apiService.lastUpdate = '刚刚'
+        healthValues.push(sysStatus.api.value || 0)
       }
       if (sysStatus.database) {
         services.value.database.health = sysStatus.database.value || 0
         services.value.database.status = sysStatus.database.status || 'unknown'
         services.value.database.statusText = sysStatus.database.status === 'healthy' ? '运行正常' : '轻微延迟'
         services.value.database.lastUpdate = '刚刚'
+        healthValues.push(sysStatus.database.value || 0)
       }
       if (sysStatus.cache) {
         services.value.cache.health = sysStatus.cache.value || 0
         services.value.cache.status = sysStatus.cache.status || 'unknown'
-        services.value.cache.statusText = sysStatus.cache.status === 'healthy' ? '运行正常' : '内存偏高'
+        services.value.cache.statusText = sysStatus.cache.status === 'healthy' ? '运行正常' :
+          sysStatus.cache.status === 'warning' ? '空间偏紧' : '空间不足'
         services.value.cache.lastUpdate = '刚刚'
+        healthValues.push(sysStatus.cache.value || 0)
+      }
+
+      // 动态计算系统健康总分
+      if (healthValues.length > 0) {
+        const avgHealth = Math.round(healthValues.reduce((a, b) => a + b, 0) / healthValues.length)
+        systemHealth.value.score = avgHealth
+        if (avgHealth >= 90) {
+          systemHealth.value.status = '优秀'
+          systemHealth.value.type = 'success'
+        } else if (avgHealth >= 75) {
+          systemHealth.value.status = '良好'
+          systemHealth.value.type = 'success'
+        } else if (avgHealth >= 60) {
+          systemHealth.value.status = '一般'
+          systemHealth.value.type = 'warning'
+        } else {
+          systemHealth.value.status = '较差'
+          systemHealth.value.type = 'danger'
+        }
       }
     }
-    
-    // 更新模型列表
+
+    // 更新系统资源（磁盘、内存）
+    if (resourcesRes.data) {
+      const res = resourcesRes.data
+
+      // 磁盘信息
+      if (res.disk && !res.disk.error) {
+        diskUsage.value = res.disk.usage_percent || 0
+        diskUsed.value = res.disk.used_gb || 0
+        diskTotal.value = res.disk.total_gb || 0
+        diskAvailable.value = res.disk.free_gb || 0
+      }
+
+      // 内存信息（可以扩展显示）
+      if (res.memory && !res.memory.error) {
+        console.log('内存使用:', res.memory.usage_percent + '%')
+      }
+
+      // CPU信息（可以扩展显示）
+      if (res.cpu && !res.cpu.error) {
+        console.log('CPU使用率:', res.cpu.usage_percent + '%')
+      }
+    }
+
+    // 更新模型列表（使用后端返回的真实数据）
     if (modelsRes.data && Array.isArray(modelsRes.data)) {
       models.value = modelsRes.data.map(m => ({
         fundCode: m.fundCode,
-        fundName: `基金 ${m.fundCode}`,
-        modelVersion: '-',
-        accuracy: parseFloat(m.accuracy) || 0,
+        fundName: m.fundName || `基金 ${m.fundCode}`,
+        modelVersion: m.modelVersion || '-',
+        accuracy: typeof m.accuracy === 'number' ? m.accuracy : parseFloat(m.accuracy) || 0,
         lastTrained: m.trainedAt || '-',
-        predictions: 0,
+        predictions: m.predictions || 0,
         status: m.status === 'active' ? 'active' : 'stale'
       }))
     }
-    
+
   } catch (error) {
     console.error('刷新数据失败:', error)
+    systemHealth.value = {
+      score: 0,
+      status: '加载失败',
+      type: 'danger'
+    }
   } finally {
     refreshing.value = false
   }

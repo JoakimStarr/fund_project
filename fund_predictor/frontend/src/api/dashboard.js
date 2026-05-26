@@ -19,3 +19,8 @@ export function getRecentPredictions(params = {}) {
 export function getModelList() {
   return request.get('/dashboard/models')
 }
+
+// 获取系统资源使用情况
+export function getSystemResources() {
+  return request.get('/dashboard/system-resources')
+}
