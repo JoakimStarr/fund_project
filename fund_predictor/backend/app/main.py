@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api import backtest, dashboard, fund, intraday, model, task, train
+from app.api import backtest, dashboard, fund, intraday, model, task, train, ai_analysis
 from app.core.config import STATIC_DIR, ensure_dirs
 from app.core.errors import AppError
 from app.core.logging_config import (
@@ -123,5 +123,6 @@ app.include_router(task.router)
 app.include_router(model.router)
 app.include_router(backtest.router)
 app.include_router(dashboard.router)
+app.include_router(ai_analysis.router)
 
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
