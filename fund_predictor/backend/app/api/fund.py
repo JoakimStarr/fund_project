@@ -46,7 +46,7 @@ def predict(req: PredictRequest):
                 "上一次训练失败，模型未保存，请查看日志。",
                 details={
                     "fund_code": fund_code,
-                    "task_id": latest_task.get("task_id"),
+                    "task_id": latest_task.get("taskId"),
                     "error_code": latest_task.get("error_code"),
                     "error_stage": latest_task.get("stage"),
                     "error_message": latest_task.get("error_message"),
@@ -111,13 +111,68 @@ def model_info(fund_code: str):
 @router.get("/{fund_code}/backtest")
 def backtest(fund_code: str):
     from app.services.model_registry_service import fund_model_dir
+    import numpy as np
 
     path = fund_model_dir(fund_code) / "backtest.csv"
     if not path.exists():
         raise ModelNotFoundError("回测文件不存在", details={"fund_code": fund_code})
     df = pd.read_csv(path)
     df = df.where(pd.notnull(df), None)
-    return {"ok": True, "data": df.to_dict(orient="records")}
+
+    records = df.to_dict(orient="records")
+
+    if len(records) == 0:
+        return {"ok": True, "data": {"metrics": {}, "backtest": []}}
+
+    actuals = df["target_next"].values
+    preds = df["pred"].values
+
+    mae = float(np.mean(np.abs(actuals - preds)))
+    rmse = float(np.sqrt(np.mean((actuals - preds) ** 2)))
+    if np.std(actuals) > 0 and np.std(preds) > 0:
+        correlation = float(np.corrcoef(actuals, preds)[0, 1])
+    else:
+        correlation = 0.0
+
+    direction_actual = np.sign(actuals)
+    direction_pred = np.sign(preds)
+    direction_accuracy = float(np.mean(direction_actual == direction_pred))
+
+    residuals = np.abs(actuals - preds)
+    std_residual = np.std(residuals)
+    if std_residual > 0:
+        in_interval_80 = np.mean(residuals <= 1.28 * std_residual)
+        in_interval_90 = np.mean(residuals <= 1.645 * std_residual)
+    else:
+        in_interval_80 = 1.0
+        in_interval_90 = 1.0
+
+    metrics = {
+        "interval_coverage_80": round(float(in_interval_80), 4),
+        "interval_coverage_90": round(float(in_interval_90), 4),
+        "direction_accuracy": round(direction_accuracy, 4),
+        "mae": round(mae, 6),
+        "rmse": round(rmse, 6),
+        "correlation": round(correlation, 4),
+    }
+
+    backtest_data = []
+    for r in records:
+        pred_val = r.get("pred", 0) or 0
+        residual_abs = abs((r.get("target_next", 0) or 0) - pred_val)
+        backtest_data.append({
+            "date": r.get("date", ""),
+            "actual": r.get("target_next"),
+            "predicted": pred_val,
+            "interval80Lower": round(pred_val - 1.28 * std_residual, 6) if std_residual > 0 else None,
+            "interval80Upper": round(pred_val + 1.28 * std_residual, 6) if std_residual > 0 else None,
+            "interval90Lower": round(pred_val - 1.645 * std_residual, 6) if std_residual > 0 else None,
+            "interval90Upper": round(pred_val + 1.645 * std_residual, 6) if std_residual > 0 else None,
+            "direction": "up" if pred_val > 0.001 else ("down" if pred_val < -0.001 else "neutral"),
+            "inInterval": bool(residual_abs <= 1.28 * std_residual) if std_residual > 0 else True,
+        })
+
+    return {"ok": True, "data": {"metrics": metrics, "backtest": backtest_data}}
 
 
 admin_router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
