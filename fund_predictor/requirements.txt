@@ -10,3 +10,4 @@ requests>=2.31.0,<3.0.0
 httpx>=0.25.0,<1.0.0
 pyyaml>=6.0
 optuna>=3.5.0
+zai>=0.1.0  # 智谱 AI 官方 SDK（v2.6.0 新增）

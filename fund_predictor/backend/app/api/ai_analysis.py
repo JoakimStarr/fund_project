@@ -12,7 +12,7 @@ from app.core.errors import AIProviderError
 from app.core.logging_config import set_log_context, request_id_var
 from app.services.ai_analysis_service import get_analysis, get_news, get_provider_status
 
-router = APIRouter(tags=["ai_analysis"])
+router = APIRouter(prefix="/api/v1", tags=["ai_analysis"])
 logger = logging.getLogger(__name__)
 
 

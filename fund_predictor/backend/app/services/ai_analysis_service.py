@@ -8,8 +8,6 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime, date
 from typing import Optional, Any
 
-import httpx
-
 from app.core.config import (
     AI_ENABLED,
     AI_PRIMARY_PROVIDER,
@@ -62,19 +60,51 @@ class ProviderStatus:
 
 
 class LLMClient:
-    """统一 HTTP 客户端（OpenAI 兼容格式）"""
+    """统一 LLM 客户端（支持智谱 zai 库和 OpenAI 兼容格式）"""
 
     def __init__(self, config: LLMConfig):
         self.config = config
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client = None
 
-    async def _get_client(self) -> httpx.AsyncClient:
-        """获取或创建 HTTP 客户端实例
-
-        Returns:
-            httpx.AsyncClient 实例
+    def _get_client(self):
+        """获取或创建 LLM 客户端实例
+        
+        根据 provider 类型选择合适的客户端：
+        - glm: 使用 ZhipuAiClient (zai 库)
+        - 其他: 使用 httpx (OpenAI 兼容格式)
         """
-        if self._client is None or self._client.is_closed:
+        if self._client is not None:
+            return self._client
+            
+        if self.config.provider == "glm":
+            # 使用智谱官方 zai 库
+            try:
+                from zai import ZhipuAiClient
+                
+                self._client = ZhipuAiClient(
+                    api_key=self.config.api_key,
+                    base_url=self.config.base_url
+                )
+                
+                logger.info(
+                    "zai_client_created provider=%s model=%s base_url=%s",
+                    self.config.provider, 
+                    self.config.model,
+                    self.config.base_url
+                )
+                return self._client
+                
+            except ImportError as e:
+                logger.error("zai_library_not_installed error=%s", e)
+                raise AIProviderError(
+                    "zai 库未安装，请运行: pip install zai",
+                    provider=self.config.provider,
+                    details={"error": str(e)}
+                )
+        else:
+            # 使用 httpx (OpenAI 兼容格式，用于 SiliconFlow 等)
+            import httpx
+            
             self._client = httpx.AsyncClient(
                 timeout=httpx.Timeout(self.config.timeout, connect=10.0),
                 headers={
@@ -82,7 +112,14 @@ class LLMClient:
                     "Content-Type": "application/json",
                 },
             )
-        return self._client
+            
+            logger.info(
+                "httpx_client_created provider=%s model=%s base_url=%s",
+                self.config.provider,
+                self.config.model,
+                self.config.base_url
+            )
+            return self._client
 
     async def chat(self, prompt: str) -> str:
         """发送 Chat Completion 请求
@@ -96,9 +133,74 @@ class LLMClient:
         Raises:
             AIProviderError: 请求失败时抛出
         """
-        client = await self._get_client()
-        url = f"{self.config.base_url.rstrip('/')}/chat/completions"
+        client = self._get_client()
+        
+        if self.config.provider == "glm":
+            # 使用 zai 库调用智谱 API
+            return await self._chat_with_zai(client, prompt)
+        else:
+            # 使用 httpx 调用 OpenAI 兼容 API
+            return await self._chat_with_httpx(client, prompt)
 
+    async def _chat_with_zai(self, client, prompt: str) -> str:
+        """使用 zai 库调用智谱 GLM API"""
+        
+        for attempt in range(AI_RETRY_TIMES + 1):
+            try:
+                logger.debug(
+                    "llm_request_zai provider=%s model=%s attempt=%d",
+                    self.config.provider, self.config.model, attempt + 1
+                )
+
+                # zai 库的 chat.completions.create 是同步方法，需要在线程池中运行
+                import asyncio
+                
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: client.chat.completions.create(
+                        model=self.config.model,
+                        messages=[
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=self.config.temperature,
+                        max_tokens=self.config.max_tokens,
+                    )
+                )
+                
+                result_text = response.choices[0].message.content
+                
+                logger.info(
+                    "llm_success_zai provider=%s model=%s tokens_used=%s",
+                    self.config.provider,
+                    self.config.model,
+                    response.usage.total_tokens if hasattr(response, 'usage') else 'unknown',
+                )
+                
+                return result_text
+
+            except Exception as e:
+                logger.warning(
+                    "llm_error_zai provider=%s attempt=%d error=%s",
+                    self.config.provider, attempt + 1, str(e)
+                )
+                
+                if attempt < AI_RETRY_TIMES:
+                    import asyncio
+                    await asyncio.sleep(AI_RETRY_DELAY * (attempt + 1))
+                    continue
+                    
+                raise AIProviderError(
+                    f"智谱 API 调用失败 ({self.config.provider})",
+                    provider=self.config.provider,
+                    details={"error": str(e), "attempt": attempt + 1}
+                )
+
+    async def _chat_with_httpx(self, client, prompt: str) -> str:
+        """使用 httpx 调用 OpenAI 兼容 API (SiliconFlow 等)"""
+        
+        url = f"{self.config.base_url.rstrip('/')}/chat/completions"
+        
         payload = {
             "model": self.config.model,
             "messages": [{"role": "user", "content": prompt}],
@@ -109,7 +211,7 @@ class LLMClient:
         for attempt in range(AI_RETRY_TIMES + 1):
             try:
                 logger.debug(
-                    "llm_request provider=%s model=%s attempt=%d",
+                    "llm_request_httpx provider=%s model=%s attempt=%d",
                     self.config.provider, self.config.model, attempt + 1
                 )
 
@@ -120,7 +222,7 @@ class LLMClient:
                 result_text = data["choices"][0]["message"]["content"]
 
                 logger.info(
-                    "llm_success provider=%s model=%s tokens_used=%s",
+                    "llm_success_httpx provider=%s model=%s tokens_used=%s",
                     self.config.provider,
                     self.config.model,
                     data.get("usage", {}).get("total_tokens", "unknown"),
@@ -128,53 +230,21 @@ class LLMClient:
 
                 return result_text
 
-            except httpx.HTTPStatusError as e:
-                status_code = e.response.status_code
+            except Exception as e:
                 logger.warning(
-                    "llm_http_error provider=%s status=%d attempt=%d",
-                    self.config.provider, status_code, attempt + 1
+                    "llm_error_httpx provider=%s attempt=%d error=%s",
+                    self.config.provider, attempt + 1, str(e)
                 )
-
-                if status_code == 401:
-                    raise AIProviderError(
-                        f"API Key 无效 ({self.config.provider})",
-                        provider=self.config.provider,
-                        details={"status_code": status_code}
-                    )
-                elif status_code == 429:
-                    if attempt < AI_RETRY_TIMES:
-                        import asyncio
-                        await asyncio.sleep(AI_RETRY_DELAY * (attempt + 1))
-                        continue
-                    raise AIProviderError(
-                        f"请求频率过高 ({self.config.provider})",
-                        provider=self.config.provider,
-                        details={"status_code": status_code}
-                    )
-                elif status_code >= 500:
-                    if attempt < AI_RETRY_TIMES and AI_FALLBACK_ON_ERROR:
-                        import asyncio
-                        await asyncio.sleep(AI_RETRY_DELAY)
-                        continue
-                    raise AIProviderError(
-                        f"服务端错误 ({self.config.provider}: {status_code})",
-                        provider=self.config.provider,
-                        details={"status_code": status_code}
-                    )
-
-            except httpx.ConnectError as e:
-                logger.warning(
-                    "llm_connect_error provider=%s error=%s",
-                    self.config.provider, e
-                )
+                
                 if attempt < AI_RETRY_TIMES:
                     import asyncio
-                    await asyncio.sleep(AI_RETRY_DELAY)
+                    await asyncio.sleep(AI_RETRY_DELAY * (attempt + 1))
                     continue
+                    
                 raise AIProviderError(
-                    f"连接失败 ({self.config.provider})",
+                    f"API 调用失败 ({self.config.provider})",
                     provider=self.config.provider,
-                    details={"error": str(e)}
+                    details={"error": str(e), "attempt": attempt + 1}
                 )
 
             except httpx.ReadTimeout as e:
