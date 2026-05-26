@@ -14,8 +14,8 @@ data:
   fetch_timeout_seconds: 20
   fetch_max_workers: 5
   fetch_retry_times: 2
-  min_train_rows: 220
-  cold_start_threshold: 250
+  min_train_rows: 150
+  cold_start_threshold: 200
 
 feature:
   lookback_lags: [1, 2, 3, 5, 10]

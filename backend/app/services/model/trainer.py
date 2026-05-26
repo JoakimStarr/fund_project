@@ -5,7 +5,7 @@ from sklearn.linear_model import Ridge, ElasticNet
 from sklearn.preprocessing import StandardScaler
 from sqlalchemy import select
 from app.core.config import settings
-from app.core.database import async_session
+from app.core.database import engine, async_session
 from app.models.fund_nav import FundNav
 from app.models.fund_profile import FundProfileCache
 from app.services.features.feature_service import build_and_screen
@@ -15,21 +15,9 @@ from app.services.model.conformal import calibrate
 from app.services.model.versioning import save_model
 
 
-async def train_model(fund_code: str, session) -> dict:
-    result = await session.execute(
-        select(FundNav).where(FundNav.fund_code == fund_code).order_by(FundNav.nav_date)
-    )
-    nav_rows = result.scalars().all()
-    if not nav_rows or len(nav_rows) < settings.data["min_train_rows"]:
-        raise ValueError(f"基金 {fund_code} NAV数据不足 {settings.data['min_train_rows']} 行，当前 {len(nav_rows)} 行")
-    nav_df = pd.DataFrame([{"nav_date": r.nav_date, "nav": r.nav, "acc_nav": r.acc_nav} for r in nav_rows])
-    profile_result = await session.execute(
-        select(FundProfileCache).where(FundProfileCache.fund_code == fund_code)
-    )
-    profile = profile_result.scalar_one_or_none()
-    fund_type = profile.fund_type if profile else "hybrid_equity"
-    nav_data_list = [{"nav_date": r.nav_date, "nav": r.nav, "acc_nav": r.acc_nav, "daily_return": r.daily_return} for r in nav_rows]
-    features, selected_features = build_and_screen(fund_code, nav_data_list, fund_type)
+def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_features, fund_code) -> dict:
+    import pandas as pd
+    nav_df = pd.DataFrame(nav_data_list)
     nav_df["nav_date"] = pd.to_datetime(nav_df["nav_date"])
     nav_df = nav_df.sort_values("nav_date").set_index("nav_date")
     forward_returns = nav_df["nav"].pct_change().shift(-1)
@@ -40,8 +28,10 @@ async def train_model(fund_code: str, session) -> dict:
     y = y_series.values.astype(np.float64)
     mask = ~(np.isnan(y) | np.isinf(y))
     X, y = X[mask], y[mask]
+    nan_mask = ~np.any(np.isnan(X) | np.isinf(X), axis=1)
+    X, y = X[nan_mask], y[nan_mask]
     n_total = len(X)
-    if n_total < 220:
+    if n_total < 150:
         raise ValueError(f"清洗后数据仅 {n_total} 行，无法训练")
     wfcv_params = calc_wfcv_params(n_total)
     splits = settings.model["train_split_ratio"]
@@ -55,7 +45,6 @@ async def train_model(fund_code: str, session) -> dict:
     X_train_s = scaler.fit_transform(X_train)
     X_valid_s = scaler.transform(X_valid)
     X_test_select_s = scaler.transform(X_test_select)
-    X_all_s = scaler.transform(X)
     candidate_configs = settings.model["candidate_models"]
     models = {}
     for cfg in candidate_configs:
@@ -77,12 +66,8 @@ async def train_model(fund_code: str, session) -> dict:
     best_model = None
     best_name = ""
     for name, model in models.items():
-        if name == "stacking":
-            model.fit(X_train_s, y_train)
-            pred = model.predict(X_valid_s)
-        else:
-            model.fit(X_train_s, y_train)
-            pred = model.predict(X_valid_s)
+        model.fit(X_train_s, y_train)
+        pred = model.predict(X_valid_s)
         mae = float(np.mean(np.abs(pred - y_valid)))
         direction_acc = float(np.mean((pred > 0) == (y_valid > 0)))
         mae_weight = settings.model["selection_mae_weight"]
@@ -94,7 +79,7 @@ async def train_model(fund_code: str, session) -> dict:
             best_model = model
             best_name = name
     if wfcv_params["actual_rounds"] >= 3:
-        wfcv_results = run_wfcv(Ridge, {"alpha": 1.0}, X_all_s, y, wfcv_params)
+        wfcv_results = run_wfcv(Ridge, {"alpha": 1.0}, StandardScaler().fit_transform(X), y, wfcv_params)
     else:
         wfcv_results = [{"round": 0, "mae": results[best_name]["mae"], "direction_accuracy": results[best_name]["direction_accuracy"]}]
     calib_result = calibrate(best_model, X_test_select_s, y_test_select)
@@ -119,3 +104,20 @@ async def train_model(fund_code: str, session) -> dict:
     model_version = save_model(fund_code, {"model": best_model, "scaler": scaler, "calibration": calib_result, "fund_type": fund_type}, metrics, selected_features if selected_features else [])
     metrics["model_version"] = model_version
     return metrics
+
+
+async def train_model(fund_code: str, session) -> dict:
+    result = await session.execute(
+        select(FundNav).where(FundNav.fund_code == fund_code).order_by(FundNav.nav_date)
+    )
+    nav_rows = result.scalars().all()
+    if not nav_rows or len(nav_rows) < settings.data["min_train_rows"]:
+        raise ValueError(f"基金 {fund_code} NAV数据不足 {settings.data['min_train_rows']} 行，当前 {len(nav_rows)} 行")
+    profile_result = await session.execute(
+        select(FundProfileCache).where(FundProfileCache.fund_code == fund_code)
+    )
+    profile = profile_result.scalar_one_or_none()
+    fund_type = profile.fund_type if profile else "hybrid_equity"
+    nav_data_list = [{"nav_date": r.nav_date, "nav": r.nav, "acc_nav": r.acc_nav, "daily_return": r.daily_return} for r in nav_rows]
+    features, selected_features = build_and_screen(fund_code, nav_data_list, fund_type)
+    return _do_sync_training(nav_rows, fund_type, features, selected_features, fund_code)

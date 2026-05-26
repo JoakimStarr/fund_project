@@ -4,8 +4,8 @@ from app.core.errors import InsufficientDataError
 
 
 def calc_wfcv_params(n_rows: int) -> dict:
-    if n_rows < 220:
-        raise InsufficientDataError(f"数据行数 {n_rows} 不足 220 行")
+    if n_rows < 150:
+        raise InsufficientDataError(f"数据行数 {n_rows} 不足 150 行")
     if n_rows >= 500:
         train_window = 500
         max_rounds = 24
