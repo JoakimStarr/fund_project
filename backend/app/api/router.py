@@ -10,10 +10,10 @@ from app.api.admin import router as admin_router
 
 api_router = APIRouter()
 
-api_router.include_router(fund_router, prefix="/fund", tags=["fund"])
-api_router.include_router(train_router, prefix="/train", tags=["train"])
-api_router.include_router(task_router, prefix="/tasks", tags=["tasks"])
-api_router.include_router(intraday_router, prefix="/intraday", tags=["intraday"])
-api_router.include_router(ai_analysis_router, prefix="/ai", tags=["ai"])
-api_router.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
-api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
+api_router.include_router(fund_router)
+api_router.include_router(train_router)
+api_router.include_router(task_router)
+api_router.include_router(intraday_router)
+api_router.include_router(ai_analysis_router)
+api_router.include_router(dashboard_router)
+api_router.include_router(admin_router)

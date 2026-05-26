@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from datetime import datetime
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from app.core.database import init_db
 from app.core.logging_config import setup_logging
 from app.core.middleware import setup_middleware
@@ -29,3 +30,8 @@ app.include_router(api_router, prefix="/api/v1")
 @app.get("/health")
 async def health():
     return {"status": "ok", "timestamp": datetime.now().isoformat(), "version": "1.0.0"}
+
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/docs")

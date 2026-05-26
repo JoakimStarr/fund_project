@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel
 
-from backend.app.schemas.predict import ConfidenceInterval
+from .predict import ConfidenceInterval
 
 
 class IntradayRequest(BaseModel):

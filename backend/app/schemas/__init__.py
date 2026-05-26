@@ -1,5 +1,5 @@
-from backend.app.schemas.common import ApiResponse, ErrorDetail
-from backend.app.schemas.fund import (
+from .common import ApiResponse, ErrorDetail
+from .fund import (
     FundPredictRequest,
     FundValidateRequest,
     FundValidateResponse,
@@ -7,8 +7,8 @@ from backend.app.schemas.fund import (
     FundRollbackRequest,
     FundSearchResult,
 )
-from backend.app.schemas.train import TrainRequest, TrainTaskResponse
-from backend.app.schemas.predict import (
+from .train import TrainRequest, TrainTaskResponse
+from .predict import (
     ConfidenceInterval,
     ModelInfo,
     ConstraintInfo,
@@ -16,13 +16,13 @@ from backend.app.schemas.predict import (
     ShapFactor,
     PredictResponse,
 )
-from backend.app.schemas.intraday import (
+from .intraday import (
     IntradayRequest,
     HoldingContribution,
     MarketSession,
     IntradayResponse,
 )
-from backend.app.schemas.ai_analysis import AiAnalysisRequest, AiAnalysisResponse
+from .ai_analysis import AiAnalysisRequest, AiAnalysisResponse
 
 __all__ = [
     "ApiResponse",
