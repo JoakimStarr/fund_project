@@ -151,3 +151,9 @@ class NewsServiceError(AppError):
     code = "NEWS_SERVICE_ERROR"
     stage = "news_fetch"
     http_status = 200  # 新闻获取失败不阻断主流程
+
+
+class NotFoundError(AppError):
+    """资源未找到错误"""
+    code = "NOT_FOUND"
+    http_status = 404

@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, Query
 
-from app.core.errors import AppError
+from app.core.errors import AppError, NotFoundError
 from app.core.logging_config import set_log_context
 from app.services.intraday_service import estimate_intraday_nav, get_latest_intraday_estimate
 
@@ -109,13 +109,6 @@ def get_intraday_latest(
 
     cached = get_latest_intraday_estimate(fund_code)
     if cached is None:
-        from app.core.errors import NotFoundError
-
-        class NotFoundError(AppError):
-            code = "NO_INTRADAY_CACHE"
-            stage = "intraday_cache"
-            http_status = 404
-
         raise NotFoundError(
             "暂无盘中估算数据，请先调用POST接口触发估算",
             details={"fund_code": fund_code, "hint": "POST /api/fund/{fund_code}/intraday"},
