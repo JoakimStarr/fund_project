@@ -68,6 +68,13 @@ def get_task(task_id: str) -> dict | None:
             data["details"] = json.loads(data["error_details"])
         except json.JSONDecodeError:
             data["details"] = {"raw": data["error_details"]}
+
+    # 映射字段名为 camelCase 以匹配前端期望
+    data["taskId"] = data.pop("task_id", None)
+    data["fundCode"] = data.pop("fund_code", None)
+    if data.get("created_at"):
+        data["startTime"] = data["created_at"]
+
     return data
 
 
@@ -85,6 +92,13 @@ def get_latest_task(fund_code: str) -> dict | None:
             data["details"] = json.loads(data["error_details"])
         except json.JSONDecodeError:
             data["details"] = {"raw": data["error_details"]}
+
+    # 映射字段名为 camelCase 以匹配前端期望
+    data["taskId"] = data.pop("task_id", None)
+    data["fundCode"] = data.pop("fund_code", None)
+    if data.get("created_at"):
+        data["startTime"] = data["created_at"]
+
     return data
 
 
@@ -138,7 +152,11 @@ def get_tasks_history(limit: int = 50, fund_code: str | None = None) -> list[dic
         # 添加可读的开始时间
         if data.get("created_at"):
             data["startTime"] = data["created_at"]
-        
+
+        # 映射字段名为 camelCase 以匹配前端期望
+        data["taskId"] = data.pop("task_id", None)
+        data["fundCode"] = data.pop("fund_code", None)
+
         result.append(data)
     
     return result
