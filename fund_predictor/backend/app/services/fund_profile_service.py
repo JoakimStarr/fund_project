@@ -71,47 +71,53 @@ def _parse_benchmark_weight(benchmark: str | None) -> float | None:
 
 
 def classify_fund(fund_code: str) -> FundProfile:
-    try:
-        info = ak.fund_individual_basic_info_xq(symbol=fund_code)
-    except Exception as exc:
-        logger.warning("fund_profile_fetch_failed fund_code=%s reason=%s", fund_code, exc)
-        return FundProfile(fund_code=fund_code, fund_type="hybrid_equity")
+    logger.info("Fetching profile for fund: %s", fund_code)
 
-    raw_type = str(info.get("基金类型", ""))
-    benchmark = str(info.get("业绩比较基准", ""))
-    strategy = str(info.get("投资策略", ""))
-    fund_name = str(info.get("基金简称", ""))
+    info = _fetch_from_primary_source(fund_code)
+    if info is None:
+        logger.warning("All data sources failed for fund %s, returning minimal profile", fund_code)
+        return _get_minimal_profile(fund_code)
+
+    logger.debug("AKShare returned info keys: %s", list(info.keys()) if info else "None")
+
+    raw_type = str(info.get("基金类型", "") or "")
+    benchmark = str(info.get("业绩比较基准", "") or "")
+    strategy = str(info.get("投资策略", "") or "")
+    fund_name = str(info.get("基金简称", "") or "").strip()
+    establish_date = str(info.get("成立日期", "") or "").strip()
+    size = _parse_size(info.get("最新规模"))
+    manager = str(info.get("基金经理", "") or "").strip()
+    fee_rate = _extract_fee_rate(info)
+    keywords = _extract_strategy_keywords(strategy)
 
     fund_type = _classify_by_type(raw_type)
     if fund_type == "unknown":
         fund_type = _classify_by_benchmark(benchmark)
 
-    size = _parse_size(info.get("最新规模"))
-    manager = str(info.get("基金经理", ""))
-    keywords = _extract_strategy_keywords(strategy)
     skip = (fund_type == "money_market")
 
-    logger.info(
-        "fund_classified fund_code=%s type=%s name=%s size=%s",
-        fund_code, fund_type, fund_name, size,
-    )
+    risk_level = _classify_risk_level_from_info(info, fund_type)
 
-    if fund_type == "money_market":
-        skip = True
+    logger.info(
+        "fund_classified fund_code=%s type=%s name=%s establish_date=%s size=%s manager=%s fee_rate=%s",
+        fund_code, fund_type, fund_name, establish_date or "(empty)", size, manager or "(empty)", fee_rate,
+    )
 
     return FundProfile(
         fund_code=fund_code,
         fund_type=fund_type,
-        fund_name=fund_name,
+        fund_name=fund_name or "暂无数据",
         fund_size=size,
-        manager=manager,
-        benchmark=benchmark,
+        manager=manager or "暂无数据",
+        benchmark=benchmark or "暂无数据",
         strategy_keywords=keywords,
         skip_prediction=skip,
         raw_info=info,
         fund_type_raw=raw_type,
+        establish_date=establish_date or "-",
+        fee_rate=fee_rate,
         strategy_text=strategy,
-        risk_level=_risk_level_for_type(fund_type),
+        risk_level=risk_level,
     )
 
 
@@ -330,3 +336,96 @@ def _risk_level_for_type(fund_type: str) -> str:
         "unknown": "未知",
     }
     return mapping.get(fund_type, "未知")
+
+
+def _fetch_from_primary_source(fund_code: str) -> Optional[dict]:
+    import akshare as ak
+
+    try:
+        info = ak.fund_individual_basic_info_xq(symbol=fund_code)
+        if info and isinstance(info, dict) and len(info) > 0:
+            logger.info("Primary source (xueqiu) succeeded for fund %s", fund_code)
+            return dict(info)
+        logger.warning("Primary source returned empty/invalid data for fund %s", fund_code)
+    except Exception as exc:
+        logger.warning("Primary source (xueqiu) failed for %s: %s", fund_code, exc)
+
+    try:
+        logger.info("Trying fallback source (eastmoney) for fund %s", fund_code)
+        info = ak.fund_individual_basic_info_em(symbol=fund_code)
+        if info and isinstance(info, dict) and len(info) > 0:
+            logger.info("Fallback source (eastmoney) succeeded for fund %s", fund_code)
+            return _normalize_eastmoney_info(info)
+        logger.warning("Fallback source returned empty data for fund %s", fund_code)
+    except Exception as exc:
+        logger.warning("Fallback source (eastmoney) failed for %s: %s", fund_code, exc)
+
+    return None
+
+
+def _normalize_eastmoney_info(info: dict) -> dict:
+    field_map = {
+        "基金简称": ["基金简称", "基金名称", "NAME", "name", "SHORTNAME"],
+        "基金类型": ["基金类型", "TYPE", "type", "FUNDTYPE"],
+        "成立日期": ["成立日期", "成立时间", "SETUPDATE", "setupDate"],
+        "最新规模": ["最新规模", "基金规模", "资产规模", "SCALE", "scale"],
+        "基金经理": ["基金经理", "经理", "MANAGER", "manager"],
+        "业绩比较基准": ["业绩比较基准", "比较基准", "BENCHMARK", "benchmark"],
+        "投资策略": ["投资策略", "投资目标", "策略", "INVESTRATEGY"],
+    }
+    result = {}
+    for target_key, source_keys in field_map.items():
+        for sk in source_keys:
+            val = info.get(sk)
+            if val is not None and str(val).strip():
+                result[target_key] = val
+                break
+        if target_key not in result:
+            result[target_key] = info.get(target_key, "")
+    return result
+
+
+def _extract_fee_rate(info: dict) -> Optional[float]:
+    fee_fields = [
+        ("管理费率", r"([\d.]+)%?"),
+        ("托管费率", r"([\d.]+)%?"),
+        ("销售服务费率", r"([\d.]+)%?"),
+    ]
+    total_fee = 0.0
+    found = False
+    import re
+    for field_name, pattern in fee_fields:
+        raw = info.get(field_name, "")
+        if not raw:
+            continue
+        match = re.search(pattern, str(raw))
+        if match:
+            try:
+                total_fee += float(match.group(1))
+                found = True
+            except ValueError:
+                continue
+    return round(total_fee, 2) if found else None
+
+
+def _classify_risk_level_from_info(info: dict, fund_type: str) -> str:
+    risk_from_info = str(info.get("风险等级", "") or "").strip()
+    if risk_from_info and risk_from_info != "-" and risk_from_info != "未知":
+        return risk_from_info
+    return _risk_level_for_type(fund_type)
+
+
+def _get_minimal_profile(fund_code: str) -> FundProfile:
+    return FundProfile(
+        fund_code=fund_code,
+        fund_type="unknown",
+        fund_name="暂无数据",
+        establish_date="-",
+        fund_size=None,
+        manager="暂无数据",
+        fee_rate=None,
+        benchmark="暂无数据",
+        risk_level="未知",
+        strategy_text="数据获取失败，请稍后重试",
+        skip_prediction=True,
+    )

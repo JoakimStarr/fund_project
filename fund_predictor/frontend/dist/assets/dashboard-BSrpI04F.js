@@ -1,1 +1,0 @@
-import{r as t}from"./request-Dt8Bv6Ij.js";function a(){return t.get("/dashboard/stats")}function o(e={}){const{limit:r=10}=e;return t.get(`/dashboard/recent-predictions?limit=${r}`)}function n(){return t.get("/dashboard/models")}export{n as a,o as b,a as g};
