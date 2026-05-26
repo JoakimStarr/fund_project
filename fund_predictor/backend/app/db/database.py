@@ -162,6 +162,26 @@ def _init_schema(conn: sqlite3.Connection) -> None:
     )
     conn.execute("CREATE INDEX IF NOT EXISTS idx_fetch_log_entity ON data_fetch_log(entity_type, entity_key, fetched_at)")
 
+    # ★ AI 分析缓存表（v2.6.0 新增）
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS ai_analysis_cache (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            fund_code       TEXT NOT NULL,
+            trade_date      TEXT NOT NULL,
+            source          TEXT NOT NULL,
+            analysis_json   TEXT NOT NULL,
+            provider_used   TEXT,
+            model_used      TEXT,
+            news_count      INTEGER DEFAULT 0,
+            created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(fund_code, trade_date, source)
+        )
+        """
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_ai_cache_fund_date ON ai_analysis_cache(fund_code, trade_date)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_ai_cache_created ON ai_analysis_cache(created_at)")
+
     conn.commit()
 
 

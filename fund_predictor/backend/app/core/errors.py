@@ -123,3 +123,31 @@ class DuplicateFeatureColumnsError(AppError):
 class ModelTrainingFailedError(AppError):
     code = "MODEL_TRAINING_FAILED"
     stage = "training"
+
+
+# ====================================================
+# ★ AI 分析模块错误类（v2.6.0 新增）
+# ====================================================
+
+
+class AIProviderError(AppError):
+    """AI Provider 调用失败"""
+    code = "AI_PROVIDER_ERROR"
+    stage = "ai_analysis"
+    http_status = 503
+
+    def __init__(
+        self,
+        message: str,
+        provider: str | None = None,
+        details: dict[str, Any] | None = None
+    ):
+        super().__init__(message, details=details)
+        self.provider = provider or "unknown"
+
+
+class NewsServiceError(AppError):
+    """新闻服务错误"""
+    code = "NEWS_SERVICE_ERROR"
+    stage = "news_fetch"
+    http_status = 200  # 新闻获取失败不阻断主流程

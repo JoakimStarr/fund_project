@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 import yaml
 
@@ -105,6 +106,104 @@ REQUEST_INTERVAL = _cfg.get("data_sources", {}).get("request_interval", {
 # 最大重试次数和间隔
 MAX_RETRY_TIMES = int(_cfg.get("data_sources", {}).get("max_retry_times", 3))
 RETRY_INTERVAL = float(_cfg.get("data_sources", {}).get("retry_interval", 1.0))
+
+# ====================================================
+# ★ AI 分析模块配置（v2.6.0 新增）
+# ====================================================
+
+AI_PROVIDER_CONFIG = _cfg.get("ai_provider", {})
+
+# 主 Provider 配置
+AI_PRIMARY_PROVIDER = AI_PROVIDER_CONFIG.get("primary", {}).get("provider", "glm")
+AI_PRIMARY_API_KEY = os.environ.get(
+    "GLM_API_KEY",
+    AI_PROVIDER_CONFIG.get("primary", {}).get("api_key", "")
+)
+AI_PRIMARY_BASE_URL = AI_PROVIDER_CONFIG.get("primary", {}).get(
+    "base_url",
+    "https://open.bigmodel.cn/api/paas/v4"
+)
+AI_PRIMARY_MODEL = AI_PROVIDER_CONFIG.get("primary", {}).get("model", "glm-4-flash")
+AI_PRIMARY_TIMEOUT = int(AI_PROVIDER_CONFIG.get("primary", {}).get("timeout_seconds", 15))
+AI_PRIMARY_MAX_TOKENS = int(AI_PROVIDER_CONFIG.get("primary", {}).get("max_tokens", 512))
+AI_PRIMARY_TEMPERATURE = float(AI_PROVIDER_CONFIG.get("primary", {}).get("temperature", 0.3))
+
+# 备用 Provider 配置
+AI_FALLBACK_PROVIDER = AI_PROVIDER_CONFIG.get("fallback", {}).get("provider", "siliconflow")
+AI_FALLBACK_API_KEY = os.environ.get(
+    "SILICONFLOW_API_KEY",
+    AI_PROVIDER_CONFIG.get("fallback", {}).get("api_key", "")
+)
+AI_FALLBACK_BASE_URL = AI_PROVIDER_CONFIG.get("fallback", {}).get(
+    "base_url",
+    "https://api.siliconflow.cn/v1"
+)
+AI_FALLBACK_MODEL = AI_PROVIDER_CONFIG.get("fallback", {}).get(
+    "model",
+    "Qwen/Qwen2.5-7B-Instruct"
+)
+AI_FALLBACK_TIMEOUT = int(AI_PROVIDER_CONFIG.get("fallback", {}).get("timeout_seconds", 20))
+AI_FALLBACK_MAX_TOKENS = int(AI_PROVIDER_CONFIG.get("fallback", {}).get("max_tokens", 512))
+AI_FALLBACK_TEMPERATURE = float(AI_PROVIDER_CONFIG.get("fallback", {}).get("temperature", 0.3))
+
+# 调用策略
+AI_RETRY_TIMES = int(AI_PROVIDER_CONFIG.get("retry_times", 2))
+AI_RETRY_DELAY = float(AI_PROVIDER_CONFIG.get("retry_delay_seconds", 1))
+AI_FALLBACK_ON_ERROR = bool(AI_PROVIDER_CONFIG.get("fallback_on_error", True))
+AI_CACHE_TTL = str(AI_PROVIDER_CONFIG.get("cache_ttl", "day"))
+
+# 输出格式约束
+AI_FORCE_JSON_OUTPUT = bool(AI_PROVIDER_CONFIG.get("force_json_output", True))
+AI_ALLOWED_ACTIONS = AI_PROVIDER_CONFIG.get("allowed_actions", [
+    "增持",
+    "持有",
+    "减持",
+    "观望"
+])
+
+# AI 功能是否启用（检查 API Key 是否配置）
+AI_ENABLED = bool(AI_PRIMARY_API_KEY or AI_FALLBACK_API_KEY)
+
+# ====================================================
+# ★ 新闻聚合配置（v2.6.0 新增）
+# ====================================================
+
+NEWS_SERVICE_CONFIG = _cfg.get("news_service", {})
+
+# 新闻源配置
+NEWS_SOURCES = NEWS_SERVICE_CONFIG.get("sources", {
+    "cls": {
+        "enabled": True,
+        "akshare_func": "stock_telegraph_cls_em",
+        "max_items": 50,
+        "relevance_min_score": 0.3
+    },
+    "em": {
+        "enabled": True,
+        "akshare_func": "stock_news_em",
+        "max_items": 20,
+        "relevance_min_score": 0.4
+    },
+    "sina": {
+        "enabled": False,
+        "akshare_func": "stock_news_sina",
+        "max_items": 20,
+        "relevance_min_score": 0.5
+    }
+})
+
+# 相关性计算配置
+NEWS_KEYWORD_SOURCES = NEWS_SERVICE_CONFIG.get("keyword_sources", [
+    "fund_name",
+    "top5_holdings",
+    "fund_type_keywords"
+])
+NEWS_MAX_NEWS_FOR_AI = int(NEWS_SERVICE_CONFIG.get("max_news_for_ai", 3))
+NEWS_MAX_NEWS_FOR_DISPLAY = int(NEWS_SERVICE_CONFIG.get("max_news_for_display", 5))
+
+# 缓存配置
+NEWS_CACHE_MINUTES = int(NEWS_SERVICE_CONFIG.get("cache_minutes", 10))
+NEWS_FETCH_TIMEOUT = int(NEWS_SERVICE_CONFIG.get("fetch_timeout_seconds", 8))
 
 
 def ensure_dirs() -> None:

@@ -53,3 +53,36 @@ CWD: /home/joakim/Project/fund_project/fund_predictor/frontend
 
 [2026-05-26T02:13:34.488Z] Frontend EXIT code=0 uptime=0.0s
 ============================================================
+
+============================================================
+[2026-05-26T03:14:46.803Z] Frontend development START
+PID: 3929593
+Node: v22.22.2
+CWD: /home/joakim/Project/fund_project/fund_predictor/frontend
+============================================================
+
+
+[2026-05-26T03:14:46.803Z] Frontend EXIT code=0 uptime=0.0s
+============================================================
+
+============================================================
+[2026-05-26T03:21:24.775Z] Frontend development START
+PID: 3959394
+Node: v22.22.2
+CWD: /home/joakim/Project/fund_project/fund_predictor/frontend
+============================================================
+
+
+[2026-05-26T03:21:24.775Z] Frontend EXIT code=0 uptime=0.0s
+============================================================
+
+============================================================
+[2026-05-26T03:23:11.682Z] Frontend development START
+PID: 3966854
+Node: v22.22.2
+CWD: /home/joakim/Project/fund_project/fund_predictor/frontend
+============================================================
+
+
+[2026-05-26T03:23:11.683Z] Frontend EXIT code=0 uptime=0.0s
+============================================================
