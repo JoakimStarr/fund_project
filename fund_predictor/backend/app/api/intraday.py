@@ -67,13 +67,17 @@ def trigger_intraday_estimate(fund_code: str):
 @router.get("/{fund_code}/intraday/latest")
 def get_intraday_latest(
     fund_code: str,
+    auto_estimate: bool = Query(True, description="缓存为空时是否自动触发估算（默认开启）"),
     force_refresh: bool = Query(False, description="是否强制重新计算"),
 ):
     """
     获取最新盘中估算结果。
 
-    如果有缓存则直接返回，否则返回404提示先触发估算。
-    可通过 force_refresh=true 强制重新计算。
+    优先级：
+    1. force_refresh=true → 强制重新计算
+    2. 缓存命中 → 直接返回缓存
+    3. 缓存未命中 + auto_estimate=true → 自动触发估算并返回
+    4. 缓存未命中 + auto_estimate=false → 返回404提示手动触发
     """
     fund_code = fund_code.strip()
     set_log_context(fund_code=fund_code)
@@ -109,10 +113,49 @@ def get_intraday_latest(
 
     cached = get_latest_intraday_estimate(fund_code)
     if cached is None:
-        raise NotFoundError(
-            "暂无盘中估算数据，请先调用POST接口触发估算",
-            details={"fund_code": fund_code, "hint": "POST /api/fund/{fund_code}/intraday"},
-        )
+        if auto_estimate:
+            logger.info("api_intraday_auto_estimate fund_code=%s (cache miss, triggering estimation)", fund_code)
+            try:
+                result = estimate_intraday_nav(fund_code)
+                if not result.get("ok", True) and "error" in result:
+                    raise IntradayEstimateError(
+                        f"盘中估算失败: {result['error']}",
+                        details={"fund_code": fund_code},
+                    )
+                logger.info("api_intraday_auto_estimate_success fund_code=%s", fund_code)
+                return {
+                    "ok": True,
+                    "data": {
+                        "fund_code": result["fund_code"],
+                        "last_nav": result.get("last_nav"),
+                        "last_date": result.get("last_date"),
+                        "estimated_nav": result.get("estimated_nav"),
+                        "estimated_change_pct": result.get("estimated_change_pct"),
+                        "holding_path_return": result.get("holding_path_return"),
+                        "index_path_return": result.get("index_path_return"),
+                        "fusion_weight": result.get("fusion_weight"),
+                        "confidence": result.get("confidence"),
+                        "from_cache": False,
+                        "auto_triggered": True,
+                        "estimated_at": result.get("estimated_at"),
+                    },
+                }
+            except AppError:
+                raise
+            except Exception as e:
+                logger.exception("api_intraday_auto_estimate_error fund_code=%s", fund_code)
+                raise IntradayEstimateError(
+                    f"自动估算失败: {str(e)}",
+                    details={
+                        "fund_code": fund_code,
+                        "hint": f"可尝试手动调用 POST /api/v1/fund/{fund_code}/intraday",
+                    }
+                ) from e
+        else:
+            raise NotFoundError(
+                "暂无盘中估算数据，请先调用POST接口触发估算",
+                details={"fund_code": fund_code, "hint": f"POST /api/v1/fund/{fund_code}/intraday"},
+            )
 
     logger.info("api_intraday_cache_hit fund_code=%s", fund_code)
     return {
