@@ -90,6 +90,8 @@ def fund_profile(fund_code: str, force_refresh: bool = False):
             "strategy_keywords": profile.strategy_keywords,
             "skip_prediction": profile.skip_prediction,
             "risk_level": profile.risk_level,
+            "asset_allocation": profile.asset_allocation,
+            "industry_distribution": profile.industry_distribution,
             "cache_info": {
                 "cached": bool(profile.cached_at) and not profile.stale,
                 "fetched_at": profile.cached_at or "",

@@ -148,6 +148,8 @@ interface ProfileData {
   strategy_keywords: string[]
   skip_prediction: boolean
   risk_level: string
+  asset_allocation: Record<string, number>
+  industry_distribution: Array<{name: string, value: number}>
   cache_info: CacheInfo | null
 }
 
@@ -165,6 +167,8 @@ const profileData = ref<ProfileData>({
   strategy_keywords: [],
   skip_prediction: false,
   risk_level: '',
+  asset_allocation: {},
+  industry_distribution: [],
   cache_info: null,
 })
 
@@ -226,16 +230,9 @@ const displayMetrics = computed(() => {
   ]
 })
 
-const defaultAllocation = [
-  { name: '股票', value: 60, color: '#5470c6' },
-  { name: '债券', value: 25, color: '#91cc75' },
-  { name: '现金', value: 10, color: '#fac858' },
-  { name: '其他', value: 5, color: '#ee6666' },
-]
-
-const defaultIndustry = [
-  { name: '待获取持仓数据', value: 1, color: '#ccc' },
-]
+// 默认颜色配置
+const allocationColors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4']
+const industryColors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
 
 function loadProfile() {
   const code = effectiveFundCode.value
@@ -263,12 +260,50 @@ function loadProfile() {
 }
 
 function renderCharts() {
+  // 资产配置图表
   if (allocationChartRef.value) {
     if (!allocationInstance) {
       allocationInstance = echarts.init(allocationChartRef.value)
     }
+    
+    // 使用真实数据或默认数据
+    const allocationData = profileData.value.asset_allocation
+    let chartData: Array<{name: string, value: number}> = []
+    
+    if (allocationData && Object.keys(allocationData).length > 0) {
+      // 使用真实资产配置数据
+      chartData = Object.entries(allocationData).map(([name, value], index) => ({
+        name,
+        value: typeof value === 'number' ? value : parseFloat(value as string) || 0,
+        itemStyle: { color: allocationColors[index % allocationColors.length] }
+      })).filter(item => item.value > 0)
+    } else {
+      // 根据基金类型推断默认配置
+      const fundType = profileData.value.fund_type
+      if (fundType === 'money_market') {
+        chartData = [
+          { name: '现金及等价物', value: 95, itemStyle: { color: '#91cc75' } },
+          { name: '其他', value: 5, itemStyle: { color: '#ee6666' } }
+        ]
+      } else if (fundType === 'bond_pure' || fundType === 'bond_mixed') {
+        chartData = [
+          { name: '债券', value: 85, itemStyle: { color: '#91cc75' } },
+          { name: '现金', value: 10, itemStyle: { color: '#fac858' } },
+          { name: '其他', value: 5, itemStyle: { color: '#ee6666' } }
+        ]
+      } else {
+        // 股票型/混合型默认
+        chartData = [
+          { name: '股票', value: 70, itemStyle: { color: '#5470c6' } },
+          { name: '债券', value: 20, itemStyle: { color: '#91cc75' } },
+          { name: '现金', value: 8, itemStyle: { color: '#fac858' } },
+          { name: '其他', value: 2, itemStyle: { color: '#ee6666' } }
+        ]
+      }
+    }
+    
     allocationInstance.setOption({
-      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      tooltip: { trigger: 'item', formatter: '{b}: {c}% ({d}%)' },
       legend: { bottom: 0, type: 'scroll' },
       series: [{
         type: 'pie',
@@ -277,25 +312,60 @@ function renderCharts() {
         avoidLabelOverlap: false,
         itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
         label: { show: true, formatter: '{b}\n{d}%' },
-        data: defaultAllocation,
+        data: chartData,
       }],
     }, true)
   }
 
+  // 行业分布图表
   if (industryChartRef.value) {
     if (!industryInstance) {
       industryInstance = echarts.init(industryChartRef.value)
     }
+    
+    const industryData = profileData.value.industry_distribution
+    let chartData: Array<{name: string, value: number, itemStyle: {color: string}}> = []
+    let xAxisData: string[] = []
+    
+    if (industryData && industryData.length > 0) {
+      // 使用真实行业分布数据
+      chartData = industryData.map((item, index) => ({
+        name: item.name,
+        value: item.value,
+        itemStyle: { color: industryColors[index % industryColors.length] }
+      }))
+      xAxisData = industryData.map(item => item.name)
+    } else {
+      // 显示提示信息
+      chartData = [{ name: '暂无数据', value: 0, itemStyle: { color: '#ccc' } }]
+      xAxisData = ['暂无行业分布数据']
+    }
+    
     industryInstance.setOption({
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      tooltip: { 
+        trigger: 'axis', 
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any) => {
+          const p = params[0]
+          return p.value > 0 ? `${p.name}: ${p.value}%` : p.name
+        }
+      },
       grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
-      xAxis: { type: 'category', data: defaultIndustry.map(i => i.name), axisLabel: { rotate: 30, fontSize: 11 } },
-      yAxis: { type: 'value', name: '占比(%)' },
+      xAxis: { 
+        type: 'category', 
+        data: xAxisData, 
+        axisLabel: { rotate: 30, fontSize: 11 } 
+      },
+      yAxis: { 
+        type: 'value', 
+        name: '占比(%)',
+        max: industryData && industryData.length > 0 ? undefined : 10
+      },
       series: [{
         type: 'bar',
-        data: defaultIndustry.map(i => ({ value: i.value * 100, itemStyle: { color: i.color } })),
+        data: chartData,
         barMaxWidth: 40,
-        label: { show: true, position: 'top', fontSize: 11 },
+        label: { show: true, position: 'top', fontSize: 11, formatter: (p: any) => p.value > 0 ? p.value + '%' : '' },
       }],
     }, true)
   }

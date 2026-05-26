@@ -63,7 +63,9 @@ def _init_schema(conn: sqlite3.Connection) -> None:
             fetched_at      TEXT NOT NULL,
             updated_at      TEXT NOT NULL,
             cache_ttl_days  INTEGER DEFAULT 7,
-            raw_info_json   TEXT DEFAULT ''
+            raw_info_json   TEXT DEFAULT '',
+            asset_allocation_json TEXT DEFAULT '',
+            industry_distribution_json TEXT DEFAULT ''
         )
         """
     )

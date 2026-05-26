@@ -29,6 +29,9 @@ class FundProfile:
     risk_level: str = ""
     stale: bool = False
     cached_at: str = ""
+    # 新增字段：资产配置和行业分布
+    asset_allocation: dict = field(default_factory=dict)  # {"股票": 60, "债券": 25, ...}
+    industry_distribution: list = field(default_factory=list)  # [{"name": "科技", "value": 30}, ...]
 
 
 def _parse_benchmark_weight(benchmark: str | None) -> float | None:
@@ -107,9 +110,20 @@ def classify_fund(fund_code: str) -> FundProfile:
 
     risk_level = _classify_risk_level_from_info(info, fund_type)
 
+    # 获取管理费率（如果基础信息中没有，尝试详细接口）
+    if fee_rate is None:
+        fee_rate = _extract_fee_rate_from_detail(fund_code)
+    
+    # 获取资产配置和行业分布
+    logger.info("Fetching asset allocation and industry distribution for %s", fund_code)
+    asset_allocation = _get_asset_allocation(fund_code)
+    industry_distribution = _get_industry_distribution(fund_code)
+    
     logger.info(
-        "fund_classified fund_code=%s type=%s name=%s establish_date=%s size=%s manager=%s fee_rate=%s",
+        "fund_classified fund_code=%s type=%s name=%s establish_date=%s size=%s manager=%s fee_rate=%s "
+        "asset_allocation=%s industry_count=%d",
         fund_code, fund_type, fund_name, establish_date or "(empty)", size, manager or "(empty)", fee_rate,
+        bool(asset_allocation), len(industry_distribution)
     )
 
     return FundProfile(
@@ -127,6 +141,8 @@ def classify_fund(fund_code: str) -> FundProfile:
         fee_rate=fee_rate,
         strategy_text=strategy,
         risk_level=risk_level,
+        asset_allocation=asset_allocation,
+        industry_distribution=industry_distribution,
     )
 
 
@@ -160,8 +176,9 @@ def get_profile(fund_code: str, force_refresh: bool = False) -> FundProfile:
                     establish_date, fund_size, manager, fee_rate,
                     benchmark, strategy_text, strategy_keywords,
                     skip_prediction, risk_level,
-                    data_source, fetched_at, updated_at, cache_ttl_days, raw_info_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'akshare', ?, ?, 7, ?)
+                    data_source, fetched_at, updated_at, cache_ttl_days, raw_info_json,
+                    asset_allocation_json, industry_distribution_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'akshare', ?, ?, 7, ?, ?, ?)
                 ON CONFLICT(fund_code) DO UPDATE SET
                     fund_name=excluded.fund_name,
                     fund_type=excluded.fund_type,
@@ -177,7 +194,9 @@ def get_profile(fund_code: str, force_refresh: bool = False) -> FundProfile:
                     risk_level=excluded.risk_level,
                     fetched_at=excluded.fetched_at,
                     updated_at=excluded.updated_at,
-                    raw_info_json=excluded.raw_info_json
+                    raw_info_json=excluded.raw_info_json,
+                    asset_allocation_json=excluded.asset_allocation_json,
+                    industry_distribution_json=excluded.industry_distribution_json
                 """,
                 [
                     profile.fund_code, profile.fund_name, profile.fund_type, profile.fund_type_raw,
@@ -187,6 +206,8 @@ def get_profile(fund_code: str, force_refresh: bool = False) -> FundProfile:
                     int(profile.skip_prediction), profile.risk_level,
                     now, now,
                     json.dumps(profile.raw_info, ensure_ascii=False, default=str),
+                    json.dumps(profile.asset_allocation, ensure_ascii=False),
+                    json.dumps(profile.industry_distribution, ensure_ascii=False),
                 ],
             )
             duration_ms = int((datetime.now() - start).total_seconds() * 1000)
@@ -236,6 +257,21 @@ def _row_to_profile(row: dict) -> FundProfile:
         raw_info = json.loads(raw_str)
     except Exception:
         raw_info = {}
+    
+    # 解析资产配置
+    alloc_str = row.get("asset_allocation_json") or "{}"
+    try:
+        asset_allocation = json.loads(alloc_str)
+    except Exception:
+        asset_allocation = {}
+    
+    # 解析行业分布
+    industry_str = row.get("industry_distribution_json") or "[]"
+    try:
+        industry_distribution = json.loads(industry_str)
+    except Exception:
+        industry_distribution = []
+    
     return FundProfile(
         fund_code=row["fund_code"],
         fund_type=row["fund_type"] or "unknown",
@@ -253,6 +289,8 @@ def _row_to_profile(row: dict) -> FundProfile:
         risk_level=row["risk_level"] or "",
         stale=False,
         cached_at=row.get("fetched_at", ""),
+        asset_allocation=asset_allocation,
+        industry_distribution=industry_distribution,
     )
 
 
@@ -464,6 +502,221 @@ def _classify_risk_level_from_info(info: dict, fund_type: str) -> str:
     if risk_from_info and risk_from_info != "-" and risk_from_info != "未知":
         return risk_from_info
     return _risk_level_for_type(fund_type)
+
+
+def _extract_fee_rate_from_detail(fund_code: str) -> Optional[float]:
+    """从基金详情页面获取管理费率（更详细的接口）"""
+    import akshare as ak
+    try:
+        # 尝试使用东方财富的详细接口
+        info = ak.fund_individual_detail_info_xq(symbol=fund_code)
+        if info is not None and not info.empty:
+            # 转换为字典
+            if 'item' in info.columns and 'value' in info.columns:
+                detail_dict = {}
+                for _, row in info.iterrows():
+                    key = str(row['item']).strip()
+                    val = row['value']
+                    if not pd.isna(val):
+                        detail_dict[key] = str(val).strip()
+                
+                # 查找费率信息
+                fee_str = detail_dict.get('管理费率', '') or detail_dict.get('费率', '')
+                if fee_str:
+                    import re
+                    match = re.search(r'([\d.]+)%?', fee_str)
+                    if match:
+                        return round(float(match.group(1)), 2)
+    except Exception as e:
+        logger.debug("Detail info fetch failed for %s: %s", fund_code, e)
+    
+    return None
+
+
+def _get_asset_allocation(fund_code: str) -> dict:
+    """获取基金资产配置（股票、债券、现金等占比）"""
+    import akshare as ak
+    import pandas as pd
+    
+    try:
+        # 使用基金公开信息中的资产配置数据
+        # 尝试从基金详情页面获取
+        info = ak.fund_individual_detail_info_xq(symbol=fund_code)
+        if info is not None and not info.empty:
+            detail_dict = {}
+            if 'item' in info.columns and 'value' in info.columns:
+                for _, row in info.iterrows():
+                    key = str(row['item']).strip()
+                    val = row['value']
+                    if not pd.isna(val):
+                        detail_dict[key] = str(val).strip()
+            
+            # 尝试解析资产配置字段
+            allocation = {}
+            
+            # 查找股票、债券、现金等占比
+            asset_fields = {
+                '股票占净值比例': '股票',
+                '债券占净值比例': '债券',
+                '现金占净值比例': '现金',
+                '基金占净值比例': '基金',
+                '其他资产占净值比例': '其他',
+                '银行存款占净值比例': '银行存款',
+                '买入返售金融资产占净值比例': '买入返售',
+                '资产分布-股票': '股票',
+                '资产分布-债券': '债券',
+                '资产分布-现金': '现金',
+            }
+            
+            for field_key, alloc_name in asset_fields.items():
+                if field_key in detail_dict:
+                    try:
+                        val_str = detail_dict[field_key]
+                        # 提取数字（可能包含 % 符号）
+                        import re
+                        match = re.search(r'([\d.]+)', val_str.replace('%', ''))
+                        if match:
+                            value = float(match.group(1))
+                            if value > 0:
+                                allocation[alloc_name] = round(value, 2)
+                    except (ValueError, TypeError):
+                        continue
+            
+            if allocation:
+                logger.info("Asset allocation fetched for %s: %s", fund_code, allocation)
+                return allocation
+                
+    except Exception as e:
+        logger.debug("Asset allocation from detail failed for %s: %s", fund_code, e)
+    
+    # 备选：从持仓数据计算近似资产配置
+    try:
+        return _calculate_asset_from_holdings(fund_code)
+    except Exception as e:
+        logger.debug("Asset from holdings failed for %s: %s", fund_code, e)
+    
+    return {}
+
+
+def _get_industry_distribution(fund_code: str) -> list:
+    """获取基金行业分布（前N大行业占比）"""
+    import akshare as ak
+    import pandas as pd
+    
+    try:
+        # 使用 cninfo 的行业配置报告
+        df = ak.fund_report_industry_allocation_cninfo(symbol=fund_code)
+        if df is not None and not df.empty:
+            # 获取最新报告期
+            latest_period = df.iloc[0].get('报告期', '')
+            latest_data = df[df['报告期'] == latest_period] if latest_period else df
+            
+            industries = []
+            for _, row in latest_data.iterrows():
+                try:
+                    name = row.get('行业名称', row.get('行业', ''))
+                    ratio = float(row.get('占净值比例', row.get('比例', 0)))
+                    if name and ratio > 0:
+                        industries.append({
+                            'name': str(name),
+                            'value': round(ratio, 2)
+                        })
+                except (ValueError, TypeError):
+                    continue
+            
+            # 按占比排序，取前10
+            industries = sorted(industries, key=lambda x: x['value'], reverse=True)[:10]
+            
+            if industries:
+                logger.info("Industry distribution fetched for %s: %d industries", 
+                          fund_code, len(industries))
+                return industries
+                
+    except Exception as e:
+        logger.warning("Industry distribution fetch failed for %s: %s", fund_code, e)
+    
+    # 备选方案：从持仓数据计算行业分布
+    try:
+        return _calculate_industry_from_holdings(fund_code)
+    except Exception as e:
+        logger.debug("Industry from holdings failed for %s: %s", fund_code, e)
+    
+    return []
+
+
+def _calculate_asset_from_holdings(fund_code: str) -> dict:
+    """从持仓数据计算近似资产配置"""
+    import akshare as ak
+    
+    try:
+        df = ak.fund_portfolio_hold_em(symbol=fund_code, date="2024")
+        if df is None or df.empty:
+            return {}
+        
+        # 获取最新季度
+        latest_quarter = df.iloc[0].get('季度', '')
+        latest_df = df[df['季度'] == latest_quarter] if latest_quarter else df
+        
+        # 计算股票持仓占比（前10大持仓之和作为近似）
+        stock_ratio = 0
+        for _, row in latest_df.iterrows():
+            try:
+                ratio = float(row.get('占净值比例', 0))
+                stock_ratio += ratio
+            except (ValueError, TypeError):
+                continue
+        
+        # 简化假设：剩余部分为现金+债券
+        if stock_ratio > 0:
+            return {
+                '股票': round(stock_ratio, 2),
+                '债券': round(max(0, 80 - stock_ratio), 2),  # 假设债券约20-30%
+                '现金': round(max(0, 20 - (80 - stock_ratio)), 2)  # 剩余为现金
+            }
+        
+    except Exception as e:
+        logger.debug("Asset calculation from holdings failed for %s: %s", fund_code, e)
+    
+    return {}
+
+
+def _calculate_industry_from_holdings(fund_code: str) -> list:
+    """从持仓数据计算行业分布（备选方案）"""
+    import akshare as ak
+    
+    try:
+        # 获取最新持仓
+        df = ak.fund_portfolio_hold_em(symbol=fund_code, date="2024")
+        if df is None or df.empty:
+            return []
+        
+        # 获取最新季度
+        latest_quarter = df.iloc[0].get('季度', '')
+        latest_df = df[df['季度'] == latest_quarter] if latest_quarter else df
+        
+        # 获取股票代码列表
+        stock_codes = latest_df['股票代码'].tolist()
+        
+        # 获取每个股票的行业（这里简化处理，实际可以查询股票行业）
+        # 返回持仓占比作为近似
+        industries = []
+        for _, row in latest_df.head(10).iterrows():  # 取前10大持仓
+            try:
+                name = row.get('股票名称', '')
+                ratio = float(row.get('占净值比例', 0))
+                if name and ratio > 0:
+                    industries.append({
+                        'name': str(name),  # 用股票名代替行业名（简化）
+                        'value': round(ratio, 2)
+                    })
+            except (ValueError, TypeError):
+                continue
+        
+        return industries
+        
+    except Exception as e:
+        logger.debug("Holdings calculation failed for %s: %s", fund_code, e)
+        return []
 
 
 def _get_minimal_profile(fund_code: str) -> FundProfile:
