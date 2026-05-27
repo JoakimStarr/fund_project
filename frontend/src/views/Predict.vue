@@ -95,6 +95,14 @@
             ~
             <span class="font-bold">{{ formatPercent(result.confidence_interval_upper) }}</span>
           </el-descriptions-item>
+          <el-descriptions-item label="校准样本数" :span="2">
+            <span :class="{ 'text-warning': (result.model_info?.calibration_size || 0) < 30 }">
+              {{ result.model_info?.calibration_size || '--' }}
+            </span>
+            <el-tag v-if="(result.model_info?.calibration_size || 0) < 30" type="warning" size="small" style="margin-left:8px">
+              样本不足，置信区间可能不稳定
+            </el-tag>
+          </el-descriptions-item>
         </el-descriptions>
       </el-card>
 

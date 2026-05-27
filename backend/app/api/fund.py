@@ -7,7 +7,7 @@ from app.schemas.fund import FundPredictRequest, FundValidateRequest, FundValida
 from app.services.fund.normalizer import normalize as normalize_fund_code
 from app.services.fund.profile_service import get_profile as fetch_profile
 from app.services.predict.prediction_service import predict as do_predict
-from app.services.model.versioning import rollback as rollback_model
+from app.services.model.versioning import rollback as rollback_model, load_model
 from app.services.data.danjuan_client import search_funds as dj_search, get_fund_info as dj_get_info
 
 router = APIRouter(prefix="/fund", tags=["fund"])
@@ -19,6 +19,22 @@ async def predict(req: FundPredictRequest, db=Depends(get_db)):
         raw = await do_predict(req.fund_code, db)
         direction = "up" if raw.get("estimated_return", 0) > 0 else "down" if raw.get("estimated_return", 0) < 0 else "neutral"
         direction_prob = min(0.95, max(0.05, 0.5 + abs(raw.get("estimated_return", 0)) * 10))
+        
+        # 加载模型元数据以获取校准样本数等信息
+        model_info = {}
+        try:
+            _, metrics, _ = load_model(req.fund_code)
+            if metrics:
+                model_info = {
+                    "calibration_size": metrics.get("calibration_size", 0),
+                    "train_rows": metrics.get("train_rows", 0),
+                    "best_model": metrics.get("best_model", ""),
+                    "model_version": metrics.get("model_version", ""),
+                    "valid_direction_accuracy": metrics.get("valid_direction_accuracy", 0),
+                }
+        except Exception:
+            pass
+        
         data = {
             "fund_code": raw["fund_code"],
             "fund_name": raw.get("fund_name"),
@@ -40,6 +56,7 @@ async def predict(req: FundPredictRequest, db=Depends(get_db)):
             "holdings_used": raw.get("holdings_used"),
             "market_session": raw.get("market_session", {}),
             "timestamp": raw.get("timestamp"),
+            "model_info": model_info,
         }
         return ApiResponse(ok=True, data=data)
     except ValueError as e:

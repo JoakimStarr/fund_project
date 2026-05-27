@@ -47,6 +47,26 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
     X_test_select_s = scaler.transform(X_test_select)
     candidate_configs = settings.model["candidate_models"]
     models = {}
+    
+    # 根据训练数据量动态调整超参数
+    n_train = len(X_train)
+    if n_train < 100:
+        # 小数据集：保守配置，防止过拟合
+        lgbm_n_estimators, lgbm_max_depth, lgbm_min_child = 30, 3, 15
+        xgb_n_estimators, xgb_max_depth, xgb_min_child = 20, 3, 5
+    elif n_train < 300:
+        # 中等数据集
+        lgbm_n_estimators, lgbm_max_depth, lgbm_min_child = 60, 4, 12
+        xgb_n_estimators, xgb_max_depth, xgb_min_child = 40, 4, 3
+    elif n_train < 600:
+        # 较大数据集
+        lgbm_n_estimators, lgbm_max_depth, lgbm_min_child = 80, 5, 10
+        xgb_n_estimators, xgb_max_depth, xgb_min_child = 60, 5, 2
+    else:
+        # 大数据集：使用配置文件的默认值
+        lgbm_n_estimators, lgbm_max_depth, lgbm_min_child = 120, 6, 8
+        xgb_n_estimators, xgb_max_depth, xgb_min_child = 100, 6, 2
+    
     for cfg in candidate_configs:
         name = cfg["name"]
         if name == "ridge":
@@ -55,10 +75,30 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
             models[name] = ElasticNet(alpha=cfg.get("alpha", 0.01), l1_ratio=cfg.get("l1_ratio", 0.5), max_iter=1000)
         elif name == "lgbm":
             from lightgbm import LGBMRegressor
-            models[name] = LGBMRegressor(n_estimators=cfg.get("n_estimators", 120), max_depth=cfg.get("max_depth", 5), learning_rate=cfg.get("learning_rate", 0.05), min_child_samples=cfg.get("min_child_samples", 10), verbose=-1)
+            # 使用 dart boosting 增加多样性，防止过拟合
+            models[name] = LGBMRegressor(
+                boosting_type=cfg.get("boosting_type", "dart"),
+                n_estimators=cfg.get("n_estimators", lgbm_n_estimators),
+                max_depth=cfg.get("max_depth", lgbm_max_depth),
+                learning_rate=cfg.get("learning_rate", 0.05),
+                min_child_samples=cfg.get("min_child_samples", lgbm_min_child),
+                drop_rate=cfg.get("drop_rate", 0.1),
+                skip_drop=cfg.get("skip_drop", 0.5),
+                verbose=-1
+            )
         elif name == "xgboost":
             from xgboost import XGBRegressor
-            models[name] = XGBRegressor(n_estimators=cfg.get("n_estimators", 120), max_depth=cfg.get("max_depth", 5), learning_rate=cfg.get("learning_rate", 0.05), verbosity=0)
+            # 传统 gbdt，与 LGBM 形成方法论差异
+            models[name] = XGBRegressor(
+                booster=cfg.get("booster", "gbtree"),
+                n_estimators=cfg.get("n_estimators", xgb_n_estimators),
+                max_depth=cfg.get("max_depth", xgb_max_depth),
+                learning_rate=cfg.get("learning_rate", 0.08),
+                min_child_weight=cfg.get("min_child_weight", xgb_min_child),
+                subsample=cfg.get("subsample", 0.8),
+                colsample_bytree=cfg.get("colsample_bytree", 0.8),
+                verbosity=0
+            )
     stacking = StackingModel()
     models["stacking"] = stacking
     results = {}
