@@ -7,6 +7,7 @@ from app.api.intraday import router as intraday_router
 from app.api.ai_analysis import router as ai_analysis_router
 from app.api.dashboard import router as dashboard_router
 from app.api.admin import router as admin_router
+from app.api.backtest import router as backtest_router
 
 api_router = APIRouter()
 
@@ -17,3 +18,4 @@ api_router.include_router(intraday_router)
 api_router.include_router(ai_analysis_router)
 api_router.include_router(dashboard_router)
 api_router.include_router(admin_router)
+api_router.include_router(backtest_router)
