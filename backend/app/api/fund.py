@@ -144,15 +144,19 @@ async def batch_predict(req: FundBatchPredictRequest, db=Depends(get_db)):
     for code in codes:
         try:
             pred = await do_predict(code, db)
-            results.append(pred.model_dump())
+            # 兼容Pydantic v1和v2
+            if hasattr(pred, 'model_dump'):
+                results.append(pred.model_dump())
+            elif hasattr(pred, 'dict'):
+                results.append(pred.dict())
+            else:
+                results.append(pred)
         except Exception as e:
             errors.append({"fund_code": code, "error": str(e)})
     return ApiResponse(ok=True, data={"results": results, "errors": errors, "total": len(codes)})
 
 
-@router.get("/{code}/backtest")
-async def backtest(code: str, days: int = Query(90)):
-    return ApiResponse(ok=True, data={"message": "回测功能开发中", "fund_code": code, "days": days})
+
 
 
 @router.post("/{code}/rollback")

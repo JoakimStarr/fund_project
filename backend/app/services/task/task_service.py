@@ -111,7 +111,12 @@ async def get_task_status(task_id: str, session):
     task = await session.get(TrainTask, task_id)
     if task is None:
         return None
-    return {"task_id": task.id, "fund_code": task.fund_code, "status": task.status, "progress": task.progress, "message": task.error_message or "", "log_text": task.log_text or "", "metrics": json.loads(task.metrics_json) if task.metrics_json else None, "model_version": task.model_version, "created_at": task.created_at.isoformat() if task.created_at else None, "started_at": task.started_at.isoformat() if task.started_at else None, "finished_at": task.finished_at.isoformat() if task.finished_at else None}
+    # 将log_text转换为logs数组，兼容前端显示
+    logs = []
+    if task.log_text:
+        logs = task.log_text.split('\n') if '\n' in task.log_text else [task.log_text]
+    
+    return {"task_id": task.id, "fund_code": task.fund_code, "status": task.status, "progress": task.progress, "message": task.error_message or "", "log_text": task.log_text or "", "logs": logs, "metrics": json.loads(task.metrics_json) if task.metrics_json else None, "model_version": task.model_version, "created_at": task.created_at.isoformat() if task.created_at else None, "started_at": task.started_at.isoformat() if task.started_at else None, "finished_at": task.finished_at.isoformat() if task.finished_at else None}
 
 
 async def list_tasks(session, fund_code: str = None, limit: int = 20, offset: int = 0) -> list:
