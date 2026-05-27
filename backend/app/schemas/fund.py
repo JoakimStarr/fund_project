@@ -2,11 +2,6 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class FundPredictRequest(BaseModel):
-    fund_code: str
-    force_retrain: bool = False
-
-
 class FundValidateRequest(BaseModel):
     raw_input: str
 
@@ -19,10 +14,6 @@ class FundValidateResponse(BaseModel):
     fund_type: Optional[str] = None
     skip_prediction: Optional[bool] = None
     normalization_steps: Optional[list] = None
-
-
-class FundBatchPredictRequest(BaseModel):
-    fund_codes: list[str]
 
 
 class FundRollbackRequest(BaseModel):

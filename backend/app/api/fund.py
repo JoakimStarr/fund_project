@@ -3,66 +3,13 @@ from fastapi import APIRouter, Query, Depends
 
 from app.core.database import get_db
 from app.schemas.common import ApiResponse
-from app.schemas.fund import FundPredictRequest, FundValidateRequest, FundValidateResponse, FundBatchPredictRequest, FundRollbackRequest, FundSearchResult
+from app.schemas.fund import FundValidateRequest, FundValidateResponse, FundRollbackRequest, FundSearchResult
 from app.services.fund.normalizer import normalize as normalize_fund_code
 from app.services.fund.profile_service import get_profile as fetch_profile
-from app.services.predict.prediction_service import predict as do_predict
-from app.services.model.versioning import rollback as rollback_model, load_model
+from app.services.model.versioning import rollback as rollback_model
 from app.services.data.danjuan_client import search_funds as dj_search, get_fund_info as dj_get_info
 
 router = APIRouter(prefix="/fund", tags=["fund"])
-
-
-@router.post("/predict")
-async def predict(req: FundPredictRequest, db=Depends(get_db)):
-    try:
-        raw = await do_predict(req.fund_code, db, save_result=True)
-        direction = "up" if raw.get("estimated_return", 0) > 0 else "down" if raw.get("estimated_return", 0) < 0 else "neutral"
-        direction_prob = min(0.95, max(0.05, 0.5 + abs(raw.get("estimated_return", 0)) * 10))
-        
-        # 加载模型元数据以获取校准样本数等信息
-        model_info = {}
-        try:
-            _, metrics, _ = load_model(req.fund_code)
-            if metrics:
-                model_info = {
-                    "calibration_size": metrics.get("calibration_size", 0),
-                    "train_rows": metrics.get("train_rows", 0),
-                    "best_model": metrics.get("best_model", ""),
-                    "model_version": metrics.get("model_version", ""),
-                    "valid_direction_accuracy": metrics.get("valid_direction_accuracy", 0),
-                }
-        except Exception:
-            pass
-        
-        data = {
-            "fund_code": raw["fund_code"],
-            "fund_name": raw.get("fund_name"),
-            "fund_type": raw.get("fund_type"),
-            "prev_nav": raw["prev_nav"],
-            "prev_date": raw["prev_date"],
-            "predicted_return": raw["estimated_return"],
-            "predicted_nav": raw["estimated_nav"],
-            "confidence_interval_lower": raw["estimated_return"] - 0.02,
-            "confidence_interval_upper": raw["estimated_return"] + 0.02,
-            "direction": direction,
-            "direction_probability": round(direction_prob, 4),
-            "confidence": raw["confidence"],
-            "method": raw.get("method", "dual_path_fusion"),
-            "method_display": raw.get("method_display", "双路径融合法"),
-            "path_a": raw.get("path_a", {}),
-            "path_b": raw.get("path_b", {}),
-            "fusion_weight": raw.get("fusion_weight", {"path_a": 0.6, "path_b": 0.4}),
-            "holdings_used": raw.get("holdings_used"),
-            "market_session": raw.get("market_session", {}),
-            "timestamp": raw.get("timestamp"),
-            "model_info": model_info,
-        }
-        return ApiResponse(ok=True, data=data)
-    except ValueError as e:
-        return ApiResponse(ok=False, error={"code": "PREDICT_ERROR", "message": str(e), "status": 422})
-    except Exception as e:
-        return ApiResponse(ok=False, error={"code": "PREDICT_ERROR", "message": str(e), "status": 500})
 
 
 @router.get("/search")
@@ -134,29 +81,6 @@ async def fund_profile(code: str, db=Depends(get_db)):
 @router.get("/{code}/news")
 async def fund_news(code: str):
     return ApiResponse(ok=True, data={"message": "新闻功能开发中", "fund_code": code})
-
-
-@router.post("/batch-predict")
-async def batch_predict(req: FundBatchPredictRequest, db=Depends(get_db)):
-    codes = req.fund_codes[:10]
-    results = []
-    errors = []
-    for code in codes:
-        try:
-            pred = await do_predict(code, db, save_result=True)
-            # 兼容Pydantic v1和v2
-            if hasattr(pred, 'model_dump'):
-                results.append(pred.model_dump())
-            elif hasattr(pred, 'dict'):
-                results.append(pred.dict())
-            else:
-                results.append(pred)
-        except Exception as e:
-            errors.append({"fund_code": code, "error": str(e)})
-    return ApiResponse(ok=True, data={"results": results, "errors": errors, "total": len(codes)})
-
-
-
 
 
 @router.post("/{code}/rollback")

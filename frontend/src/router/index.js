@@ -12,12 +12,6 @@ const routes = [
         meta: { title: '决策中心', icon: 'DataAnalysis' }
       },
       {
-        path: 'predict',
-        name: 'Predict',
-        component: () => import('@/views/Predict.vue'),
-        meta: { title: '智能预测', icon: 'TrendCharts' }
-      },
-      {
         path: 'intraday',
         name: 'Intraday',
         component: () => import('@/views/Intraday.vue'),
