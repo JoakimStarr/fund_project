@@ -64,6 +64,36 @@ async def _load_fund_nav(fund_code: str):
         return pd.DataFrame([{"date": r.nav_date, "nav": r.nav, "acc_nav": r.acc_nav or r.nav} for r in rows])
 
 
+async def _load_index_history() -> pd.DataFrame:
+    """加载指数历史数据并计算收益率"""
+    from app.services.data.akshare_client import get_index_daily
+    index_data = {}
+    for code, idx_name in INDEX_CANDIDATES.items():
+        try:
+            df = await get_index_daily(INDEX_SINA_CODES[code])
+            if df is not None and not df.empty:
+                df = df.copy()
+                df['date'] = pd.to_datetime(df['date'])
+                df = df.sort_values('date')
+                df[f'{idx_name}_ret'] = df['close'].pct_change()
+                index_data[idx_name] = df[['date', f'{idx_name}_ret']]
+        except Exception as e:
+            logger.warning("index_history_load_failed code=%s error=%s", code, e)
+    
+    if not index_data:
+        return pd.DataFrame()
+    
+    # 合并所有指数数据
+    merged = None
+    for idx_name, df in index_data.items():
+        if merged is None:
+            merged = df
+        else:
+            merged = merged.merge(df, on='date', how='outer')
+    
+    return merged.sort_values('date') if merged is not None else pd.DataFrame()
+
+
 async def _fetch_stock_realtime(codes: list) -> dict:
     import httpx
     result = {}
@@ -277,6 +307,13 @@ async def estimate_t_day(fund_code: str, session=None, mode: str = "auto", save_
     fund_df = await _load_fund_nav(fund_code)
     if fund_df is None or len(fund_df) < 10:
         raise ValueError(f"基金 {fund_code} 无足够净值数据")
+    
+    # 加载指数历史数据并合并
+    index_df = await _load_index_history()
+    if not index_df.empty:
+        fund_df['date'] = pd.to_datetime(fund_df['date'])
+        fund_df = fund_df.merge(index_df, on='date', how='left')
+    
     last_row = fund_df.iloc[-1]
     prev_nav = float(last_row["nav"])
     last_date = str(last_row["date"])

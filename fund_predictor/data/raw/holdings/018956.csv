@@ -1,0 +1,11 @@
+fund_code,report_date,stock_code,stock_name,shares,market_value,weight_nav,rank,source,holding_scope,created_at
+018956,2026-03-31,300502,新易盛,267.89,118632.5,0.0975,1,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28
+018956,2026-03-31,300308,中际旭创,207.69,118259.28,0.09720000000000001,2,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28
+018956,2026-03-31,300757,罗博特科,309.72,117882.53,0.0969,3,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28
+018956,2026-03-31,300394,天孚通信,389.68,117527.49,0.0966,4,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28
+018956,2026-03-31,688048,长光华芯,457.33,94208.99,0.0774,5,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28
+018956,2026-03-31,002837,英维克,1000.0,84350.0,0.0693,6,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28
+018956,2026-03-31,600105,永鼎股份,2658.97,73759.83,0.060599999999999994,7,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28
+018956,2026-03-31,301183,东田微,368.08,58892.19,0.0484,8,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28
+018956,2026-03-31,603052,可川科技,834.19,54739.55,0.045,9,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28
+018956,2026-03-31,688313,仕佳光子,616.13,51256.25,0.0421,10,akshare_fund_portfolio_hold_em,top10,2026-05-26T14:13:28

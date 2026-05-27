@@ -1,0 +1,266 @@
+/* ============================================
+   全局样式重置与基础样式
+   ============================================ */
+
+// CSS 变量（深色主题默认）
+:root {
+  --bg-primary: #{$dark-bg-primary};
+  --bg-secondary: #{$dark-bg-secondary};
+  --bg-tertiary: #{$dark-bg-tertiary};
+  --bg-card: #{$dark-bg-card};
+  --bg-card-hover: #{$dark-bg-card-hover};
+  --glass-bg: #{$glass-bg};
+  --glass-border: #{$glass-border};
+  --text-primary: #{$text-primary};
+  --text-secondary: #{$text-secondary};
+  --text-muted: #{$text-muted};
+  --primary: #{$primary};
+  --primary-soft: #{$primary-soft};
+  --primary-glow: #{$primary-glow};
+  --positive: #{$positive};
+  --positive-soft: #{$positive-soft};
+  --negative: #{$negative};
+  --negative-soft: #{$negative-soft};
+  --neutral: #{$neutral};
+  --border: #{$border};
+  --border-strong: #{$border-strong};
+}
+
+// 浅色主题变量
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --glass-bg: rgba(0, 0, 0, 0.02);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --primary: #2563eb;
+  --primary-soft: rgba(37, 99, 235, 0.1);
+  --primary-glow: rgba(37, 99, 235, 0.2);
+  --positive: #dc2626;
+  --positive-soft: rgba(220, 38, 38, 0.1);
+  --negative: #16a34a;
+  --negative-soft: rgba(22, 163, 74, 0.1);
+  --neutral: #64748b;
+  --border: rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.12);
+}
+
+/* 全局重置 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: 'Inter', 'PingFang SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 链接样式 */
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: lighten-color($primary, 10%);
+  }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: $radius-sm;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: $radius-sm;
+
+  &:hover {
+    background: var(--text-muted);
+  }
+}
+
+/* 选中文本样式 */
+::selection {
+  background: rgba($primary, 0.3);
+  color: white;
+}
+
+/* Element Plus 深色主题覆盖 */
+[data-theme="dark"] {
+  .el-button--primary {
+    --el-button-bg-color: #{$primary};
+    --el-button-border-color: #{$primary};
+    --el-button-hover-bg-color: darken-color($primary, 5%);
+    --el-button-hover-border-color: darken-color($primary, 5%);
+  }
+
+  .el-input__wrapper,
+  .el-textarea__inner {
+    background-color: var(--bg-tertiary);
+    box-shadow: 0 0 0 1px var(--border) inset;
+  }
+
+  .el-card {
+    --el-card-bg-color: var(--bg-card);
+    --el-card-border-color: var(--glass-border);
+  }
+
+  .el-table {
+    --el-table-bg-color: transparent;
+    --el-table-tr-bg-color: transparent;
+    --el-table-header-bg-color: var(--bg-tertiary);
+    --el-table-row-hover-bg-color: var(--glass-bg);
+    --el-table-border-color: var(--border);
+    color: var(--text-primary);
+  }
+
+  .el-dialog {
+    --el-dialog-bg-color: var(--bg-secondary);
+    --el-dialog-title-font-size: 18px;
+  }
+
+  .el-tag {
+    border-color: var(--border);
+  }
+}
+
+/* 工具类 */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.text-positive { color: var(--positive); }
+.text-negative { color: var(--negative); }
+.text-neutral { color: var(--neutral); }
+.text-muted { color: var(--text-muted); }
+.text-primary { color: var(--primary); }
+
+.mt-4 { margin-top: 16px; }
+.mb-4 { margin-bottom: 16px; }
+.ml-4 { margin-left: 16px; }
+.mr-4 { margin-right: 16px; }
+
+.p-4 { padding: 16px; }
+.px-4 { padding-left: 16px; padding-right: 16px; }
+.py-4 { padding-top: 16px; padding-bottom: 16px; }
+
+.hidden { display: none !important; }
+.visible { display: block !important; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+
+.rounded-lg { border-radius: $radius-lg; }
+.rounded-xl { border-radius: $radius-xl; }
+.rounded-full { border-radius: $radius-full; }
+
+/* 卡片基础样式 */
+.card-base {
+  background: var(--glass-bg);
+  backdrop-filter: $glass-blur;
+  border: 1px solid var(--glass-border);
+  border-radius: $radius-lg;
+  padding: 24px;
+  transition: all $transition-normal;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    box-shadow: $shadow-lg;
+  }
+}
+
+/* 玻璃效果卡片 */
+.glass-card {
+  @extend .card-base;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba($primary, 0.5),
+      transparent
+    );
+  }
+}
+
+/* 渐变文字 */
+.gradient-text {
+  background: linear-gradient(135deg, $primary 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* 响应式隐藏 */
+@media (max-width: $breakpoint-md) {
+  .hide-mobile { display: none !important; }
+}
+
+@media (min-width: ($breakpoint-md + 1)) {
+  .hide-desktop { display: none !important; }
+}

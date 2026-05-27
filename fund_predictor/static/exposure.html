@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>资产暴露 - Quant Dashboard</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">QuantDesk</div>
+        <div class="logo-subtitle">量化决策系统</div>
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item" data-page="dashboard"><a href="/index.html"><span class="nav-icon">🎯</span><span class="nav-text">决策中心</span></a></li>
+        <li class="nav-item active" data-page="exposure"><a href="/exposure.html"><span class="nav-icon">📊</span><span class="nav-text">资产暴露</span></a></li>
+        <li class="nav-item" data-page="backtest"><a href="/backtest.html"><span class="nav-icon">📈</span><span class="nav-text">回测诊断</span></a></li>
+        <li class="nav-item" data-page="model"><a href="/model.html"><span class="nav-icon">⚙️</span><span class="nav-text">模型系统</span></a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>资产暴露</h1>
+          <div class="topbar-subtitle">基金代理资产组合暴露分析</div>
+        </div>
+      </header>
+
+      <section class="control-section">
+        <div class="control-row">
+          <div class="input-field">
+            <label>基金代码</label>
+            <input id="fundCode" type="text" value="018956" maxlength="12">
+          </div>
+          <button id="loadBtn" class="btn btn-primary">加载</button>
+        </div>
+        <div id="errorBox" class="error-card hidden"></div>
+      </section>
+
+      <section id="emptyState" class="empty-state">
+        <div class="empty-icon">📊</div>
+        <div class="empty-title">输入基金代码查看资产暴露</div>
+      </section>
+
+      <section id="resultSection" class="hidden">
+        <div class="content-grid">
+          <div class="metric-item">
+            <div class="metric-name">Top10 状态</div>
+            <div id="top10Status" class="metric-number">-</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Proxy R²</div>
+            <div id="proxyR2" class="metric-number">-</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Tracking Error</div>
+            <div id="trackingError" class="metric-number">-</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">持仓风险提示</div>
+          <div id="riskWarning" class="risk-text">-</div>
+        </div>
+      </section>
+
+      <footer class="disclaimer">
+        本系统仅用于量化研究和模型实验，不构成投资建议。
+      </footer>
+    </main>
+  </div>
+
+  <script src="/assets/common.js"></script>
+  <script src="/assets/api.js"></script>
+  <script src="/assets/exposure.js"></script>
+</body>
+</html>

@@ -22,6 +22,18 @@ async def _get(url: str, params: dict = None, timeout: int = 15) -> dict:
 
 
 async def search_funds(keyword: str, limit: int = 20) -> list[dict]:
+    from .fund_cache_service import ensure_cache_exists, search_local
+    
+    # 1. 首先尝试本地缓存搜索
+    try:
+        if ensure_cache_exists():
+            local_results = search_local(keyword, limit)
+            if local_results:
+                return local_results
+    except Exception as e:
+        pass
+    
+    # 2. 本地无匹配，回退到东方财富API
     try:
         em_headers = {
             "User-Agent": HEADERS["User-Agent"],
@@ -67,6 +79,7 @@ async def search_funds(keyword: str, limit: int = 20) -> list[dict]:
     except Exception as e:
         pass
 
+    # 3. 如果是数字代码，尝试直接获取基金信息
     if keyword.isdigit() and len(keyword) >= 4:
         try:
             info = await get_fund_info(keyword.zfill(6))
