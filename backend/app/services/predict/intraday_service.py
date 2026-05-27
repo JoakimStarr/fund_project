@@ -67,10 +67,23 @@ async def _load_fund_nav(fund_code: str):
 async def _load_index_history() -> pd.DataFrame:
     """加载指数历史数据并计算收益率"""
     from app.services.data.akshare_client import get_index_daily
+    import asyncio
+    
+    def _fetch_index(symbol):
+        """在线程池中执行同步的AKShare调用"""
+        try:
+            return get_index_daily(symbol)
+        except Exception as e:
+            logger.warning("index_fetch_failed symbol=%s error=%s", symbol, e)
+            return None
+    
     index_data = {}
+    loop = asyncio.get_running_loop()
+    
     for code, idx_name in INDEX_CANDIDATES.items():
         try:
-            df = await get_index_daily(INDEX_SINA_CODES[code])
+            # 在线程池中执行同步调用
+            df = await loop.run_in_executor(None, _fetch_index, INDEX_SINA_CODES[code])
             if df is not None and not df.empty:
                 df = df.copy()
                 df['date'] = pd.to_datetime(df['date'])
