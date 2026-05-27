@@ -22,6 +22,12 @@
           style="width:260px"
           value-format="YYYY-MM-DD"
         />
+        <el-button-group>
+          <el-button size="small" @click="setQuickRange(7)">近一周</el-button>
+          <el-button size="small" @click="setQuickRange(30)">近一月</el-button>
+          <el-button size="small" @click="setQuickRange(90)">近三月</el-button>
+          <el-button size="small" @click="setQuickRange(180)">近半年</el-button>
+        </el-button-group>
         <el-button type="primary" :loading="loading" @click="loadData">查询</el-button>
       </div>
     </el-card>
@@ -113,6 +119,16 @@ async function handleSearch(query, cb) {
 
 function handleSelect(item) {
   fundCode.value = item.fund_code || item.value.split(' - ')[0]
+}
+
+function setQuickRange(days) {
+  const end = new Date()
+  const start = new Date()
+  start.setDate(start.getDate() - days)
+  dateRange.value = [
+    start.toISOString().split('T')[0],
+    end.toISOString().split('T')[0]
+  ]
 }
 
 async function loadData() {
