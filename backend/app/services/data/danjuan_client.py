@@ -90,6 +90,7 @@ async def get_fund_info(fund_code: str) -> dict:
         raise DataFetchError(f"蛋卷基金API错误: {data.get('message', 'unknown')}")
     fd = data.get("data", {})
     derived = fd.get("fund_derived", {})
+    op = fd.get("op_fund", {})
     return {
         "fund_code": fd.get("fd_code", fund_code),
         "fund_name": fd.get("fd_name", ""),
@@ -97,13 +98,27 @@ async def get_fund_info(fund_code: str) -> dict:
         "found_date": fd.get("found_date", ""),
         "keeper_name": fd.get("keeper_name", ""),
         "manager_name": fd.get("manager_name", ""),
+        "totshare": fd.get("totshare", ""),
+        "trup_name": fd.get("trup_name", ""),
+        "type_desc": fd.get("type_desc", ""),
+        "rating_desc": fd.get("rating_desc", ""),
+        "risk_level": fd.get("risk_level"),
+        "style_tips": op.get("tips", "") if isinstance(op, dict) else "",
         "unit_nav": derived.get("unit_nav"),
         "nav_grtd": derived.get("nav_grtd"),
         "nav_grl1m": derived.get("nav_grl1m"),
         "nav_grl3m": derived.get("nav_grl3m"),
         "nav_grlty": derived.get("nav_grlty"),
         "nav_grl1y": derived.get("nav_grl1y"),
+        "nav_grl6m": derived.get("nav_grl6m"),
+        "nav_grl3y": derived.get("nav_grl3y"),
+        "nav_grl5y": derived.get("nav_grl5y"),
         "annual_performance": derived.get("annual_performance_list", []),
+        "benchmark_index": fd.get("benchmark_index", []),
+        "performance_bench_mark": fd.get("performance_bench_mark", ""),
+        "invest_orientation": fd.get("invest_orientation", ""),
+        "invest_target": fd.get("invest_target", ""),
+        "follower_count": fd.get("follower_count"),
     }
 
 
@@ -124,6 +139,63 @@ async def get_fund_detail(fund_code: str) -> dict:
         "fee_rate": fee,
         "manager_info": manager_info,
     }
+
+
+async def get_asset_percent(fund_code: str, report_date: str = "") -> dict:
+    params = {"fund_code": fund_code}
+    if report_date:
+        params["report_date"] = report_date
+    url = f"{DJ_BASE}/djapi/fundx/base/fund/record/asset/percent"
+    asset_headers = {
+        **HEADERS,
+        "Referer": f"{DJ_BASE}/funding/{fund_code}",
+    }
+    async with httpx.AsyncClient(headers=asset_headers, follow_redirects=True) as client:
+        resp = await client.get(url, params=params, timeout=15)
+        if resp.status_code == 403:
+            return await _fallback_asset_from_detail(fund_code)
+        resp.raise_for_status()
+        data = resp.json()
+    items = data.get("data", {}).get("item_list", []) or []
+    result = []
+    for item in items:
+        result.append({
+            "name": item.get("name", ""),
+            "code": (item.get("code") or "").strip().zfill(6),
+            "percent": item.get("percent"),
+            "type_code": item.get("type_code", ""),
+            "report_date": report_date or item.get("report_date", ""),
+        })
+    return {
+        "fund_code": fund_code,
+        "items": result,
+        "report_date": report_date or "",
+    }
+
+
+async def _fallback_asset_from_detail(fund_code: str) -> dict:
+    try:
+        detail = await get_fund_detail(fund_code)
+        stocks = detail.get("holdings", [])
+        bonds = detail.get("bonds", [])
+        items = []
+        for s in stocks:
+            items.append({
+                "name": s.get("name", ""),
+                "code": (s.get("code") or "").strip().zfill(6),
+                "percent": s.get("percent"),
+                "type_code": "stock",
+            })
+        for b in bonds:
+            items.append({
+                "name": b.get("name", ""),
+                "code": "",
+                "percent": b.get("percent"),
+                "type_code": "bond",
+            })
+        return {"fund_code": fund_code, "items": items, "report_date": "", "source": "detail_fallback"}
+    except Exception:
+        return {"fund_code": fund_code, "items": [], "report_date": ""}
 
 
 async def get_fund_growth(fund_code: str, period: str = "3y") -> list[dict]:

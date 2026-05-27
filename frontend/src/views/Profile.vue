@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width:1000px;margin:0 auto">
+  <div style="max-width:1100px;margin:0 auto">
     <h2>基金画像</h2>
 
     <el-card shadow="never" style="margin-bottom:16px">
@@ -21,107 +21,166 @@
     <template v-if="profile">
       <el-card shadow="never" style="margin-bottom:16px">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-          <h3>{{ profile.fund_name }}</h3>
+          <h3 style="margin:0">{{ profile.fund_name || '--' }}</h3>
           <el-tag type="primary" size="small" effect="dark">{{ profile.fund_type || '--' }}</el-tag>
+          <el-tag v-if="profile.rating" size="small">{{ profile.rating }}</el-tag>
         </div>
         <el-descriptions :column="3" size="small" border>
-          <el-descriptions-item label="基金代码">{{ profile.fund_code || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="成立日期">{{ profile.established_date || profile.established || '--' }}</el-descriptions-item>
-          <el-descriptions-item label="基金规模">{{ formatNumber(profile.fund_size || profile.size) }}</el-descriptions-item>
+          <el-descriptions-item label="基金代码">{{ profile.fund_code }}</el-descriptions-item>
+          <el-descriptions-item label="基金全称">{{ profile.full_name || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="风格描述">{{ profile.type_desc || profile.fund_type_raw || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="成立日期">{{ profile.established || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="基金规模">{{ profile.size_text || '--' }}</el-descriptions-item>
           <el-descriptions-item label="基金经理">{{ profile.manager || '--' }}</el-descriptions-item>
           <el-descriptions-item label="基金公司">{{ profile.company || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="托管银行">{{ profile.custodian_bank || '--' }}</el-descriptions-item>
           <el-descriptions-item label="最新净值">{{ profile.latest_nav?.toFixed(4) || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="风险等级">
+            <template v-if="profile.risk_level != null">
+              <el-rate v-model.number="riskLevelVal" disabled show-score score-template="{value}级" />
+            </template>
+            <span v-else>--</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="投资风格">{{ profile.style_tips || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="评级">{{ profile.rating || '--' }}</el-descriptions-item>
         </el-descriptions>
       </el-card>
 
       <el-row :gutter="16" style="margin-bottom:16px">
-        <el-col :span="4" v-for="m in metricCards" :key="m.label">
-          <el-card shadow="hover" :body-style="{padding:'16px 8px',textAlign:'center'}">
-            <div style="font-size:20px;font-weight:700;color:var(--primary-color)">{{ m.value }}</div>
+        <el-col :span="6" v-for="m in metricCards" :key="m.label">
+          <el-card shadow="hover" :body-style="{padding:'14px 8px',textAlign:'center'}">
+            <div :style="{fontSize:'20px',fontWeight:700,color:m.color}">{{ m.value }}</div>
             <div style="font-size:12px;color:#909399;margin-top:4px">{{ m.label }}</div>
           </el-card>
         </el-col>
       </el-row>
 
-      <el-row :gutter="16">
-        <el-col :span="12">
-          <el-card shadow="never" style="margin-bottom:16px">
-            <template #header><span style="font-weight:600">持仓明细</span></template>
-            <el-table :data="holdings" size="small" stripe empty-text="暂无持仓数据" max-height="300">
-              <el-table-column prop="name" label="持仓标的" min-width="140" />
-              <el-table-column prop="weight" label="权重" width="90" align="center">
-                <template #default="{row}">{{ (row.weight * 100).toFixed(1) }}%</template>
+      <el-row :gutter="16" style="margin-bottom:16px">
+        <el-col :span="14">
+          <el-card shadow="never" style="height:100%">
+            <template #header>
+              <span style="font-weight:600">资产配置与持仓明细</span>
+              <el-tag size="small" type="info" style="margin-left:8px">股票/债券/现金合并展示</el-tag>
+            </template>
+            <el-table :data="allAssets" size="small" stripe empty-text="暂无资产配置数据" max-height="380">
+              <el-table-column prop="name" label="标的名称" min-width="130" />
+              <el-table-column prop="code" label="代码" width="85" align="center" />
+              <el-table-column label="权重" width="90" align="center">
+                <template #default="{row}">{{ (row.weight * 100).toFixed(2) }}%</template>
               </el-table-column>
-              <el-table-column prop="change" label="涨跌幅" width="90" align="center">
-                <template #default="{row}">{{ row.change != null ? (row.change * 100).toFixed(1) + '%' : '--' }}</template>
+              <el-table-column prop="type_label" label="类型" width="80" align="center">
+                <template #default="{row}">
+                  <el-tag :type="row.type_tag" size="small">{{ row.type_label }}</el-tag>
+                </template>
               </el-table-column>
             </el-table>
+            <div v-if="assetSummary" style="margin-top:12px;display:flex;gap:20px;font-size:13px">
+              <span>股票合计: <b>{{ (assetSummary.stock * 100).toFixed(1) }}%</b></span>
+              <span>债券合计: <b>{{ (assetSummary.bond * 100).toFixed(1) }}%</b></span>
+              <span>现金合计: <b>{{ (assetSummary.cash * 100).toFixed(1) }}%</b></span>
+            </div>
           </el-card>
         </el-col>
-        <el-col :span="12">
-          <el-card shadow="never" style="margin-bottom:16px">
-            <template #header><span style="font-weight:600">资产配置</span></template>
-            <div ref="pieChartRef" style="height:260px"></div>
+        <el-col :span="10">
+          <el-card shadow="never" style="height:100%">
+            <template #header><span style="font-weight:600">资产分布</span></template>
+            <div ref="pieChartRef" style="height:320px"></div>
           </el-card>
         </el-col>
       </el-row>
 
-      <el-card shadow="never" style="margin-bottom:16px">
-        <template #header><span style="font-weight:600">分类置信度</span></template>
-        <div v-if="classificationConfidence" style="padding:8px 0">
-          <div
-            v-for="(val, key) in classificationConfidence"
-            :key="key"
-            style="display:flex;align-items:center;gap:12px;margin-bottom:10px"
-          >
-            <span style="width:80px;font-size:13px;color:#606266">{{ key }}</span>
-            <el-progress
-              :percentage="val * 100"
-              :stroke-width="12"
-              style="flex:1"
-              :format="() => (val * 100).toFixed(0) + '%'"
-            />
-          </div>
-        </div>
-        <div v-else style="text-align:center;padding:20px;color:#909399;font-size:13px">
-          暂无分类置信度数据
-        </div>
-      </el-card>
-
-      <el-card v-if="hasPredictionCapability" shadow="never">
+      <el-card v-if="hasPredictionCapability" shadow="never" style="margin-bottom:16px">
         <template #header><span style="font-weight:600">预测能力评估</span></template>
-        <el-descriptions :column="3" size="small" border>
+        <el-descriptions :column="4" size="small" border>
           <el-descriptions-item label="方向准确率">
             {{ predictionCapability.direction_accuracy != null ? (predictionCapability.direction_accuracy * 100).toFixed(1) + '%' : '--' }}
           </el-descriptions-item>
           <el-descriptions-item label="MAE">{{ predictionCapability.mae?.toFixed(4) || '--' }}</el-descriptions-item>
           <el-descriptions-item label="模型版本">{{ predictionCapability.model_version || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="训练天数">{{ predictionCapability.train_rows || '--' }}</el-descriptions-item>
         </el-descriptions>
+      </el-card>
+
+      <el-card v-if="profile.invest_strategy" shadow="never">
+        <template #header><span style="font-weight:600">投资策略</span></template>
+        <div style="white-space:pre-wrap;font-size:14px;line-height:1.8;color:#606266">{{ profile.invest_strategy }}</div>
       </el-card>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFundStore } from '@/stores/fund'
-import { formatNumber, formatPercent } from '@/utils/format'
+import { Search } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const fundStore = useFundStore()
 const fundCode = ref('')
 const profile = ref(null)
-const holdings = ref([])
-const metricCards = ref([])
-const classificationConfidence = ref(null)
-const predictionCapability = ref(null)
 const pieChartRef = ref(null)
 let pieChartInstance = null
 
-const hasPredictionCapability = computed(() => {
-  return predictionCapability.value && predictionCapability.value.direction_accuracy != null
+const riskLevelVal = computed(() => profile.value?.risk_level || 0)
+
+const metricCards = computed(() => {
+  const p = profile.value
+  if (!p) return []
+  const cards = []
+  if (p.nav_grtd != null) cards.push({ label: '日涨跌', value: formatPct(p.nav_grtd), color: p.nav_grtd >= 0 ? 'var(--danger-color)' : 'var(--success-color)' })
+  if (p.nav_grl1m != null) cards.push({ label: '近1月', value: formatPct(p.nav_grl1m), color: (p.nav_grl1m || 0) >= 0 ? 'var(--danger-color)' : 'var(--success-color)' })
+  if (p.nav_grl3m != null) cards.push({ label: '近3月', value: formatPct(p.nav_grl3m), color: (p.nav_grl3m || 0) >= 0 ? 'var(--danger-color)' : 'var(--success-color)' })
+  if (p.nav_grl6m != null) cards.push({ label: '近6月', value: formatPct(p.nav_grl6m), color: (p.nav_grl6m || 0) >= 0 ? 'var(--danger-color)' : 'var(--success-color)' })
+  if (!cards.some(c => c.label === '今年') && p.nav_grlty != null) cards.push({ label: '今年', value: formatPct(p.nav_grlty), color: (p.nav_grlty || 0) >= 0 ? 'var(--danger-color)' : 'var(--success-color)' })
+  if (!cards.some(c => c.label === '1年') && p.nav_grl1y != null) cards.push({ label: '1年', value: formatPct(p.nav_grl1y), color: (p.nav_grl1y || 0) >= 0 ? 'var(--danger-color)' : 'var(--success-color)' })
+  if (!cards.some(c => c.label === '3年') && p.nav_grl3y != null) cards.push({ label: '3年', value: formatPct(p.nav_grl3y), color: (p.nav_grl3y || 0) >= 0 ? 'var(--danger-color)' : 'var(--success-color)' })
+  if (!cards.some(c => c.label === '5年') && p.nav_grl5y != null) cards.push({ label: '5年', value: formatPct(p.nav_grl5y), color: (p.nav_grl5y || 0) >= 0 ? 'var(--danger-color)' : 'var(--success-color)' })
+  if (cards.length < 4 && p.latest_nav) cards.push({ label: '最新净值', value: p.latest_nav.toFixed(4), color: 'var(--primary-color)' })
+  if (cards.length < 4) cards.push({ label: '数据天数', value: (p.data_days || 0) + '天', color: '#909399' })
+  return cards.slice(0, 6)
 })
+
+const allAssets = computed(() => {
+  const aa = profile.value?.asset_allocation
+  if (!aa) return []
+  const result = []
+  for (const s of (aa.stocks || [])) {
+    result.push({ ...s, type_label: '股票', type_tag: '' })
+  }
+  for (const b of (aa.bonds || [])) {
+    result.push({ ...b, type_label: '债券', type_tag: 'warning' })
+  }
+  for (const c of (aa.cash || [])) {
+    result.push({ ...c, type_label: '现金', type_tag: 'info' })
+  }
+  for (const o of (aa.other || [])) {
+    result.push({ ...o, type_label: '其他', type_tag: 'info' })
+  }
+  return result.sort((a, b) => b.weight - a.weight)
+})
+
+const assetSummary = computed(() => {
+  const aa = profile.value?.asset_allocation
+  if (!aa) return null
+  return {
+    stock: aa.stock_total_weight || 0,
+    bond: aa.bond_total_weight || 0,
+    cash: aa.cash_total_weight || 0,
+  }
+})
+
+const hasPredictionCapability = computed(() => {
+  const pc = profile.value?.prediction_capability
+  return pc && pc.direction_accuracy != null
+})
+
+function formatPct(val) {
+  if (val == null) return '--'
+  const num = parseFloat(val)
+  if (isNaN(num)) return val
+  return (num >= 0 ? '+' : '') + num.toFixed(2) + '%'
+}
 
 watch(() => route.params.code, (code) => {
   if (code) {
@@ -149,39 +208,38 @@ async function loadProfile() {
   try {
     const data = await fundStore.fetchProfile(fundCode.value)
     profile.value = data
-    if (data) {
-      holdings.value = data.holdings || []
-      classificationConfidence.value = data.classification_confidence || null
-      predictionCapability.value = data.prediction_capability || null
-      if (data.metrics) {
-        metricCards.value = Object.entries(data.metrics).slice(0, 6).map(([k, v]) => ({
-          label: k,
-          value: typeof v === 'number' ? (v * 100).toFixed(1) + '%' : String(v)
-        }))
-      }
-      if (data.asset_allocation) {
-        initPieChart(data.asset_allocation)
-      }
+    if (data?.asset_allocation) {
+      initPieChart(data.asset_allocation)
     }
   } catch {}
 }
 
-function initPieChart(data) {
+function initPieChart(aa) {
   nextTick(() => {
     if (!pieChartRef.value) return
     import('echarts').then(echarts => {
       if (pieChartInstance) pieChartInstance.dispose()
       pieChartInstance = echarts.init(pieChartRef.value)
-      const pieData = Object.entries(data).map(([name, value]) => ({ name, value: (value * 100).toFixed(1) }))
+      const stockW = (aa.stock_total_weight || 0) * 100
+      const bondW = (aa.bond_total_weight || 0) * 100
+      const cashW = (aa.cash_total_weight || 0) * 100
+      const otherW = Math.max(0, 100 - stockW - bondW - cashW)
+      const pieData = [
+        { name: `股票 ${stockW.toFixed(1)}%`, value: stockW, itemStyle: { color: '#409eff' } },
+        { name: `债券 ${bondW.toFixed(1)}%`, value: bondW, itemStyle: { color: '#67c23a' } },
+        { name: `现金 ${cashW.toFixed(1)}%`, value: cashW, itemStyle: { color: '#e6a23c' } },
+      ]
+      if (otherW > 0.5) pieData.push({ name: `其他 ${otherW.toFixed(1)}%`, value: otherW, itemStyle: { color: '#909399' } })
       pieChartInstance.setOption({
         tooltip: { trigger: 'item', formatter: '{b}: {c}%' },
+        legend: { bottom: 0 },
         series: [{
           type: 'pie',
-          radius: ['40%', '65%'],
-          center: ['50%', '50%'],
+          radius: ['35%', '62%'],
+          center: ['50%', '45%'],
           data: pieData,
           label: { formatter: '{b}\n{d}%', fontSize: 11 },
-          emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.5)' } }
+          emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.3)' } }
         }]
       })
     })
