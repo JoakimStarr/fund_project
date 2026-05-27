@@ -29,12 +29,7 @@ const routes = [
         component: () => import('@/views/Backtest.vue'),
         meta: { title: '回测诊断', icon: 'DataLine' }
       },
-      {
-        path: 'compare',
-        name: 'Compare',
-        component: () => import('@/views/Compare.vue'),
-        meta: { title: '多基金对比', icon: 'Grid' }
-      },
+
       {
         path: 'profile/:code?',
         name: 'Profile',
