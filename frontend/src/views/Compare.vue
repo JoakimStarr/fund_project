@@ -1,15 +1,17 @@
 <template>
-  <div style="max-width:1000px;margin:0 auto">
-    <h2>多基金对比</h2>
+  <PageContainer narrow>
+    <div class="page-header mb-16">
+      <h2 class="page-title">多基金对比</h2>
+    </div>
 
-    <el-card shadow="never" style="margin-bottom:16px">
-      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+    <SectionCard compact class="mb-16">
+      <div class="compare-add-row mb-8">
         <el-autocomplete
           v-model="newCode"
           :fetch-suggestions="handleSearch"
           placeholder="输入基金代码或名称添加"
           clearable
-          style="flex:1"
+          class="search-input"
           @keyup.enter="addFund"
           @select="handleSelect"
         />
@@ -29,17 +31,16 @@
         >
           {{ c }}
         </el-tag>
-        <span v-if="!fundCodes.length" style="font-size:13px;color:#909399">请添加基金代码进行比较（最多10只）</span>
+        <span v-if="!fundCodes.length" class="text-tertiary text-sm">请添加基金代码进行比较（最多10只）</span>
       </div>
-    </el-card>
+    </SectionCard>
 
-    <el-card v-if="predicting" shadow="never">
+    <SectionCard v-if="predicting">
       <el-skeleton :rows="5" animated />
-    </el-card>
+    </SectionCard>
 
     <template v-if="results.length">
-      <el-card shadow="never" style="margin-bottom:16px">
-        <template #header><span style="font-weight:600">预测对比</span></template>
+      <SectionCard title="预测对比" class="mb-16">
         <el-table :data="results" size="small" stripe>
           <el-table-column prop="fund_code" label="基金代码" width="110" align="center" />
           <el-table-column prop="fund_name" label="基金名称" min-width="140" />
@@ -53,33 +54,31 @@
           </el-table-column>
           <el-table-column label="置信区间" width="160" align="center">
             <template #default="{row}">
-              <span style="font-size:12px;color:#909399">
+              <span class="text-tertiary text-sm">
                 [{{ formatPercent(row.confidence_interval?.lower) }}, {{ formatPercent(row.confidence_interval?.upper) }}]
               </span>
             </template>
           </el-table-column>
           <el-table-column label="上涨概率" width="110" align="center">
             <template #default="{row}">
-              <span :style="{color:(row.direction_probability||0)>0.5?'var(--danger-color)':'var(--success-color)'}">
+              <span :style="{color:(row.direction_probability||0)>0.5?'var(--danger)':'var(--success)'}">
                 {{ ((row.direction_probability || 0) * 100).toFixed(0) }}%
               </span>
             </template>
           </el-table-column>
         </el-table>
-      </el-card>
+      </SectionCard>
 
-      <el-card shadow="never">
-        <template #header><span style="font-weight:600">涨跌对比图</span></template>
-        <div ref="chartRef" style="height:300px"></div>
-      </el-card>
+      <SectionCard title="涨跌对比图">
+        <div ref="chartRef" style="height:300px" />
+      </SectionCard>
     </template>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { batchPredict } from '@/api/fund'
-import { searchFunds } from '@/api/fund'
+import { batchPredict, searchFunds } from '@/api/fund'
 import { formatPercent } from '@/utils/format'
 
 const newCode = ref('')
@@ -178,3 +177,27 @@ onUnmounted(() => {
   if (chartInstance) chartInstance.dispose()
 })
 </script>
+
+<style scoped lang="scss">
+.page-header {
+  animation: fadeInUp 0.5s var(--ease-out-expo);
+}
+
+.page-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+.compare-add-row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  :deep(.el-autocomplete) { width: 100%; }
+}
+</style>

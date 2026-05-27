@@ -1,15 +1,17 @@
 <template>
-  <div style="max-width:1000px;margin:0 auto">
-    <h2>回测诊断</h2>
+  <PageContainer narrow>
+    <div class="page-header mb-16">
+      <h2 class="page-title">回测诊断</h2>
+    </div>
 
-    <el-card shadow="never" style="margin-bottom:16px">
-      <div style="display:flex;gap:12px;align-items:center">
+    <SectionCard compact class="mb-16">
+      <div class="backtest-search">
         <el-autocomplete
           v-model="fundCode"
           :fetch-suggestions="handleSearch"
           placeholder="输入基金代码"
           clearable
-          style="flex:1"
+          class="search-input"
           @keyup.enter="loadData"
           @select="handleSelect"
         />
@@ -19,10 +21,10 @@
           range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          style="width:260px"
+          class="date-picker"
           value-format="YYYY-MM-DD"
         />
-        <el-button-group>
+        <el-button-group class="quick-range">
           <el-button size="small" @click="setQuickRange(7)">近一周</el-button>
           <el-button size="small" @click="setQuickRange(30)">近一月</el-button>
           <el-button size="small" @click="setQuickRange(90)">近三月</el-button>
@@ -30,25 +32,20 @@
         </el-button-group>
         <el-button type="primary" :loading="loading" @click="loadData">查询</el-button>
       </div>
-    </el-card>
+    </SectionCard>
 
     <template v-if="metrics.length">
-      <el-row :gutter="16" style="margin-bottom:16px">
-        <el-col :span="4" v-for="m in metrics" :key="m.label">
-          <el-card shadow="hover" :body-style="{padding:'16px 8px',textAlign:'center'}">
-            <div style="font-size:22px;font-weight:700;color:var(--primary-color)">{{ m.value }}</div>
-            <div style="font-size:12px;color:#909399;margin-top:4px">{{ m.label }}</div>
-          </el-card>
+      <el-row :gutter="12" class="mb-16">
+        <el-col :xs="12" :sm="8" :md="4" v-for="m in metrics" :key="m.label" class="mb-8">
+          <StatCard icon="DataBoard" :value="m.value" :label="m.label" accent="var(--primary)" />
         </el-col>
       </el-row>
 
-      <el-card shadow="never" style="margin-bottom:16px">
-        <template #header><span style="font-weight:600">实际 vs 预测走势</span></template>
-        <div ref="chartRef" style="height:350px"></div>
-      </el-card>
+      <SectionCard title="实际 vs 预测走势" class="mb-16">
+        <div ref="chartRef" style="height:350px" />
+      </SectionCard>
 
-      <el-card shadow="never">
-        <template #header><span style="font-weight:600">详细回测记录</span></template>
+      <SectionCard title="详细回测记录">
         <el-table :data="records" size="small" stripe empty-text="暂无回测记录" max-height="400">
           <el-table-column prop="date" label="日期" width="110" align="center" />
           <el-table-column label="实际涨跌" width="110" align="center">
@@ -72,11 +69,7 @@
           </el-table-column>
           <el-table-column label="方向判断" width="100" align="center">
             <template #default="{row}">
-              <el-tag
-                :type="row.direction_correct ? 'success' : 'danger'"
-                size="small"
-                effect="plain"
-              >
+              <el-tag :type="row.direction_correct ? 'success' : 'danger'" size="small" effect="plain">
                 {{ row.direction_correct ? '正确' : '错误' }}
               </el-tag>
             </template>
@@ -88,9 +81,9 @@
             <template #default="{row}">{{ formatPercent(row.confidence_upper) }}</template>
           </el-table-column>
         </el-table>
-      </el-card>
+      </SectionCard>
     </template>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup>
@@ -213,3 +206,44 @@ onUnmounted(() => {
   if (chartInstance) chartInstance.dispose()
 })
 </script>
+
+<style scoped lang="scss">
+.page-header {
+  animation: fadeInUp 0.5s var(--ease-out-expo);
+}
+
+.page-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+.backtest-search {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 160px;
+  :deep(.el-autocomplete) { width: 100%; }
+}
+
+.date-picker {
+  width: 240px;
+  @media (max-width: 767px) {
+    width: 100%;
+  }
+}
+
+.quick-range {
+  @media (max-width: 767px) {
+    width: 100%;
+    display: flex;
+    :deep(.el-button) {
+      flex: 1;
+    }
+  }
+}
+</style>

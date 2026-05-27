@@ -1,59 +1,143 @@
 <template>
-  <el-container style="height: 100vh">
-    <Sidebar />
-    <el-container>
-      <el-header style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid #eee;padding:0 20px;height:60px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <el-icon :size="20" style="cursor:pointer" @click="appStore.toggleSidebar"><Fold /></el-icon>
-          <el-breadcrumb>
-            <el-breadcrumb-item to="/">首页</el-breadcrumb-item>
-            <el-breadcrumb-item v-if="$route.meta.title">{{ $route.meta.title }}</el-breadcrumb-item>
-          </el-breadcrumb>
+  <div class="app-layout">
+    <Sidebar class="desktop-only" />
+    <div class="layout-main">
+      <TopBar class="desktop-only" />
+      <div class="app-mobile-header mobile-only">
+        <router-link to="/" class="mobile-logo">
+          <div class="mobile-logo-icon">
+            <el-icon :size="18" color="#fff"><DataAnalysis /></el-icon>
+          </div>
+          <span class="mobile-logo-text">基金预测系统</span>
+        </router-link>
+        <div class="mobile-market-badge">
+          <span class="market-dot" :class="`market-dot--${appStore.marketSession.session}`" />
+          <span class="mobile-market-text">{{ appStore.marketSession.note }}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <el-tag
-            :type="marketTagType"
-            size="small"
-            effect="dark"
-          >
-            {{ appStore.marketSession.note }}
-          </el-tag>
-        </div>
-      </el-header>
-      <el-main style="background:#f5f7fa;padding:20px;overflow-y:auto">
-        <router-view />
-      </el-main>
-      <el-footer style="display:flex;align-items:center;justify-content:center;height:40px;background:#fff;border-top:1px solid #eee;font-size:12px;color:#909399">
+      </div>
+      <main class="app-content">
+        <router-view v-slot="{ Component }">
+          <Transition name="page" mode="out-in">
+            <component :is="Component" />
+          </Transition>
+        </router-view>
+      </main>
+      <footer class="app-footer desktop-only">
         基金净值预测系统 · 仅供研究参考，不构成投资建议
-      </el-footer>
-    </el-container>
-  </el-container>
+      </footer>
+      <MobileTabBar class="mobile-only" />
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import Sidebar from './Sidebar.vue'
+import TopBar from './TopBar.vue'
+import MobileTabBar from './MobileTabBar.vue'
 
 const appStore = useAppStore()
-
-const marketTagType = computed(() => {
-  const session = appStore.marketSession.session
-  if (session === 'morning' || session === 'afternoon') return 'success'
-  if (session === 'lunch') return 'warning'
-  return 'info'
-})
-
-let timer
-onMounted(() => {
-  appStore.updateMarketSession()
-  appStore.fetchAiProviderStatus()
-  timer = setInterval(() => {
-    appStore.updateMarketSession()
-  }, 60000)
-})
-
-onUnmounted(() => {
-  if (timer) clearInterval(timer)
-})
 </script>
+
+<style scoped lang="scss">
+.app-layout {
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+.layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  background: var(--bg-page);
+
+  @media (max-width: 767px) {
+    padding: var(--space-md);
+    padding-bottom: calc(56px + env(safe-area-inset-bottom) + var(--space-md));
+  }
+}
+
+.app-footer {
+  height: var(--footer-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.app-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 var(--space-md);
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  flex-shrink: 0;
+}
+
+.mobile-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  text-decoration: none;
+}
+
+.mobile-logo-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #1a73e8, #6c5ce7);
+}
+
+.mobile-logo-text {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: #fff;
+}
+
+.mobile-market-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.market-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+
+  &--morning,
+  &--afternoon {
+    background: var(--success);
+  }
+
+  &--lunch {
+    background: var(--warning);
+  }
+
+  &--closed,
+  &--weekend {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.mobile-market-text {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+}
+</style>

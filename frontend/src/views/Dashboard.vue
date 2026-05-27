@@ -1,70 +1,55 @@
 <template>
-  <div style="max-width:1200px;margin:0 auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <h2>决策中心</h2>
-      <el-tag type="info" effect="plain">{{ today }}</el-tag>
+  <PageContainer>
+    <div class="dashboard-header flex-between mb-16">
+      <h2 class="dashboard-title">决策中心</h2>
+      <el-tag type="info" effect="plain" class="animate-fade-in">{{ today }}</el-tag>
     </div>
 
-    <el-row :gutter="16" style="margin-bottom:20px">
-      <el-col :span="6" v-for="s in statCards" :key="s.label">
-        <el-card shadow="hover" :body-style="{padding:'20px'}">
-          <div style="display:flex;align-items:center;gap:12px">
-            <el-icon :size="36" :color="s.color"><component :is="s.icon" /></el-icon>
-            <div>
-              <div style="font-size:26px;font-weight:700">{{ s.value }}</div>
-              <div style="font-size:13px;color:#909399;margin-top:4px">{{ s.label }}</div>
-            </div>
-          </div>
-        </el-card>
+    <el-row :gutter="16" class="mb-16">
+      <el-col :xs="12" :sm="12" :md="6" v-for="(s, i) in statCards" :key="s.label" class="mb-8">
+        <StatCard
+          :icon="s.icon"
+          :value="s.value"
+          :label="s.label"
+          :accent="s.color"
+          :style="{ animationDelay: `${i * 0.1}s` }"
+          class="animate-fade-in-up"
+        />
       </el-col>
     </el-row>
 
-    <el-card shadow="never" style="margin-bottom:20px">
-      <template #header>
-        <span style="font-weight:600">快捷操作</span>
-      </template>
-      <el-row :gutter="16">
-        <el-col :span="4" v-for="a in quickActions" :key="a.path">
-          <el-card shadow="hover" :body-style="{padding:'20px 10px',cursor:'pointer',textAlign:'center'}" @click="$router.push(a.path)">
-            <el-icon :size="32" :color="a.color"><component :is="a.icon" /></el-icon>
-            <div style="margin-top:8px;font-size:13px;color:#606266">{{ a.label }}</div>
-          </el-card>
+    <SectionCard title="快捷操作" class="mb-16">
+      <el-row :gutter="12">
+        <el-col :xs="12" :sm="8" :md="4" v-for="a in quickActions" :key="a.path" class="mb-8">
+          <div class="quick-action-card" @click="$router.push(a.path)">
+            <el-icon :size="28" :color="a.color"><component :is="a.icon" /></el-icon>
+            <span class="quick-action-label">{{ a.label }}</span>
+          </div>
         </el-col>
       </el-row>
-    </el-card>
+    </SectionCard>
 
-    <el-row :gutter="16">
-      <el-col :span="14">
-        <el-card shadow="never">
-          <template #header>
-            <span style="font-weight:600">准确率趋势</span>
-          </template>
-          <div ref="chartRef" style="height:280px"></div>
-        </el-card>
+    <el-row :gutter="16" class="mb-16">
+      <el-col :xs="24" :md="14" class="mb-8">
+        <SectionCard title="准确率趋势">
+          <div ref="chartRef" style="height:280px" />
+        </SectionCard>
       </el-col>
-      <el-col :span="10">
-        <el-card shadow="never">
-          <template #header>
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-weight:600">系统状态</span>
-              <el-tag size="small" :type="aiStatusTagType">{{ aiStatusText }}</el-tag>
-            </div>
+      <el-col :xs="24" :md="10" class="mb-8">
+        <SectionCard title="系统状态">
+          <template #extra>
+            <el-tag size="small" :type="aiStatusTagType">{{ aiStatusText }}</el-tag>
           </template>
-          <div v-if="!systemStatus.length" style="text-align:center;padding:30px 0;color:#909399;font-size:13px">
-            暂无系统状态信息
-          </div>
-          <div v-for="s in systemStatus" :key="s.label" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px">
-            <span style="color:#606266">{{ s.label }}</span>
+          <div v-if="!systemStatus.length" class="empty-text">暂无系统状态信息</div>
+          <div v-for="s in systemStatus" :key="s.label" class="status-item">
+            <span class="text-secondary">{{ s.label }}</span>
             <el-tag size="small" :type="s.status === 'ok' ? 'success' : 'danger'">{{ s.text }}</el-tag>
           </div>
-        </el-card>
+        </SectionCard>
       </el-col>
     </el-row>
 
-    <el-card shadow="never" style="margin-top:16px">
-      <template #header>
-        <span style="font-weight:600">近期预测记录</span>
-      </template>
+    <SectionCard title="近期预测记录">
       <el-table :data="recentPredictions" size="small" empty-text="暂无预测记录" stripe>
         <el-table-column prop="fund_code" label="基金代码" width="100" />
         <el-table-column prop="fund_name" label="基金名称" min-width="160" />
@@ -84,8 +69,8 @@
           <template #default="{row}">{{ formatDateTime(row.created_at) }}</template>
         </el-table-column>
       </el-table>
-    </el-card>
-  </div>
+    </SectionCard>
+  </PageContainer>
 </template>
 
 <script setup>
@@ -187,3 +172,58 @@ onUnmounted(() => {
   if (chartInstance) chartInstance.dispose()
 })
 </script>
+
+<style scoped lang="scss">
+.dashboard-header {
+  animation: fadeInUp 0.5s var(--ease-out-expo);
+}
+
+.dashboard-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.quick-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 8px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-out-expo);
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-light);
+    }
+  }
+}
+
+.quick-action-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: var(--font-size-base);
+  &:last-child { border-bottom: none; }
+}
+
+.empty-text {
+  text-align: center;
+  padding: 30px 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-base);
+}
+</style>

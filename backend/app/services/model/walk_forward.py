@@ -3,9 +3,25 @@ from sklearn.metrics import mean_absolute_error
 from app.core.errors import InsufficientDataError
 
 
-def calc_wfcv_params(n_rows: int) -> dict:
-    if n_rows < 150:
-        raise InsufficientDataError(f"数据行数 {n_rows} 不足 150 行")
+def calc_wfcv_params(n_rows: int, use_simplified: bool = False) -> dict:
+    min_rows = 60 if use_simplified else 150
+    if n_rows < min_rows:
+        raise InsufficientDataError(f"数据行数 {n_rows} 不足 {min_rows} 行")
+    # 简化模式：使用更小的窗口
+    if use_simplified:
+        train_window = int(n_rows * 0.6)
+        max_rounds = 3
+        valid_window = max(20, int(train_window * 0.2))
+        step_size = valid_window
+        available = (n_rows - train_window - valid_window) // step_size
+        actual_rounds = max(1, min(available, max_rounds))
+        return {
+            "train_window": train_window,
+            "valid_window": valid_window,
+            "step_size": step_size,
+            "actual_rounds": actual_rounds,
+            "degraded": True,
+        }
     if n_rows >= 500:
         train_window = 500
         max_rounds = 24

@@ -1,12 +1,14 @@
 <template>
-  <div style="max-width:1000px;margin:0 auto">
-    <h2>数据管理</h2>
+  <PageContainer narrow>
+    <div class="page-header mb-16">
+      <h2 class="page-title">数据管理</h2>
+    </div>
 
-    <el-card shadow="never" style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between">
+    <SectionCard class="mb-16">
+      <div class="admin-header">
         <div>
-          <div style="font-size:14px;font-weight:600">数据总览</div>
-          <div style="font-size:13px;color:#909399;margin-top:4px">
+          <div class="admin-header-title">数据总览</div>
+          <div class="admin-header-meta">
             基金总数：{{ overallStats.fund_count ?? '--' }} |
             最新净值日：{{ overallStats.latest_nav_date || '--' }} |
             最新持仓季：{{ overallStats.latest_holding_quarter || '--' }}
@@ -14,10 +16,9 @@
         </div>
         <el-button type="primary" :loading="updating" @click="triggerUpdate">触发更新</el-button>
       </div>
-    </el-card>
+    </SectionCard>
 
-    <el-card shadow="never">
-      <template #header><span style="font-weight:600">基金数据状态</span></template>
+    <SectionCard title="基金数据状态">
       <el-table :data="statusList" size="small" stripe empty-text="暂无数据" max-height="600">
         <el-table-column prop="fund_code" label="基金代码" width="110" align="center" />
         <el-table-column prop="fund_name" label="基金名称" min-width="140" />
@@ -39,8 +40,8 @@
           </template>
         </el-table-column>
       </el-table>
-    </el-card>
-  </div>
+    </SectionCard>
+  </PageContainer>
 </template>
 
 <script setup>
@@ -77,3 +78,33 @@ async function triggerUpdate() {
 
 onMounted(loadData)
 </script>
+
+<style scoped lang="scss">
+.page-header {
+  animation: fadeInUp 0.5s var(--ease-out-expo);
+}
+
+.page-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.admin-header-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.admin-header-meta {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+</style>

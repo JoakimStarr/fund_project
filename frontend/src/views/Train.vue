@@ -1,45 +1,42 @@
 <template>
-  <div style="max-width:900px;margin:0 auto">
-    <h2>模型训练</h2>
+  <PageContainer narrow>
+    <div class="page-header mb-16">
+      <h2 class="page-title">模型训练</h2>
+    </div>
 
-    <el-card shadow="never" style="margin-bottom:16px">
-      <div style="display:flex;gap:12px;align-items:center">
+    <SectionCard compact class="mb-16">
+      <div class="train-search">
         <el-autocomplete
           v-model="fundCode"
           :fetch-suggestions="handleSearch"
           placeholder="输入基金代码"
           clearable
-          style="flex:1"
+          class="search-input"
           @keyup.enter="startTrain"
           @select="handleSelect"
         />
         <el-checkbox v-model="forceRetrain" label="强制重训" border size="small" />
         <el-button type="primary" :loading="training" @click="startTrain">开始训练</el-button>
       </div>
-    </el-card>
+    </SectionCard>
 
     <template v-if="trainStore.taskStatus">
-      <el-card shadow="never" style="margin-bottom:16px">
-        <template #header><span style="font-weight:600">训练进度</span></template>
+      <SectionCard title="训练进度" class="mb-16">
         <el-progress
           :percentage="trainStore.progress"
           :status="progressStatus"
           :stroke-width="20"
-          style="margin-bottom:12px"
+          class="mb-16"
         >
-          <span style="font-size:13px">{{ stageText }}</span>
+          <span class="text-sm">{{ stageText }}</span>
         </el-progress>
-        <div
-          ref="logRef"
-          style="background:#1d1e1f;color:#c9d1d9;padding:12px;border-radius:4px;font-size:12px;font-family:monospace;height:200px;overflow-y:auto;white-space:pre-wrap"
-        >
+        <div ref="logRef" class="log-terminal">
           <div v-for="(line, i) in logLines" :key="i">{{ line }}</div>
         </div>
-      </el-card>
+      </SectionCard>
     </template>
 
-    <el-card v-if="trainResult" shadow="never" style="margin-bottom:16px">
-      <template #header><span style="font-weight:600">训练结果</span></template>
+    <SectionCard v-if="trainResult" title="训练结果" class="mb-16">
       <el-descriptions :column="3" size="small" border>
         <el-descriptions-item label="方向准确率">
           {{ trainResult.direction_accuracy != null ? (trainResult.direction_accuracy * 100).toFixed(1) + '%' : '--' }}
@@ -50,31 +47,81 @@
         <el-descriptions-item label="模型版本">{{ trainResult.model_version || '--' }}</el-descriptions-item>
         <el-descriptions-item label="耗时">{{ trainResult.duration || '--' }}</el-descriptions-item>
       </el-descriptions>
-    </el-card>
+    </SectionCard>
 
-    <el-card shadow="never">
-      <template #header><span style="font-weight:600">训练历史</span></template>
+    <SectionCard title="训练历史">
       <el-table :data="trainStore.taskHistory" size="small" empty-text="暂无训练记录" stripe>
-        <el-table-column prop="fund_code" label="基金代码" width="110" />
-        <el-table-column prop="fund_name" label="基金名称" min-width="130" />
-        <el-table-column label="状态" width="100" align="center">
+        <el-table-column prop="fund_code" label="基金代码" width="100" />
+        <el-table-column prop="fund_name" label="基金名称" min-width="120" />
+        <el-table-column label="状态" width="80" align="center">
           <template #default="{row}">
             <el-tag :type="row.status === 'success' ? 'success' : row.status === 'running' ? 'warning' : 'info'" size="small">
               {{ row.status === 'success' ? '完成' : row.status === 'running' ? '训练中' : row.status }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="准确率" width="100" align="center">
+        <el-table-column width="110" align="center">
+          <template #header>
+            <span class="flex-center gap-4">
+              方向准确率
+              <el-tooltip content="预测涨跌方向正确的比例，越高越好" placement="top">
+                <el-icon style="color:var(--text-tertiary);cursor:pointer"><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </span>
+          </template>
           <template #default="{row}">
-            {{ row.direction_accuracy != null ? (row.direction_accuracy * 100).toFixed(1) + '%' : '--' }}
+            <span v-if="row.metrics_summary?.direction_accuracy != null && row.status === 'success'" style="color:#67c23a;font-weight:500">
+              {{ (row.metrics_summary.direction_accuracy * 100).toFixed(1) }}%
+            </span>
+            <span v-else style="color:#c0c4cc">--</span>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="训练时间" width="170" align="center">
+        <el-table-column width="100" align="center">
+          <template #header>
+            <span class="flex-center gap-4">
+              MAE
+              <el-tooltip content="平均绝对误差，预测值与真实值的平均差距，越小越好" placement="top">
+                <el-icon style="color:var(--text-tertiary);cursor:pointer"><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </span>
+          </template>
+          <template #default="{row}">
+            <span v-if="row.metrics_summary?.mae != null && row.status === 'success'" style="color:#409eff;font-weight:500">
+              {{ row.metrics_summary.mae.toFixed(4) }}
+            </span>
+            <span v-else style="color:#c0c4cc">--</span>
+          </template>
+        </el-table-column>
+        <el-table-column width="100" align="center">
+          <template #header>
+            <span class="flex-center gap-4">
+              RMSE
+              <el-tooltip content="均方根误差，对大误差更敏感的指标，越小越好" placement="top">
+                <el-icon style="color:var(--text-tertiary);cursor:pointer"><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </span>
+          </template>
+          <template #default="{row}">
+            <span v-if="row.metrics_summary?.rmse != null && row.status === 'success'" style="color:#e6a23c;font-weight:500">
+              {{ row.metrics_summary.rmse.toFixed(4) }}
+            </span>
+            <span v-else style="color:#c0c4cc">--</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="样本数" width="80" align="center">
+          <template #default="{row}">
+            <span v-if="row.metrics_summary?.train_rows != null && row.status === 'success'">
+              {{ row.metrics_summary.train_rows }}
+            </span>
+            <span v-else style="color:#c0c4cc">--</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="created_at" label="训练时间" width="150" align="center">
           <template #default="{row}">{{ formatDateTime(row.created_at) }}</template>
         </el-table-column>
       </el-table>
-    </el-card>
-  </div>
+    </SectionCard>
+  </PageContainer>
 </template>
 
 <script setup>
@@ -82,6 +129,7 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useTrainStore } from '@/stores/train'
 import { searchFunds } from '@/api/fund'
 import { formatDateTime } from '@/utils/format'
+import { QuestionFilled } from '@element-plus/icons-vue'
 
 const trainStore = useTrainStore()
 const fundCode = ref('')
@@ -173,3 +221,39 @@ async function pollTask(taskId) {
 
 trainStore.fetchHistory()
 </script>
+
+<style scoped lang="scss">
+.page-header {
+  animation: fadeInUp 0.5s var(--ease-out-expo);
+}
+
+.page-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+.train-search {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 180px;
+  :deep(.el-autocomplete) { width: 100%; }
+}
+
+.log-terminal {
+  background: #1d1e1f;
+  color: #c9d1d9;
+  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+</style>

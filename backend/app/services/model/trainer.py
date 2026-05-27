@@ -15,7 +15,7 @@ from app.services.model.conformal import calibrate
 from app.services.model.versioning import save_model
 
 
-def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_features, fund_code) -> dict:
+def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_features, fund_code, use_simplified_mode: bool = False) -> dict:
     import pandas as pd
     nav_df = pd.DataFrame(nav_data_list)
     nav_df["nav_date"] = pd.to_datetime(nav_df["nav_date"])
@@ -31,9 +31,19 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
     nan_mask = ~np.any(np.isnan(X) | np.isinf(X), axis=1)
     X, y = X[nan_mask], y[nan_mask]
     n_total = len(X)
-    if n_total < 150:
-        raise ValueError(f"清洗后数据仅 {n_total} 行，无法训练")
-    wfcv_params = calc_wfcv_params(n_total)
+    
+    # 简化模式：针对新成立基金，降低数据量要求
+    MIN_ROWS_FULL = 150
+    MIN_ROWS_SIMPLIFIED = 60
+    
+    if n_total < MIN_ROWS_SIMPLIFIED:
+        raise ValueError(f"清洗后数据仅 {n_total} 行，无法训练（至少需要{MIN_ROWS_SIMPLIFIED}行）")
+    
+    # 自动切换到简化模式
+    if n_total < MIN_ROWS_FULL and not use_simplified_mode:
+        use_simplified_mode = True
+        print(f"[简化模式] 基金 {fund_code} 数据量 {n_total} 行，启用简化训练模式")
+    wfcv_params = calc_wfcv_params(n_total, use_simplified_mode)
     splits = settings.model["train_split_ratio"]
     train_end = int(n_total * splits[0])
     valid_end = train_end + int(n_total * splits[1])
@@ -48,12 +58,21 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
     candidate_configs = settings.model["candidate_models"]
     models = {}
     
+    # 简化模式：只使用简单模型，禁用复杂集成学习
+    if use_simplified_mode:
+        # 简化模式：只使用线性模型，避免过拟合
+        candidate_configs = [
+            {"name": "ridge", "alpha": 1.0},
+            {"name": "elasticnet", "alpha": 0.01, "l1_ratio": 0.5}
+        ]
+        print(f"[简化模式] 使用简化模型配置: {[c['name'] for c in candidate_configs]}")
+    
     # 根据训练数据量动态调整超参数
     n_train = len(X_train)
-    if n_train < 100:
-        # 小数据集：保守配置，防止过拟合
-        lgbm_n_estimators, lgbm_max_depth, lgbm_min_child = 30, 3, 15
-        xgb_n_estimators, xgb_max_depth, xgb_min_child = 20, 3, 5
+    if n_train < 100 or use_simplified_mode:
+        # 小数据集或简化模式：保守配置，防止过拟合
+        lgbm_n_estimators, lgbm_max_depth, lgbm_min_child = 20, 2, 20
+        xgb_n_estimators, xgb_max_depth, xgb_min_child = 15, 2, 10
     elif n_train < 300:
         # 中等数据集
         lgbm_n_estimators, lgbm_max_depth, lgbm_min_child = 60, 4, 12
@@ -99,8 +118,11 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
                 colsample_bytree=cfg.get("colsample_bytree", 0.8),
                 verbosity=0
             )
-    stacking = StackingModel()
-    models["stacking"] = stacking
+    # 简化模式：禁用堆叠模型
+    if not use_simplified_mode:
+        stacking = StackingModel()
+        models["stacking"] = stacking
+    
     results = {}
     best_score = float("inf")
     best_model = None
@@ -109,16 +131,24 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
         model.fit(X_train_s, y_train)
         pred = model.predict(X_valid_s)
         mae = float(np.mean(np.abs(pred - y_valid)))
+        # 计算 MSE 和 RMSE
+        mse = float(np.mean((pred - y_valid) ** 2))
+        rmse = float(np.sqrt(mse))
         direction_acc = float(np.mean((pred > 0) == (y_valid > 0)))
         mae_weight = settings.model["selection_mae_weight"]
         dir_weight = settings.model["selection_direction_weight"]
         score = mae * mae_weight + (1 - direction_acc) * dir_weight
-        results[name] = {"mae": mae, "direction_accuracy": direction_acc, "score": score}
+        results[name] = {"mae": mae, "mse": mse, "rmse": rmse, "direction_accuracy": direction_acc, "score": score}
         if score < best_score:
             best_score = score
             best_model = model
             best_name = name
-    if wfcv_params["actual_rounds"] >= 3:
+    
+    # 简化模式：跳过WFCV或使用简化版本
+    if use_simplified_mode:
+        wfcv_results = [{"round": 0, "mae": results[best_name]["mae"], "direction_accuracy": results[best_name]["direction_accuracy"]}]
+        print(f"[简化模式] 跳过WFCV交叉验证")
+    elif wfcv_params["actual_rounds"] >= 3:
         wfcv_results = run_wfcv(Ridge, {"alpha": 1.0}, StandardScaler().fit_transform(X), y, wfcv_params)
     else:
         wfcv_results = [{"round": 0, "mae": results[best_name]["mae"], "direction_accuracy": results[best_name]["direction_accuracy"]}]
@@ -131,6 +161,8 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
     metrics = {
         "best_model": best_name,
         "valid_mae": results[best_name]["mae"],
+        "valid_mse": results[best_name]["mse"],
+        "valid_rmse": results[best_name]["rmse"],
         "valid_direction_accuracy": results[best_name]["direction_accuracy"],
         "valid_score": best_score,
         "wfcv_rounds": wfcv_params["actual_rounds"],
@@ -143,6 +175,7 @@ def _do_sync_training(nav_data_list: list, fund_type: str, features, selected_fe
         "calibration_q_value": calib_result["q_value"],
         "calibration_size": calib_result["calibration_size"],
         "trained_date": trained_date,
+        "simplified_mode": use_simplified_mode,
     }
     model_version = trained_date
     metrics["model_version"] = model_version
@@ -155,8 +188,10 @@ async def train_model(fund_code: str, session) -> dict:
         select(FundNav).where(FundNav.fund_code == fund_code).order_by(FundNav.nav_date)
     )
     nav_rows = result.scalars().all()
-    if not nav_rows or len(nav_rows) < settings.data["min_train_rows"]:
-        raise ValueError(f"基金 {fund_code} NAV数据不足 {settings.data['min_train_rows']} 行，当前 {len(nav_rows)} 行")
+    # 简化模式：允许最少60行原始数据
+    min_rows = 60
+    if not nav_rows or len(nav_rows) < min_rows:
+        raise ValueError(f"基金 {fund_code} NAV数据不足 {min_rows} 行，当前 {len(nav_rows)} 行")
     profile_result = await session.execute(
         select(FundProfileCache).where(FundProfileCache.fund_code == fund_code)
     )
@@ -164,4 +199,6 @@ async def train_model(fund_code: str, session) -> dict:
     fund_type = profile.fund_type if profile else "hybrid_equity"
     nav_data_list = [{"nav_date": r.nav_date, "nav": r.nav, "acc_nav": r.acc_nav, "daily_return": r.daily_return} for r in nav_rows]
     features, selected_features = build_and_screen(fund_code, nav_data_list, fund_type)
-    return _do_sync_training(nav_rows, fund_type, features, selected_features, fund_code)
+    # 根据数据量决定是否使用简化模式
+    use_simplified = len(nav_data_list) < 300
+    return _do_sync_training(nav_data_list, fund_type, features, selected_features, fund_code, use_simplified_mode=use_simplified)
