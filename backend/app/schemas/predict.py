@@ -2,62 +2,54 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class ConfidenceInterval(BaseModel):
-    lower: float
-    upper: float
-    confidence_level: float = 0.90
+class PathResult(BaseModel):
+    return_val: float
+    return_pct: float
+    available: bool
+    meta: Optional[dict] = None
 
 
-class ModelInfo(BaseModel):
-    model_type: str
-    base_models: Optional[list] = None
-    mae: Optional[float] = None
-    direction_accuracy: Optional[float] = None
-    features_used: Optional[int] = None
-    training_days: Optional[int] = None
-    trained_date: Optional[str] = None
-    model_version: Optional[str] = None
-    wfcv_rounds: Optional[int] = None
+class FusionWeight(BaseModel):
+    path_a: float
+    path_b: float
 
 
-class ConstraintInfo(BaseModel):
-    is_clipped: bool
-    original_return: Optional[float] = None
-    limit: Optional[float] = None
+class MarketSession(BaseModel):
+    is_trading: bool
+    session: str
+    note: str
 
 
-class FundHealth(BaseModel):
-    data_sufficiency: str
-    data_days: int
-    data_freshness: str
-    latest_nav_date: str
-    model_age_days: Optional[int] = None
-    prediction_reliability: str
-    warnings: Optional[list] = None
-
-
-class ShapFactor(BaseModel):
-    factor: str
+class HoldingContribution(BaseModel):
+    rank: int
+    code: str
+    name: str
+    weight: float
+    pct_change: float
     contribution: float
-    direction: str
-    display: str
+    price: Optional[float] = None
+    prev_close: Optional[float] = None
 
 
 class PredictResponse(BaseModel):
     fund_code: str
     fund_name: Optional[str] = None
     fund_type: Optional[str] = None
-    predict_date: str
-    target_date: str
+    prev_nav: float
+    prev_date: str
     predicted_return: float
-    predicted_nav: Optional[float] = None
-    prev_nav: Optional[float] = None
-    confidence_interval: ConfidenceInterval
+    predicted_nav: float
+    confidence_interval_lower: float = 0.0
+    confidence_interval_upper: float = 0.0
     direction: str
     direction_probability: float
-    confidence: str
-    model_info: Optional[ModelInfo] = None
-    constraint_info: Optional[ConstraintInfo] = None
-    special_period_adjustments: Optional[list] = None
-    fund_health: Optional[FundHealth] = None
-    shap_top_factors: Optional[list[ShapFactor]] = None
+    confidence: float
+    model_info: Optional[dict] = None
+    method: str = "dual_path_fusion"
+    method_display: str = "双路径融合法"
+    path_a: PathResult
+    path_b: PathResult
+    fusion_weight: FusionWeight
+    holdings_used: Optional[list] = None
+    market_session: MarketSession
+    timestamp: str

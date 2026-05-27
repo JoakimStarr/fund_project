@@ -16,8 +16,32 @@ router = APIRouter(prefix="/fund", tags=["fund"])
 @router.post("/predict")
 async def predict(req: FundPredictRequest, db=Depends(get_db)):
     try:
-        result = await do_predict(req.fund_code, db)
-        return ApiResponse(ok=True, data=result.model_dump())
+        raw = await do_predict(req.fund_code, db)
+        direction = "up" if raw.get("estimated_return", 0) > 0 else "down" if raw.get("estimated_return", 0) < 0 else "neutral"
+        direction_prob = min(0.95, max(0.05, 0.5 + abs(raw.get("estimated_return", 0)) * 10))
+        data = {
+            "fund_code": raw["fund_code"],
+            "fund_name": raw.get("fund_name"),
+            "fund_type": raw.get("fund_type"),
+            "prev_nav": raw["prev_nav"],
+            "prev_date": raw["prev_date"],
+            "predicted_return": raw["estimated_return"],
+            "predicted_nav": raw["estimated_nav"],
+            "confidence_interval_lower": raw["estimated_return"] - 0.02,
+            "confidence_interval_upper": raw["estimated_return"] + 0.02,
+            "direction": direction,
+            "direction_probability": round(direction_prob, 4),
+            "confidence": raw["confidence"],
+            "method": raw.get("method", "dual_path_fusion"),
+            "method_display": raw.get("method_display", "双路径融合法"),
+            "path_a": raw.get("path_a", {}),
+            "path_b": raw.get("path_b", {}),
+            "fusion_weight": raw.get("fusion_weight", {"path_a": 0.6, "path_b": 0.4}),
+            "holdings_used": raw.get("holdings_used"),
+            "market_session": raw.get("market_session", {}),
+            "timestamp": raw.get("timestamp"),
+        }
+        return ApiResponse(ok=True, data=data)
     except ValueError as e:
         return ApiResponse(ok=False, error={"code": "PREDICT_ERROR", "message": str(e), "status": 422})
     except Exception as e:

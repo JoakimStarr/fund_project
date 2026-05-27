@@ -1,8 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
 
-from .predict import ConfidenceInterval
-
 
 class IntradayRequest(BaseModel):
     mode: str = "auto"
@@ -32,11 +30,11 @@ class IntradayResponse(BaseModel):
     prev_nav: Optional[float] = None
     estimated_return: float
     estimated_return_pct: float
-    confidence_interval: Optional[ConfidenceInterval] = None
-    confidence: str
+    confidence_interval_lower: float = 0.0
+    confidence_interval_upper: float = 0.0
+    confidence: float
     method: str
     method_display: str
     market_session: MarketSession
-    holdings_used: Optional[list[HoldingContribution]] = None
-    holdings_freshness: Optional[dict] = None
+    holdings_used: Optional[list] = None
     timestamp: str

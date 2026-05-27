@@ -9,11 +9,10 @@ from .fund import (
 )
 from .train import TrainRequest, TrainTaskResponse
 from .predict import (
-    ConfidenceInterval,
-    ModelInfo,
-    ConstraintInfo,
-    FundHealth,
-    ShapFactor,
+    PathResult,
+    FusionWeight,
+    MarketSession as MarketSessionSchema,
+    HoldingContribution as HoldingContributionSchema,
     PredictResponse,
 )
 from .intraday import (
@@ -35,11 +34,10 @@ __all__ = [
     "FundSearchResult",
     "TrainRequest",
     "TrainTaskResponse",
-    "ConfidenceInterval",
-    "ModelInfo",
-    "ConstraintInfo",
-    "FundHealth",
-    "ShapFactor",
+    "PathResult",
+    "FusionWeight",
+    "MarketSessionSchema",
+    "HoldingContributionSchema",
     "PredictResponse",
     "IntradayRequest",
     "HoldingContribution",
