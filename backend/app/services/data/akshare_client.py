@@ -37,7 +37,30 @@ def get_fund_basic_info_xq(fund_code: str) -> pd.DataFrame:
     return ak.fund_individual_basic_info_xq(symbol=fund_code)
 
 
-def get_fund_holdings(symbol: str, date: str = "2024") -> pd.DataFrame:
+def get_fund_holdings(symbol: str, date: str = None) -> pd.DataFrame:
+    """获取基金持仓数据
+    
+    Args:
+        symbol: 基金代码
+        date: 报告期，如 "2024-03-31"，不传则获取最新报告期
+    """
+    import datetime
+    if date is None:
+        # 自动获取最近的报告期（3-31, 6-30, 9-30, 12-31）
+        today = datetime.date.today()
+        year = today.year
+        # 报告期月份
+        report_months = [3, 6, 9, 12]
+        report_day = [31, 30, 30, 31]
+        # 找到最近的报告期
+        for i in range(len(report_months) - 1, -1, -1):
+            report_date = datetime.date(year, report_months[i], report_day[i])
+            if report_date <= today:
+                date = report_date.strftime("%Y-%m-%d")
+                break
+        if date is None:
+            # 如果今年还没有报告，取去年年报
+            date = f"{year-1}-12-31"
     return ak.fund_portfolio_hold_em(symbol=symbol, date=date)
 
 

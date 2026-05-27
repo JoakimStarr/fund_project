@@ -348,9 +348,28 @@ async def estimate_t_day(fund_code: str, session=None, mode: str = "auto", save_
     def _sync_paths():
         ret_a, meta_a, contributions = _path_a_holding(holdings_list, stock_prices)
         ret_b, meta_b = _path_b_index(fund_df, index_realtime)
-        w_a, w_b = _compute_fusion_weights(fund_df)
+        
+        # 检查两条路径是否都不可用
+        path_a_available = meta_a.get("available", False)
+        path_b_available = meta_b.get("available", False)
+        
+        if not path_a_available and not path_b_available:
+            raise ValueError(
+                "盘中估算失败：持仓数据和指数回归模型均不可用。"
+                "可能原因：1) 基金持仓数据未获取；2) 指数历史数据不足；3) 实时行情接口失败。"
+                "请先在数据管理页面更新持仓数据。"
+            )
+        
+        # 如果某条路径不可用，将其权重设为0
+        if not path_a_available:
+            w_a, w_b = 0.0, 1.0
+        elif not path_b_available:
+            w_a, w_b = 1.0, 0.0
+        else:
+            w_a, w_b = _compute_fusion_weights(fund_df)
+        
         fused_ret = w_a * ret_a + w_b * ret_b
-        confidence = _compute_confidence(meta_a.get("available"), meta_b.get("available"), w_a, w_b, meta_a, meta_b)
+        confidence = _compute_confidence(path_a_available, path_b_available, w_a, w_b, meta_a, meta_b)
         return ret_a, ret_b, w_a, w_b, fused_ret, confidence, meta_a, meta_b, contributions
 
     loop = asyncio.get_running_loop()
