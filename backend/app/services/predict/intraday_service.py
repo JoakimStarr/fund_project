@@ -343,16 +343,25 @@ async def estimate_t_day(fund_code: str, session=None, mode: str = "auto", save_
         from app.services.data.holdings_service import get_latest_holdings
         try:
             hdf = await get_latest_holdings(fund_code, session)
+            logger.info("holdings_loaded fund=%s rows=%s columns=%s", fund_code, len(hdf) if hdf is not None else 0, hdf.columns.tolist() if hdf is not None else [])
             if hdf is not None and not hdf.empty:
-                code_col = next((c for c in ["股票代码", "stock_code", "代码", "code"] if c in hdf.columns), None)
-                name_col = next((c for c in ["股票名称", "stock_name", "名称", "name"] if c in hdf.columns), None)
-                weight_col = next((c for c in ["占净值比例", "占净值比例(%)", "比例", "weight"] if c in hdf.columns), None)
+                code_col = next((c for c in ["股票代码", "stock_code", "代码", "code", "股票代码 "] if c in hdf.columns), None)
+                name_col = next((c for c in ["股票名称", "stock_name", "名称", "name", "股票名称 "] if c in hdf.columns), None)
+                weight_col = next((c for c in ["占净值比例", "占净值比例(%)", "占净值比例 (%)", "比例", "weight", "持仓市值 ", "持仓市值"] if c in hdf.columns), None)
+                logger.info("holdings_columns fund=%s code_col=%s name_col=%s weight_col=%s", fund_code, code_col, name_col, weight_col)
                 if code_col and name_col:
                     for _, r in hdf.head(10).iterrows():
                         w = float(r[weight_col]) / 100.0 if weight_col and pd.notna(r.get(weight_col)) else 0
                         holdings_list.append({"code": str(r[code_col]).strip().zfill(6), "name": str(r[name_col]) if name_col else "", "weight": w})
+                        logger.debug("holding_item fund=%s code=%s name=%s weight=%s", fund_code, r[code_col], r[name_col], w)
+                else:
+                    logger.warning("holdings_columns_missing fund=%s available_cols=%s", fund_code, hdf.columns.tolist())
+            else:
+                logger.warning("holdings_empty fund=%s", fund_code)
         except Exception as e:
-            logger.debug("holdings_load_failed fund=%s error=%s", fund_code, e)
+            logger.warning("holdings_load_failed fund=%s error=%s", fund_code, e)
+            import traceback
+            logger.debug("holdings_load_failed traceback: %s", traceback.format_exc())
     import asyncio
     stock_codes = [h["code"] for h in holdings_list if h.get("weight", 0) > 0]
     stock_prices = await _fetch_stock_realtime(stock_codes)
