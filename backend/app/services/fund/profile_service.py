@@ -226,22 +226,31 @@ async def get_profile(fund_code: str, session):
         profile["latest_nav"] = None
         profile["acc_nav"] = None
         profile["nav_date"] = None
-    asset_list = await _fetch_asset_allocation(fund_code)
-    stocks = [a for a in asset_list if a.get("type_code") in ("stock", "1", "") and a.get("code")]
-    bonds = [a for a in asset_list if a.get("type_code") in ("bond", "2")]
-    cash = [a for a in asset_list if a.get("type_code") in ("cash", "3")]
-    other = [a for a in asset_list if a not in stocks and a not in bonds and a not in cash]
-    profile["holdings"] = stocks[:10]
-    profile["asset_allocation"] = {
-        "stocks": stocks[:10],
-        "bonds": bonds[:5],
-        "cash": cash[:3],
-        "other": other[:5],
-        "all_items": asset_list,
-        "stock_total_weight": round(sum(s.get("weight", 0) for s in stocks), 4),
-        "bond_total_weight": round(sum(b.get("weight", 0) for b in bonds), 4),
-        "cash_total_weight": round(sum(c.get("weight", 0) for c in cash), 4),
-    }
+    # 优先使用缓存中的持仓数据，如果没有再实时获取
+    cached_aa = profile.get("asset_allocation")
+    cached_holdings = profile.get("holdings")
+    
+    if cached_aa and cached_holdings:
+        # 使用缓存数据
+        logger.info("using_cached_asset_allocation fund=%s", fund_code)
+    else:
+        # 实时获取持仓数据
+        asset_list = await _fetch_asset_allocation(fund_code)
+        stocks = [a for a in asset_list if a.get("type_code") in ("stock", "1", "") and a.get("code")]
+        bonds = [a for a in asset_list if a.get("type_code") in ("bond", "2")]
+        cash = [a for a in asset_list if a.get("type_code") in ("cash", "3")]
+        other = [a for a in asset_list if a not in stocks and a not in bonds and a not in cash]
+        profile["holdings"] = stocks[:10]
+        profile["asset_allocation"] = {
+            "stocks": stocks[:10],
+            "bonds": bonds[:5],
+            "cash": cash[:3],
+            "other": other[:5],
+            "all_items": asset_list,
+            "stock_total_weight": round(sum(s.get("weight", 0) for s in stocks), 4),
+            "bond_total_weight": round(sum(b.get("weight", 0) for b in bonds), 4),
+            "cash_total_weight": round(sum(c.get("weight", 0) for c in cash), 4),
+        }
     try:
         from app.services.model.versioning import load_model
         _model_data, model_metrics, _features = load_model(fund_code)
