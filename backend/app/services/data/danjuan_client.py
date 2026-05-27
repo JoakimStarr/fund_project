@@ -197,20 +197,46 @@ async def get_asset_percent(fund_code: str, report_date: str = "") -> dict:
         resp.raise_for_status()
         data = resp.json()
     
-    items = data.get("data", {}).get("item_list", []) or []
+    data_section = data.get("data", {})
+    
+    # 解析股票持仓列表
+    stock_list = data_section.get("stock_list", []) or []
     result = []
-    for item in items:
+    for item in stock_list:
         result.append({
             "name": item.get("name", ""),
             "code": (item.get("code") or "").strip().zfill(6),
             "percent": item.get("percent"),
-            "type_code": item.get("type_code", ""),
-            "report_date": report_date or item.get("report_date", ""),
+            "type_code": "stock",
+            "report_date": report_date,
+            "current_price": item.get("current_price"),
+            "change_percentage": item.get("change_percentage"),
+            "industry_label": item.get("industry_label"),
         })
+    
+    # 解析债券持仓列表
+    bond_list = data_section.get("bond_list", []) or []
+    for item in bond_list:
+        result.append({
+            "name": item.get("name", ""),
+            "code": (item.get("code") or "").strip().zfill(6),
+            "percent": item.get("percent"),
+            "type_code": "bond",
+            "report_date": report_date,
+        })
+    
+    # 获取资产配置比例
+    stock_percent = data_section.get("stock_percent", 0)
+    cash_percent = data_section.get("cash_percent", 0)
+    other_percent = data_section.get("other_percent", 0)
+    
     return {
         "fund_code": fund_code,
         "items": result,
         "report_date": report_date,
+        "stock_percent": stock_percent,
+        "cash_percent": cash_percent,
+        "other_percent": other_percent,
     }
 
 
