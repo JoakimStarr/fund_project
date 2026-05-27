@@ -154,21 +154,49 @@ async def get_fund_detail(fund_code: str) -> dict:
     }
 
 
+def _get_latest_report_date() -> str:
+    """计算最近的报告期（季度末）"""
+    from datetime import date
+    today = date.today()
+    year = today.year
+    # 季度末日期：3-31, 6-30, 9-30, 12-31
+    report_dates = [
+        (year, 3, 31),
+        (year, 6, 30),
+        (year, 9, 30),
+        (year, 12, 31),
+    ]
+    # 找到最近的过去报告期
+    for y, m, d in reversed(report_dates):
+        report_date = date(y, m, d)
+        if report_date <= today:
+            return report_date.strftime("%Y-%m-%d")
+    # 如果今年没有过去的报告期，返回去年年报
+    return f"{year-1}-12-31"
+
+
 async def get_asset_percent(fund_code: str, report_date: str = "") -> dict:
-    params = {"fund_code": fund_code}
-    if report_date:
-        params["report_date"] = report_date
+    # 如果没有指定报告期，自动计算最近的
+    if not report_date:
+        report_date = _get_latest_report_date()
+    
+    params = {"fund_code": fund_code, "report_date": report_date}
     url = f"{DJ_BASE}/djapi/fundx/base/fund/record/asset/percent"
+    
+    # 使用用户提供的cookies和headers
     asset_headers = {
         **HEADERS,
         "Referer": f"{DJ_BASE}/funding/{fund_code}",
+        "Cookie": "xq_a_token=9771f0e30cf3ba917051ae17b7631a1dfe348aba; channel=XQWEB0001; device_id=web_CKQtIa1fE; h5_channel=XQWEB0001; acw_tc=276082aa17798613338538610e97684c1c3e73810ae8149ccc43f5b74dc9eb; timestamp=1779861334524",
     }
+    
     async with httpx.AsyncClient(headers=asset_headers, follow_redirects=True) as client:
         resp = await client.get(url, params=params, timeout=15)
         if resp.status_code == 403:
             return await _fallback_asset_from_detail(fund_code)
         resp.raise_for_status()
         data = resp.json()
+    
     items = data.get("data", {}).get("item_list", []) or []
     result = []
     for item in items:
@@ -182,7 +210,7 @@ async def get_asset_percent(fund_code: str, report_date: str = "") -> dict:
     return {
         "fund_code": fund_code,
         "items": result,
-        "report_date": report_date or "",
+        "report_date": report_date,
     }
 
 
