@@ -16,7 +16,7 @@ router = APIRouter(prefix="/fund", tags=["fund"])
 @router.post("/predict")
 async def predict(req: FundPredictRequest, db=Depends(get_db)):
     try:
-        raw = await do_predict(req.fund_code, db)
+        raw = await do_predict(req.fund_code, db, save_result=True)
         direction = "up" if raw.get("estimated_return", 0) > 0 else "down" if raw.get("estimated_return", 0) < 0 else "neutral"
         direction_prob = min(0.95, max(0.05, 0.5 + abs(raw.get("estimated_return", 0)) * 10))
         
@@ -143,7 +143,7 @@ async def batch_predict(req: FundBatchPredictRequest, db=Depends(get_db)):
     errors = []
     for code in codes:
         try:
-            pred = await do_predict(code, db)
+            pred = await do_predict(code, db, save_result=True)
             # 兼容Pydantic v1和v2
             if hasattr(pred, 'model_dump'):
                 results.append(pred.model_dump())
