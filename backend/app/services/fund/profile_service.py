@@ -127,6 +127,8 @@ async def get_profile(fund_code: str, session):
             "nav_grl3y": extra.get("nav_grl3y"),
             "nav_grl5y": extra.get("nav_grl5y"),
             "follower_count": extra.get("follower_count"),
+            "asset_allocation": extra.get("asset_allocation"),
+            "holdings": extra.get("holdings"),
         }
     else:
         ak_info = {}
